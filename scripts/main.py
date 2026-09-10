@@ -58,10 +58,12 @@ from CombustionAgent.prompts import get_chat_prompt, get_fill_prompt, get_retrie
 
 
 model_id = "models/Llama-3.1-8B-Instruct"
-
 schema = InputParameters.model_json_schema()
-
 opening_message = "\nHello, I'm your combustion mechanism consultant.\nI will try to provide you the best chemical mechanism for your application.\nCan you describe the simulation you would like to perform?"
-
 chatting_agent = Agent(model_id, [get_chat_prompt(), get_retrieve_prompt(schema), get_verify_prompt(), get_update_prompt(schema), get_fill_prompt(schema), get_router_prompt()], opening_message)
-chatting_agent.chat()
+
+def main():
+    chatting_agent.chat()
+
+if __name__ == "__main__":
+    main()
