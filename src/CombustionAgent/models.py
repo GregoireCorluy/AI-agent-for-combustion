@@ -1,4 +1,5 @@
 import torch
+import gc
 
 from transformers import (
                     AutoTokenizer,
@@ -34,3 +35,16 @@ class ModelManager():
                                 quantization_config=quantization_config,
                                 device_map="auto",
                             )
+    def unload_model(self) -> None:
+
+        if hasattr(self, "model"):
+            del self.model
+
+        if hasattr(self, "tokenizer"):
+            del self.tokenizer
+
+        gc.collect()
+
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            torch.cuda.ipc_collect()
