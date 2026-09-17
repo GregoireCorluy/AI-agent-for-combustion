@@ -1,5 +1,6 @@
 from .models import ModelManager
 from .parameters import InputParameters
+from .database import MechanismDatabase
 import json
 
 class LLM:
@@ -45,7 +46,7 @@ class ConversationLLM(LLM):
         self.history = [{"role": "system", "content": model_preprompt},
                         {"role": "assistant", "content": model_opening_message},]
 
-    def generate(self, message: str, max_new_tokens: int = 200, do_sample: bool = True) -> str:
+    def generate(self, message: str, max_new_tokens: int = 500, do_sample: bool = True) -> str:
 
         self.history.append({"role": "user", "content": message})
 
@@ -89,7 +90,7 @@ class RetrievalLLM(LLM):
 
 class VerifyLLM(LLM):
 
-    def verify_information(self, user_message: str, input_parameters: InputParameters, max_new_tokens: int = 500) -> str:
+    def verify_information(self, user_message: str, input_parameters: InputParameters, max_new_tokens: int = 1000) -> str:
 
         input_parameters_json = input_parameters.model_dump_json(indent=2)
 
@@ -132,25 +133,56 @@ class UpdateLLM(LLM):
 
 class FillLLM(LLM):
 
+    def __init__(self, model_manager: ModelManager, model_preprompt: str, database_path: str) -> None:
+
+        super().__init__(model_manager, model_preprompt)
+
+        self.database_path = database_path
+
     def fill_missing_information(self, current_input_parameters: InputParameters, max_new_tokens: int = 500) -> tuple[str, InputParameters]:
+
+        database = MechanismDatabase(self.database_path)
+
+        results = database.find_best_matches(
+                        current_input_parameters,
+                        max_results=10, #provides only max 10 results
+                    )
+
+        # Report from database retrieval
+        # print(f"Number of matches: {results['n_matches']}")
+
+        matched_results = results["matches"]
+
+        print("Matched results:")
+        for case in matched_results:
+            print(f"ID:       {case.get('id')}")
+
+        
+        matched_cases = [database.case_to_prompt_format(case)
+                                        for case in matched_results]
+
 
         current_input_parameters_json = current_input_parameters.model_dump_json(indent=2)
 
+        matched_cases_json = json.dumps(matched_cases, indent=2)
+
+
         message = f"""CURRENT PARAMETERS:
                     {current_input_parameters_json}
+
+                    MATCHING CASES:
+                    {matched_cases_json}
 
                     Complete the missing parameters according to your instructions.
                     """
 
         filled_json = self.generate(message, max_new_tokens=max_new_tokens, do_sample=False)
 
-        print(filled_json)
-
         data = json.loads(filled_json)
 
         filled_input_parameters = InputParameters.model_validate(data)
 
-        return filled_json, filled_input_parameters
+        return filled_json, filled_input_parameters, matched_results
 
 class RouterLLM(LLM):
 

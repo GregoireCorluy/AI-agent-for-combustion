@@ -3,9 +3,10 @@ from langgraph.graph import StateGraph, START, END
 
 class AgentGraph:
 
-    def __init__(self, agent):
+    def __init__(self, agent, database_path):
 
         self.agent = agent
+        self.database_path = database_path
 
         self.graph = StateGraph(AgentState)
 
@@ -90,8 +91,8 @@ class AgentGraph:
 
         LLM_retrieval_reply, input_parameters = self.agent.LLM_retrieval.retrieve_information(state["user_message"])
 
-        print(f"\nAgent: {LLM_retrieval_reply}")
-        print(f"Input parameters: {input_parameters}")
+        print(f"\nAgent has retrieved from the user input: {LLM_retrieval_reply}")
+        print(f"Input parameters from LLM_retrieval: {input_parameters}")
 
         LLM_verification_reply = self.agent.LLM_verification.verify_information(state["user_message"], input_parameters)
 
@@ -100,6 +101,7 @@ class AgentGraph:
         LLM_update_reply, input_parameters_updated = self.agent.LLM_update.update_information(LLM_verification_reply, input_parameters)
         
         print(f"\nUpdate by the agent: {LLM_update_reply}")
+        print(f"Input parameters after LLM_update: {input_parameters_updated}")
 
         if all(value is not None for value in input_parameters_updated.model_dump().values()):
             history_entry = (
@@ -112,8 +114,13 @@ class AgentGraph:
                             "RETRIEVAL RESULT: None of the input parameters have been retrieved from the user's message, all parameters will be inferred by the fill in function."
                         )
         else:
+            filled_fields = [
+                        field_name
+                        for field_name, value in input_parameters_updated.model_dump().items()
+                        if value is not None
+                    ]
             history_entry = (
-                            "RETRIEVAL RESULT: Some input parameters have been retrieved from the user's message, the other ones will be retrieved by the fill in function."
+                            f"RETRIEVAL RESULT: The fields {filled_fields} of the input parameters have been retrieved from the user's message, the remaining ones will be retrieved by the fill in function."
                         )
 
         return {"input_parameters": input_parameters_updated,
@@ -138,12 +145,24 @@ class AgentGraph:
 
     def fill_node(self, state: AgentState):
 
-        LLM_fill_reply, input_parameters_filled = self.agent.LLM_fill.fill_missing_information(state["input_parameters"])
+        LLM_fill_reply, input_parameters_filled, matched_results = self.agent.LLM_fill.fill_missing_information(state["input_parameters"])
         
-        print(f"\nAgent: {LLM_fill_reply}")
+        print(f"\nAgent has filled in the missing fields using the database: {LLM_fill_reply}")
+        print(f"Input parameters after LLM_fill: {input_parameters_filled}")
+
+        previous = state["input_parameters"].model_dump()
+        filled = input_parameters_filled.model_dump()
+
+        newly_filled_fields = [
+            field_name
+            for field_name, old_value in previous.items()
+            if old_value is None and filled[field_name] is not None
+        ]
+
+        matched_cases_ID = [case.get("id") for case in matched_results]
 
         history_entry = (
-                        "FILL RESULT: The input parameters, that were missing from the user's message, have been filled based on the context provided by the user and combined with RAG retrieval on a combustion database. The agent should present the extracted parameters to the user and ask for confirmation."
+                        f"FILL RESULT: The fields {newly_filled_fields} of the input parameters, that were missing from the user's message, have been filled based on the context provided by the user and combined with the retrieval from a combustion database. The fields {newly_filled_fields} were filled based on cases with ID {matched_cases_ID} from the combustion database. The agent should present the extracted parameters to the user and ask for confirmation."
                     )
 
         return {"input_parameters": input_parameters_filled,

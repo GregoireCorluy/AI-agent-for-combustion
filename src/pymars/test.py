@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.INFO)
 ## Inputs
 
 
-model = 'gri30.yaml'
+model = 'data/mechanisms/detailed/Burke-2012-H2-N2.yaml' #'gri30.yaml'
 gas = ct.Solution('gri30.yaml')
 targets = ['CH4', 'H2']
 retained = ['O2', 'N2', 'CH4', 'H2']

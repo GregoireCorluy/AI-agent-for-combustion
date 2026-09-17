@@ -2,7 +2,9 @@
 import os
 import re
 from typing import NamedTuple
-
+from datetime import date
+import re
+from datetime import date
 import cantera as ct
 
 class ReducedModel(NamedTuple):
@@ -97,7 +99,6 @@ def trim(initial_model_file, exclusion_list, new_model_file, phase_name=''):
     if phase_name:
         new_solution.name = phase_name
     else:
-        new_solution.name = os.path.splitext(new_model_file)[0]
+        new_solution.name = os.path.basename(new_model_file)[0]
 
     return new_solution
-

@@ -108,6 +108,7 @@ def get_retrieve_prompt(schema: dict) -> str:
 
             {{
                 "mechanism": null,
+                "application_regime": null,
                 "fuel": null,
                 "pressure_start": null,
                 "pressure_end": null,
@@ -117,6 +118,7 @@ def get_retrieve_prompt(schema: dict) -> str:
                 "temperature_unit": null,
                 "equivalence_ratio_start": null,
                 "equivalence_ratio_end": null,
+                "retained_species": null,
                 "target_species": null
             }}
             """
@@ -146,6 +148,23 @@ def get_verify_prompt() -> str:
             - If the extracted parameter contains information that the user did not provide, this is incorrect.
             - If a parameter differs from what the user explicitly stated, this is incorrect.
             - If no information is provided and the current value is null, consider it as correct and keep it null.
+
+            FUEL EXCEPTION:
+
+            The fuel field is an exception to the rule about not assuming missing values.
+
+            - If the user explicitly provides one fuel species but does not provide a fraction, assume a fraction of 1.0 for that species.
+            - If the user explicitly provides multiple fuel species but does not provide their fractions, assume equal fractions among the provided species.
+            - For N explicitly provided fuel species, the assumed fraction is 1/N for each species.
+            - For example:
+                - H2 → fuel: [{{"species: "H2", "fraction": 1.0}}]
+                - NH3 + H2 → fuel: [{{"species: "NH3", "fraction": 0.5}}, {{"species: "H2", "fraction": 0.5}}]
+                - NH3 + H2 + CH4 → fuel: [{{"species: "NH3", "fraction": 0.333}}, {{"species: "H2", "fraction": 0.3335}}, {{"species: "CH4", "fraction": 0.3335}}]
+            - This exception applies only when the user provides the fuel species but does not provide their fractions.
+            - If the user explicitly provides fuel fractions, those fractions must be copied exactly and must not be replaced by assumed equal fractions.
+            - Do not add fuel species that were not explicitly provided by the user.
+            - The order of the fuel species must not be changed.
+            - Do not apply this assumption to any parameter other than fuel fractions.
 
             If everything is correct, state that no modification is required.
 
@@ -232,7 +251,8 @@ def get_update_prompt(schema: dict) -> str:
 
             {{
                 "mechanism": null,
-                "fuel": "hydrogen",
+                "application_regime": null,
+                "fuel":[{{"species": "H2", "fraction": 1.0}}],
                 "pressure_start": 10,
                 "pressure_end": 100,
                 "pressure_unit": "bar",
@@ -241,6 +261,7 @@ def get_update_prompt(schema: dict) -> str:
                 "temperature_unit": "K",
                 "equivalence_ratio_start": null,
                 "equivalence_ratio_end": null,
+                "retained_species": null,
                 "target_species": null
             }}
 
@@ -251,7 +272,8 @@ def get_update_prompt(schema: dict) -> str:
 
             {{
                 "mechanism": null,
-                "fuel": "hydrogen",
+                "application_regime": null,
+                "fuel": [{{"species": "H2", "fraction": 1.0}}],
                 "pressure_start": 10,
                 "pressure_end": 100,
                 "pressure_unit": "bar",
@@ -260,6 +282,7 @@ def get_update_prompt(schema: dict) -> str:
                 "temperature_unit": "K",
                 "equivalence_ratio_start": null,
                 "equivalence_ratio_end": null,
+                "retained_species": null,
                 "target_species": null
             }}
 
@@ -269,7 +292,8 @@ def get_update_prompt(schema: dict) -> str:
 
             {{
                 "mechanism": null,
-                "fuel": "hydrogen",
+                "application_regime": null,
+                "fuel": [{{"species": "H2", "fraction": 1.0}}],
                 "pressure_start": 2,
                 "pressure_end": 5,
                 "pressure_unit": "bar",
@@ -278,6 +302,7 @@ def get_update_prompt(schema: dict) -> str:
                 "temperature_unit": "K",
                 "equivalence_ratio_start": null,
                 "equivalence_ratio_end": null,
+                "retained_species": null,
                 "target_species": null
             }}
 
@@ -288,7 +313,8 @@ def get_update_prompt(schema: dict) -> str:
 
             {{
                 "mechanism": null,
-                "fuel": "ammonia",
+                "application_regime": null,
+                "fuel": [{{"species": "NH3", "fraction": 1.0}}],
                 "pressure_start": 2,
                 "pressure_end": 5,
                 "pressure_unit": "bar",
@@ -297,6 +323,7 @@ def get_update_prompt(schema: dict) -> str:
                 "temperature_unit": "K",
                 "equivalence_ratio_start": null,
                 "equivalence_ratio_end": null,
+                "retained_species": null,
                 "target_species": null
             }}
 
@@ -306,7 +333,8 @@ def get_update_prompt(schema: dict) -> str:
 
             {{
                 "mechanism": null,
-                "fuel": "hydrogen",
+                "application_regime": null,
+                "fuel": [{{"species": "H2", "fraction": 1.0}}],
                 "pressure_start": 10,
                 "pressure_end": 100,
                 "pressure_unit": "bar",
@@ -315,6 +343,7 @@ def get_update_prompt(schema: dict) -> str:
                 "temperature_unit": "K",
                 "equivalence_ratio_start": null,
                 "equivalence_ratio_end": null,
+                "retained_species": null,
                 "target_species": null
             }}
 
@@ -325,7 +354,8 @@ def get_update_prompt(schema: dict) -> str:
 
             {{
                 "mechanism": null,
-                "fuel": "hydrogen",
+                "application_regime": null,
+                "fuel": [{{"species": "H2", "fraction": 1.0}}],
                 "pressure_start": 10,
                 "pressure_end": 100,
                 "pressure_unit": "bar",
@@ -334,6 +364,7 @@ def get_update_prompt(schema: dict) -> str:
                 "temperature_unit": "C",
                 "equivalence_ratio_start": null,
                 "equivalence_ratio_end": null,
+                "retained_species": null,
                 "target_species": null
             }}
 
@@ -342,7 +373,8 @@ def get_update_prompt(schema: dict) -> str:
             CURRENT PARAMETERS:
             {{
                 "mechanism": null,
-                "fuel": "ammonia and hydrogen",
+                "application_regime": null,
+                "fuel": [{{"species": "H2", "fraction": 0.5}}, {{"species": "NH3", "fraction": 0.5}}],
                 "pressure_start": 10,
                 "pressure_end": 100,
                 "pressure_unit": "bar",
@@ -351,6 +383,7 @@ def get_update_prompt(schema: dict) -> str:
                 "temperature_unit": "K",
                 "equivalence_ratio_start": null,
                 "equivalence_ratio_end": null,
+                "retained_species": null,
                 "target_species": null
             }}
 
@@ -360,7 +393,8 @@ def get_update_prompt(schema: dict) -> str:
             CORRECT OUTPUT:
             {{
                 "mechanism": null,
-                "fuel": "ammonia and hydrogen",
+                "application_regime": null,
+                "fuel": [{{"species": "H2", "fraction": 0.5}}, {{"species": "NH3", "fraction": 0.5}}],
                 "pressure_start": 10000,
                 "pressure_end": 100000,
                 "pressure_unit": "mbar",
@@ -369,6 +403,7 @@ def get_update_prompt(schema: dict) -> str:
                 "temperature_unit": "K",
                 "equivalence_ratio_start": null,
                 "equivalence_ratio_end": null,
+                "retained_species": null,
                 "target_species": null
             }}
 
@@ -381,76 +416,83 @@ def get_fill_prompt(schema: dict) -> str:
     return f"""
             You are the parameter completion agent of a combustion simulation assistant.
 
-            Your task is to complete a partially filled set of combustion simulation parameters.
+            Your task is to complete CURRENT PARAMETERS using the MATCHING CASES as the
+            primary source of information.
 
-            You are given:
-            1. CURRENT PARAMETERS: a JSON object containing the parameters currently known.
-            2. Some parameters may have the value null because they are not yet known.
+            ============================================================
+            RULES
+            ============================================================
 
-            Your task is to provide a complete and plausible configuration by filling the missing parameters.
+            1. PRESERVE EXISTING VALUES — HIGHEST PRIORITY
 
-            IMPORTANT:
-            This is a temporary default-completion agent. In the future, missing information
-            will be obtained from a database/RAG system. For now, use your general knowledge
-            of combustion simulations to provide reasonable default values.
+            CURRENT PARAMETERS is your ground truth and you have to fill in the missing fields from these parameters using the MATCHING CASES.
 
-            RULES:
+            NEVER change, replace, normalize, or remove a parameter whose value is NOT null in CURRENT PARAMETERS.
 
-            1. NEVER modify a parameter that already has a non-null value.
-            Preserve its value exactly.
+            Copy every existing non-null value EXACTLY from CURRENT PARAMETERS, including:
+            - numbers and units
+            - lists
+            - fuel species and fractions
+            - mechanisms
+            - species names
 
-            2. Only fill parameters whose value is null.
+            ONLY fill parameters that are currently null.
 
-            3. For a missing parameter, choose a reasonable and commonly used value
-            for a combustion simulation.
+            2. USE ALL MATCHING CASES
 
-            4. Do not invent unusual, highly specific, or arbitrary values when a
-            conventional default is available.
+            Inspect ALL matching cases before filling missing parameters.
+            The cases are combined evidence, not alternatives. Their order has no meaning.
 
-            5. For parameters involving a value and a unit:
-            - Fill the numerical value and its corresponding unit consistently.
-            - Do not convert or modify values that are already present.
-            - If both the value and unit are null, provide a reasonable value and unit.
+            For RANGE parameters:
+            - pressure_start/end
+            - temperature_start/end
+            - equivalence_ratio_start/end
 
-            6. If a reasonable value cannot be determined from the available information,
-            keep the parameter as null rather than making an arbitrary guess.
+            take the minimum start value and maximum end value across ALL matching cases.
 
-            7. Do not add fields that are not part of the schema.
+            For other parameters:
+            - if all cases agree, use that value;
+            - if they differ, use the value best supported by the cases;
+            - if no defensible value can be determined, keep null.
 
-            8. The output must contain ALL fields from the schema.
+            3. FILLING MISSING PARAMETERS
 
-            9. Return ONLY a valid JSON object.
-                Do not return Markdown.
-                Do not return ```json.
-                Do not provide explanations or comments.
+            For each null parameter:
 
-            The JSON object must follow this schema:
+            - First use information supported by the MATCHING CASES.
+            - If the cases do not provide enough information, a conventional combustion
+            default may be used when clearly appropriate.
+            - Otherwise, keep the parameter null.
+            - Never invent database information or unsupported specific values.
+
+            For fuel, preserve any existing composition exactly. Only fill a null fuel field.
+
+            For application_regime, retained_species, and target_species, use the matching
+            cases when available; otherwise use only reasonable conventional information.
+
+            For numerical values with units:
+            - preserve existing units;
+            - do not convert existing values;
+            - when both value and unit are missing, use the convention found in the
+            relevant matching cases.
+
+            4. OUTPUT
+
+            Return ONLY a valid JSON object.
+
+            - Include ALL fields defined by the schema.
+            - Do NOT add fields.
+            - Fields must be directly at the top level.
+            - Keep unresolved fields null.
+            - No Markdown, explanations, comments, or additional text.
+
+            ============================================================
+            OUTPUT SCHEMA
+            ============================================================
 
             {json.dumps(schema, indent=2)}
 
-            IMPORTANT:
-            - Do NOT put the fields inside a "properties" object.
-            - "properties" in the description above only describes the available fields.
-            - Your final response must have the fields directly at the top level.
-
-            For example, the correct format is:
-
-            {{
-                "mechanism": null,
-                "fuel": null,
-                "pressure_start": null,
-                "pressure_end": null,
-                "pressure_unit": null,
-                "temperature_start": null,
-                "temperature_end": null,
-                "temperature_unit": null,
-                "equivalence_ratio_start": null,
-                "equivalence_ratio_end": null,
-                "target_species": null
-            }}
-
-            Return the complete JSON object with the missing parameters filled where
-            a reasonable default can be provided.
+            Return the complete JSON object with missing parameters filled.
             """
 
 def get_router_prompt() -> str:

@@ -8,11 +8,14 @@ import yaml
 import itertools
 import logging
 import os
+import pickle
+from datetime import date
 import pymars.pymars as pymars
 import pymars.drgep as drgep
 import pymars.pfa as pfa
 import pymars.drg as drg
-
+from CombustionAgent.parameters import InputParameters
+from pymars.drgep import retrieve_next_ID
 
 ## Pymars log
 
@@ -25,57 +28,86 @@ class AgentToolMechReduction():
              
         ## Inputs
 
-        path = 'data/mechanisms/detailed/'
-        model = path + 'mech01-GRI3.0-1999.yaml'
-        gas = ct.Solution('gri30.yaml')
-        targets = ['CH4', 'H2']
-        retained = ['O2', 'N2', 'CH4', 'H2']
-        max_error_IDT = 15 #%
-        autoignition_kind = 'constant volume'
-        fuel = [ {'CH4': 0.99, 'H2':0.01},     
-                {'CH4': 0.8, 'H2':0.2}]
-        oxidizer = {'O2': 1.0, 'N2': 3.76}
-        equivalence_ratio = [0.5, 1.0, 2.0]
-        temperature_IDT = [700,  1100, 1500, 1800, 2000]
-        pressure = [1, 20, 50]
+        self.path = 'data/mechanisms/detailed/'
+        self.max_error_IDT = 15 #%
+        self.oxidizer = {'O2': 1.0, 'N2': 3.76}
+        self.autoignition_kind = 'constant volume'
         self.num_threads=1
-        method='DRGEP'
-        sensitivity=False
+        self.method='DRGEP'
+        self.sensitivity=False
 
 
-        # Create inputs dictionary
+    def get_data_IDT(self, input_parameters: InputParameters):
+                # Create inputs dictionary
+
+        mechanism = input_parameters.mechanism
+
+        #fuel = ...
+
+        temperature_start = input_parameters.temperature_start
+        temperature_end = input_parameters.temperature_end
+
+        pressure_start = input_parameters.pressure_start
+        pressure_end = input_parameters.pressure_end
+
+        equivalence_ratio_start = input_parameters.equivalence_ratio_start
+        equivalence_ratio_end = input_parameters.equivalence_ratio_end
+
+        model = self.path + mechanism + '.yaml'
+        targets = input_parameters.target_species
+        retained = input_parameters.retained_species
+
+        #Here for the moment can only handle one mixture
+        fuel = [{component.species: component.fraction for component in input_parameters.fuel}] #Need to modify later to explore different fuel compositions
+        temperature_IDT = (np.array([temperature_start]) if temperature_start == temperature_end else np.linspace(temperature_start, temperature_end, 3))
+        pressure = (np.array([pressure_start]) if pressure_start == pressure_end else np.linspace(pressure_start, pressure_end, 3))
+        equivalence_ratio = (np.array([equivalence_ratio_start]) if equivalence_ratio_start == equivalence_ratio_end else np.linspace(equivalence_ratio_start, equivalence_ratio_end, 3))
+
+        print("\n" + "=" * 60)
+        print("DRGEP REDUCTION CONDITIONS")
+        print("=" * 60)
+
+        print(f"Mechanism          : {mechanism}.yaml")
+        print(f"Fuel               : {fuel}")
+        print(f"Retained species   : {retained}")
+        print(f"Target species     : {targets}")
+        print(f"Temperature [K]    : {temperature_IDT}")
+        print(f"Pressure [bar]     : {pressure}")
+        print(f"Equivalence ratio  : {equivalence_ratio}")
+        print(f"Maximum error      : {self.max_error_IDT}%")
+
+        print("=" * 60 + "\n")
 
         cond_list_IDT = []
 
         for P, T, fx, phi in itertools.product(pressure, temperature_IDT, fuel, equivalence_ratio):
-
-                    #logging.basicConfig(level=logging.INFO)
-
-                
+             
                     condition = {
-                        'kind': 'constant volume',
+                        'kind': self.autoignition_kind,
                         'pressure': P,
                         'temperature': T,
                         'fuel': fx,
-                        'oxidizer': oxidizer,
+                        'oxidizer': self.oxidizer,
                         'equivalence-ratio': phi
                         }
                     cond_list_IDT.append(condition)
-
-
             
 
-        self.data = { 'model': model,
+        data = { 'model': model,
                     'targets': targets, 
                     'retained-species': retained, 
-                    'method': method,
-                    'error': max_error_IDT,
-                    'sensitivity-analysis': sensitivity,
+                    'method': self.method,
+                    'error': self.max_error_IDT,
+                    'sensitivity-analysis': self.sensitivity,
                     'autoignition-conditions':  cond_list_IDT
-                    }   
+                    } 
+
+        return data
             
-            
-            
+    def run_dgrep(self, input_parameters: InputParameters):
+
+        self.data = self.get_data_IDT(input_parameters)
+
         inputs = pymars.parse_inputs(self.data)
         self.model_file = inputs.model
         self.psr_conditions = inputs.psr_conditions
@@ -86,7 +118,23 @@ class AgentToolMechReduction():
         self.safe_species=inputs.safe_species
         self.error_limit = inputs.error
 
-    def run_dgrep(self):
+        data_pickle = {
+            "model_file": self.model_file,
+            "psr_conditions": self.psr_conditions,
+            "flame_conditions": self.flame_conditions,
+            "ignition_conditions": self.ignition_conditions,
+            "upper_threshold": self.upper_threshold,
+            "target_species": self.target_species,
+            "safe_species": self.safe_species,
+            "error_limit": self.error_limit,
+        }
+
+        path = "data/mechanisms/reduced/meta/"
+        today = date.today().strftime("%Y-%m-%d")
+        ID = retrieve_next_ID()
+
+        with open(path + today + f"-{ID}-" + input_parameters.mechanism + "-meta.pkl", "wb") as f:
+            pickle.dump(data_pickle, f)
     
         drgep.run_drgep(self.model_file, self.ignition_conditions, self.psr_conditions, self.flame_conditions, 
                         self.error_limit, self.target_species, self.safe_species, threshold_upper=None, num_threads=self.num_threads, path='data/temp/')

@@ -1,6 +1,8 @@
 """Module containing Directed Relation Graph with Error Propagation (DRGEP) reduction method.
 """
 import os
+import re
+from datetime import date
 import logging
 from collections import deque
 from heapq import heappush, heappop
@@ -352,8 +354,11 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, ignitio
     #        print(r, spcs)
     #print(reduced_model.n_species, reduced_model.n_reactions)
     #print(solution.n_species, solution.n_reactions)
+    today = date.today().strftime("%Y-%m-%d")
+    ID = retrieve_next_ID()
+    
     path_reduced_model = 'data/mechanisms/reduced/'
-    reduced_model_filename = path_reduced_model + f'{model_file.removeprefix("data/mechanisms/detailed/").removesuffix(".yaml")}_' + f'reduced_{reduced_model.n_species}.yaml'
+    reduced_model_filename = path_reduced_model + today + f"-{ID}-" +  f'{model_file.removeprefix("data/mechanisms/detailed/").removesuffix(".yaml")}-' + f'reduced_{reduced_model.n_species}.yaml'
     reduced_model.write_yaml(reduced_model_filename)
     #print('------', reduced_model_filename)
 
@@ -548,3 +553,35 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, plflame_condition
 
     logging.info('Final reduced model saved as ' + reduced_model.filename)
     return reduced_model
+
+def retrieve_next_ID():
+
+    directory = "data/mechanisms/reduced/"
+
+    today = date.today().strftime("%Y-%m-%d")
+
+    # Find files starting with today's date
+    files_today = [
+        f for f in os.listdir(directory)
+        if f.startswith(today)
+    ]
+
+    # Extract existing IDs
+    ids = []
+
+    for filename in files_today:
+        match = re.search(rf"^{today}-ID(\d{{3}})-", filename)
+
+        if match:
+            ids.append(int(match.group(1)))
+
+    # Determine next ID
+    if ids:
+        next_id = max(ids) + 1
+    else:
+        next_id = 1
+
+    # Format as ID001, ID002, ...
+    new_id = f"ID{next_id:03d}"
+
+    return new_id

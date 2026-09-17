@@ -8,7 +8,7 @@ from CombustionAgent.agent_tool import AgentToolMechReduction
 
 class Agent:
 
-    def __init__(self, model_name: str, model_preprompts: list[str], model_opening_message: str) -> None:
+    def __init__(self, model_name: str, model_preprompts: list[str], model_opening_message: str, database_path: str) -> None:
 
         self.model_manager = ModelManager(model_name)
         
@@ -16,12 +16,12 @@ class Agent:
         self.LLM_retrieval = RetrievalLLM(self.model_manager, model_preprompts[1])
         self.LLM_verification = VerifyLLM(self.model_manager, model_preprompts[2])
         self.LLM_update = UpdateLLM(self.model_manager, model_preprompts[3])
-        self.LLM_fill = FillLLM(self.model_manager, model_preprompts[4])
+        self.LLM_fill = FillLLM(self.model_manager, model_preprompts[4], database_path)
         self.LLM_router = RouterLLM(self.model_manager, model_preprompts[5])
 
         self.model_opening_message = model_opening_message
 
-        self.graph = AgentGraph(self)
+        self.graph = AgentGraph(self, database_path)
 
     def chat(self) -> None:
 
@@ -57,7 +57,7 @@ class Agent:
 
                     agent_tool_mechanism_reduction = AgentToolMechReduction()
 
-                    agent_tool_mechanism_reduction.run_dgrep()
+                    agent_tool_mechanism_reduction.run_dgrep(state["input_parameters"])
 
                     sys.exit()
 
