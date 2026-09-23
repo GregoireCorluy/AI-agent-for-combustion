@@ -1,10 +1,10 @@
 from pydantic import BaseModel, Field
 
 class FuelComponent(BaseModel):
-    species: str = Field(
+    species: str | None = Field(
         description="Fuel species in chemical notation, e.g., CH4 for methane, NH3 for ammonia or H2 for hydrogen."
     )
-    fraction: float = Field(
+    fraction: float | None = Field(
         description="Fuel fraction of this species. Coefficient needs to be between 0 and 1. Fractions must sum to 1."
     )
 

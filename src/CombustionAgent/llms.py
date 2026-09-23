@@ -11,7 +11,7 @@ class LLM:
         self.preprompt = model_preprompt
         # set temperature
 
-    def generate(self, message: str, max_new_tokens: int = 200, do_sample: bool = True) -> str:
+    def generate(self, message: str, max_new_tokens: int = 200, do_sample: bool = True, enable_thinking = True) -> str:
 
         messages = [
             {"role": "system", "content": self.preprompt},
@@ -22,18 +22,33 @@ class LLM:
                                                 messages,
                                                 add_generation_prompt=True,
                                                 return_tensors="pt",
+                                                enable_thinking = enable_thinking #added vs Llama
                                             ).to(self.model_manager.model.device)
 
         outputs = self.model_manager.model.generate( #add temperature?
                                                 **inputs,
                                                 max_new_tokens=max_new_tokens,
-                                                do_sample=do_sample,
+                                                do_sample=do_sample
                                             )
+        # Part added 
+        output_ids = outputs[0][inputs["input_ids"].shape[-1]:].tolist() 
 
-        LLM_reply = self.model_manager.tokenizer.decode(
-                                            outputs[0][inputs["input_ids"].shape[-1]:],
-                                            skip_special_tokens=True,
-                                        )
+        # parsing thinking content
+        try:
+            # rindex finding 151668 (</think>)
+            index = len(output_ids) - output_ids[::-1].index(151668)
+        except ValueError:
+            index = 0
+
+        thinking_content = self.model_manager.tokenizer.decode(output_ids[:index], skip_special_tokens=True).strip("\n")
+        LLM_reply = self.model_manager.tokenizer.decode(output_ids[index:], skip_special_tokens=True).strip("\n")
+
+        # LLM_reply = self.model_manager.tokenizer.decode(
+        #                                     outputs[0][inputs["input_ids"].shape[-1]:],
+        #                                     skip_special_tokens=True,
+        #                                 )
+
+        print(f"Thinking: {thinking_content}")
 
         return LLM_reply
 
@@ -73,12 +88,12 @@ class ConversationLLM(LLM):
 
 class RetrievalLLM(LLM):
 
-    def retrieve_information(self, message: str, max_new_tokens: int = 300) -> tuple[str, InputParameters]:
+    def retrieve_information(self, message: str, max_new_tokens: int = 1000) -> tuple[str, InputParameters]: #previously 300 max new tokens
 
         #estimation for the uncertain parts?
         #set temperature
 
-        LLM_reply = self.generate(message, max_new_tokens = max_new_tokens, do_sample = False)
+        LLM_reply = self.generate(message, max_new_tokens = max_new_tokens, do_sample = True) #True instead of False
 
         #convert JSON -> Python dictionary
         data = json.loads(LLM_reply)
@@ -103,7 +118,7 @@ class VerifyLLM(LLM):
                         Verify whether the extracted parameters accurately represent the information
                         explicitly provided in the original user message."""
 
-        LLM_reply = self.generate(message, max_new_tokens = max_new_tokens, do_sample=False)
+        LLM_reply = self.generate(message, max_new_tokens = max_new_tokens, do_sample=True) #true instead of false
 
         return LLM_reply
 
@@ -123,7 +138,7 @@ class UpdateLLM(LLM):
                     Return the complete updated JSON object.
                     """
 
-        updated_json = self.generate(message, max_new_tokens=max_new_tokens, do_sample=False)
+        updated_json = self.generate(message, max_new_tokens=max_new_tokens, do_sample=True) #true instead of false for llama
 
         data = json.loads(updated_json)
 
@@ -139,7 +154,7 @@ class FillLLM(LLM):
 
         self.database_path = database_path
 
-    def fill_missing_information(self, current_input_parameters: InputParameters, max_new_tokens: int = 500) -> tuple[str, InputParameters]:
+    def fill_missing_information(self, current_input_parameters: InputParameters, max_new_tokens: int = 2000) -> tuple[str, InputParameters]:#previously 500 
 
         database = MechanismDatabase(self.database_path)
 
@@ -166,17 +181,36 @@ class FillLLM(LLM):
 
         matched_cases_json = json.dumps(matched_cases, indent=2)
 
+        current_data = current_input_parameters.model_dump()
+
+        fixed_fields = [
+            field for field, value in current_data.items()
+            if value is not None
+        ]
+
+        fillable_fields = [
+            field for field, value in current_data.items()
+            if value is None
+        ]
+
 
         message = f"""CURRENT PARAMETERS:
                     {current_input_parameters_json}
+
+                    FIELDS THAT MUST NOT BE CHANGED:
+                    {json.dumps(fixed_fields)}
+
+                    FIELDS THAT MAY BE FILLED:
+                    {json.dumps(fillable_fields)}
 
                     MATCHING CASES:
                     {matched_cases_json}
 
                     Complete the missing parameters according to your instructions.
+                    Keep the exact values from CURRENT PARAMETERS and fill in the missing values using the MATCHING CASES according to your instructions.
                     """
 
-        filled_json = self.generate(message, max_new_tokens=max_new_tokens, do_sample=False)
+        filled_json = self.generate(message, max_new_tokens=max_new_tokens, do_sample=True, enable_thinking=True) #true instead of false with llama
 
         data = json.loads(filled_json)
 
@@ -207,7 +241,7 @@ class RouterLLM(LLM):
                     Only choose from this list. You cannot choose another option.
                     """
 
-        chosen_route = self.generate(message, max_new_tokens=max_new_tokens, do_sample=False)
+        chosen_route = self.generate(message, max_new_tokens=max_new_tokens, do_sample=False, enable_thinking=False) #changed vs LLama, sample true instead of False
 
         if chosen_route not in list_of_possible_routes:
             raise ValueError(f"LLM selected invalid route '{chosen_route}'. Expected one of: {list_of_possible_routes}.")

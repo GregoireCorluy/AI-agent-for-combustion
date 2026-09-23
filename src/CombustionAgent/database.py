@@ -20,6 +20,24 @@ class MechanismDatabase:
     # Public method
     # ============================================================
 
+    def get_unique_mechanisms(self) -> list[str]:
+        """Return the unique mechanism names stored in the database."""
+        
+        return sorted({
+            case["mechanism"]
+            for case in self.cases
+            if case.get("mechanism")
+        })
+
+    def get_unique_application_regime(self) -> list[str]:
+        """Return the unique application/regime names stored in the database."""
+        
+        return sorted({
+            regime
+            for case in self.cases
+            for regime in case.get("application_regime", [])
+        })
+    
     def find_best_matches(
         self,
         params: InputParameters,
@@ -415,7 +433,10 @@ class MechanismDatabase:
 
         # All species requested by the user must be present
         # in the database case.
-        return user_species.issubset(database_species)
+        #return user_species.issubset(database_species)
+
+        # At least one species correspond
+        return bool(user_species & database_species)
 
     # ============================================================
     # Mechanism

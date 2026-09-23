@@ -1614,3 +1614,556 @@ Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing 
 NumExpr defaulting to 16 threads.
 Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
 NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Beginning DRGEP reduction loop
+---------------------------------------------
+Threshold | Number of species | Max error idt (%) | Max error psr (%) | Max error lbv (%)
+1.00e-02  |         9         |       0.07        |       0.00       |       0.00       
+2.00e-02  |         9         |       0.07        |       0.00       |       0.00       
+3.00e-02  |         9         |       0.07        |       0.00       |       0.00       
+4.00e-02  |         9         |       0.07        |       0.00       |       0.00       
+5.00e-02  |         9         |       0.07        |       0.00       |       0.00       
+6.00e-02  |         9         |       0.07        |       0.00       |       0.00       
+7.00e-02  |         9         |       0.07        |       0.00       |       0.00       
+8.00e-02  |         9         |       0.07        |       0.00       |       0.00       
+9.00e-02  |         9         |       0.07        |       0.00       |       0.00       
+1.00e-01  |         9         |       0.07        |       0.00       |       0.00       
+1.10e-01  |         9         |       0.07        |       0.00       |       0.00       
+1.20e-01  |         9         |       0.07        |       0.00       |       0.00       
+1.30e-01  |         9         |       0.07        |       0.00       |       0.00       
+1.40e-01  |         9         |       0.07        |       0.00       |       0.00       
+1.50e-01  |         9         |       0.07        |       0.00       |       0.00       
+1.60e-01  |         9         |       0.07        |       0.00       |       0.00       
+1.70e-01  |         9         |       0.07        |       0.00       |       0.00       
+1.80e-01  |         9         |       0.07        |       0.00       |       0.00       
+1.90e-01  |         9         |       0.07        |       0.00       |       0.00       
+2.00e-01  |         9         |       0.07        |       0.00       |       0.00       
+2.10e-01  |         9         |       0.07        |       0.00       |       0.00       
+2.20e-01  |         9         |       0.07        |       0.00       |       0.00       
+2.30e-01  |         9         |       0.07        |       0.00       |       0.00       
+2.40e-01  |         9         |       0.07        |       0.00       |       0.00       
+2.50e-01  |         9         |       0.07        |       0.00       |       0.00       
+2.60e-01  |         9         |       0.07        |       0.00       |       0.00       
+2.70e-01  |         9         |       0.07        |       0.00       |       0.00       
+2.80e-01  |         9         |       0.07        |       0.00       |       0.00       
+2.90e-01  |         9         |       0.07        |       0.00       |       0.00       
+3.00e-01  |         9         |       0.07        |       0.00       |       0.00       
+3.10e-01  |         9         |       0.07        |       0.00       |       0.00       
+3.20e-01  |         9         |       0.07        |       0.00       |       0.00       
+3.30e-01  |         9         |       0.07        |       0.00       |       0.00       
+3.40e-01  |         9         |       0.07        |       0.00       |       0.00       
+3.50e-01  |         9         |       0.07        |       0.00       |       0.00       
+3.60e-01  |         9         |       0.07        |       0.00       |       0.00       
+3.70e-01  |         9         |       0.07        |       0.00       |       0.00       
+3.80e-01  |         9         |       0.07        |       0.00       |       0.00       
+3.90e-01  |         9         |       0.07        |       0.00       |       0.00       
+4.00e-01  |         9         |       0.07        |       0.00       |       0.00       
+4.10e-01  |         9         |       0.07        |       0.00       |       0.00       
+4.20e-01  |         9         |       0.07        |       0.00       |       0.00       
+4.30e-01  |         9         |       0.07        |       0.00       |       0.00       
+4.40e-01  |         9         |       0.07        |       0.00       |       0.00       
+4.50e-01  |         9         |       0.07        |       0.00       |       0.00       
+4.60e-01  |         9         |       0.07        |       0.00       |       0.00       
+4.70e-01  |         9         |       0.07        |       0.00       |       0.00       
+4.80e-01  |         9         |       0.07        |       0.00       |       0.00       
+4.90e-01  |         9         |       0.07        |       0.00       |       0.00       
+5.00e-01  |         9         |       0.07        |       0.00       |       0.00       
+5.10e-01  |         9         |       0.07        |       0.00       |       0.00       
+5.20e-01  |         9         |       0.07        |       0.00       |       0.00       
+5.30e-01  |         9         |       0.07        |       0.00       |       0.00       
+5.40e-01  |         9         |       0.07        |       0.00       |       0.00       
+5.50e-01  |         9         |       0.07        |       0.00       |       0.00       
+5.60e-01  |         9         |       0.07        |       0.00       |       0.00       
+5.70e-01  |         9         |       0.07        |       0.00       |       0.00       
+5.80e-01  |         9         |       0.07        |       0.00       |       0.00       
+5.90e-01  |         9         |       0.07        |       0.00       |       0.00       
+6.00e-01  |         9         |       0.07        |       0.00       |       0.00       
+6.10e-01  |         9         |       0.07        |       0.00       |       0.00       
+6.20e-01  |         9         |       0.07        |       0.00       |       0.00       
+6.30e-01  |         9         |       0.07        |       0.00       |       0.00       
+6.40e-01  |         9         |       0.07        |       0.00       |       0.00       
+6.50e-01  |         9         |       0.07        |       0.00       |       0.00       
+6.60e-01  |         9         |       0.07        |       0.00       |       0.00       
+6.70e-01  |         9         |       0.07        |       0.00       |       0.00       
+6.80e-01  |         9         |       0.07        |       0.00       |       0.00       
+6.90e-01  |         9         |       0.07        |       0.00       |       0.00       
+7.00e-01  |         9         |       0.07        |       0.00       |       0.00       
+7.10e-01  |         9         |       0.07        |       0.00       |       0.00       
+7.20e-01  |         9         |       0.07        |       0.00       |       0.00       
+7.30e-01  |         9         |       0.07        |       0.00       |       0.00       
+7.40e-01  |         9         |       0.07        |       0.00       |       0.00       
+7.50e-01  |         9         |       0.07        |       0.00       |       0.00       
+7.60e-01  |         9         |       0.07        |       0.00       |       0.00       
+7.70e-01  |         9         |       0.07        |       0.00       |       0.00       
+7.80e-01  |         9         |       0.07        |       0.00       |       0.00       
+7.90e-01  |         9         |       0.07        |       0.00       |       0.00       
+8.00e-01  |         9         |       0.07        |       0.00       |       0.00       
+8.10e-01  |         9         |       0.07        |       0.00       |       0.00       
+8.20e-01  |         9         |       0.07        |       0.00       |       0.00       
+8.30e-01  |         8         |     65703.02      |       0.00       |       0.00       
+---------------------------------------------
+DRGEP reduction complete.
+Skeletal model: 9 species and 23 reactions.
+Maximum error idt: 0.07%
+Maximum error psr: 0.00%
+Maximum error lbv: 0.00%
+Final reduced model saved as data/mechanisms/reduced/2026-09-20-ID001-Burke-2012-H2-N2-reduced_9.yaml
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Beginning DRGEP reduction loop
+---------------------------------------------
+Threshold | Number of species | Max error idt (%) | Max error psr (%) | Max error lbv (%)
+1.00e-02  |         9         |       0.20        |       0.00       |       0.00       
+2.00e-02  |         9         |       0.20        |       0.00       |       0.00       
+3.00e-02  |         9         |       0.20        |       0.00       |       0.00       
+4.00e-02  |         9         |       0.20        |       0.00       |       0.00       
+5.00e-02  |         9         |       0.20        |       0.00       |       0.00       
+6.00e-02  |         9         |       0.20        |       0.00       |       0.00       
+7.00e-02  |         9         |       0.20        |       0.00       |       0.00       
+8.00e-02  |         9         |       0.20        |       0.00       |       0.00       
+9.00e-02  |         9         |       0.20        |       0.00       |       0.00       
+1.00e-01  |         9         |       0.20        |       0.00       |       0.00       
+1.10e-01  |         9         |       0.20        |       0.00       |       0.00       
+1.20e-01  |         9         |       0.20        |       0.00       |       0.00       
+1.30e-01  |         9         |       0.20        |       0.00       |       0.00       
+1.40e-01  |         9         |       0.20        |       0.00       |       0.00       
+1.50e-01  |         9         |       0.20        |       0.00       |       0.00       
+1.60e-01  |         9         |       0.20        |       0.00       |       0.00       
+1.70e-01  |         9         |       0.20        |       0.00       |       0.00       
+1.80e-01  |         9         |       0.20        |       0.00       |       0.00       
+1.90e-01  |         9         |       0.20        |       0.00       |       0.00       
+2.00e-01  |         9         |       0.20        |       0.00       |       0.00       
+2.10e-01  |         9         |       0.20        |       0.00       |       0.00       
+2.20e-01  |         9         |       0.20        |       0.00       |       0.00       
+2.30e-01  |         9         |       0.20        |       0.00       |       0.00       
+2.40e-01  |         9         |       0.20        |       0.00       |       0.00       
+2.50e-01  |         9         |       0.20        |       0.00       |       0.00       
+2.60e-01  |         9         |       0.20        |       0.00       |       0.00       
+2.70e-01  |         9         |       0.20        |       0.00       |       0.00       
+2.80e-01  |         9         |       0.20        |       0.00       |       0.00       
+2.90e-01  |         9         |       0.20        |       0.00       |       0.00       
+3.00e-01  |         9         |       0.20        |       0.00       |       0.00       
+3.10e-01  |         9         |       0.20        |       0.00       |       0.00       
+3.20e-01  |         9         |       0.20        |       0.00       |       0.00       
+3.30e-01  |         9         |       0.20        |       0.00       |       0.00       
+3.40e-01  |         9         |       0.20        |       0.00       |       0.00       
+3.50e-01  |         9         |       0.20        |       0.00       |       0.00       
+3.60e-01  |         9         |       0.20        |       0.00       |       0.00       
+3.70e-01  |         9         |       0.20        |       0.00       |       0.00       
+3.80e-01  |         9         |       0.20        |       0.00       |       0.00       
+3.90e-01  |         9         |       0.20        |       0.00       |       0.00       
+4.00e-01  |         9         |       0.20        |       0.00       |       0.00       
+4.10e-01  |         9         |       0.20        |       0.00       |       0.00       
+4.20e-01  |         9         |       0.20        |       0.00       |       0.00       
+4.30e-01  |         9         |       0.20        |       0.00       |       0.00       
+4.40e-01  |         9         |       0.20        |       0.00       |       0.00       
+4.50e-01  |         9         |       0.20        |       0.00       |       0.00       
+4.60e-01  |         9         |       0.20        |       0.00       |       0.00       
+4.70e-01  |         9         |       0.20        |       0.00       |       0.00       
+4.80e-01  |         9         |       0.20        |       0.00       |       0.00       
+4.90e-01  |         9         |       0.20        |       0.00       |       0.00       
+5.00e-01  |         9         |       0.20        |       0.00       |       0.00       
+5.10e-01  |         9         |       0.20        |       0.00       |       0.00       
+5.20e-01  |         9         |       0.20        |       0.00       |       0.00       
+5.30e-01  |         9         |       0.20        |       0.00       |       0.00       
+5.40e-01  |         9         |       0.20        |       0.00       |       0.00       
+5.50e-01  |         9         |       0.20        |       0.00       |       0.00       
+5.60e-01  |         9         |       0.20        |       0.00       |       0.00       
+5.70e-01  |         9         |       0.20        |       0.00       |       0.00       
+5.80e-01  |         9         |       0.20        |       0.00       |       0.00       
+5.90e-01  |         8         |     32207.51      |       0.00       |       0.00       
+---------------------------------------------
+DRGEP reduction complete.
+Skeletal model: 9 species and 23 reactions.
+Maximum error idt: 0.20%
+Maximum error psr: 0.00%
+Maximum error lbv: 0.00%
+Final reduced model saved as data/mechanisms/reduced/2026-09-21-ID001-Burke-2012-H2-N2-reduced_9.yaml
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+No ignition detected for ignition case 0
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Beginning DRGEP reduction loop
+---------------------------------------------
+Threshold | Number of species | Max error idt (%) | Max error psr (%) | Max error lbv (%)
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Beginning DRGEP reduction loop
+---------------------------------------------
+Threshold | Number of species | Max error idt (%) | Max error psr (%) | Max error lbv (%)
+1.00e-02  |        27         |       0.12        |       0.00       |       0.00       
+2.00e-02  |        27         |       0.12        |       0.00       |       0.00       
+3.00e-02  |        27         |       0.12        |       0.00       |       0.00       
+4.00e-02  |        27         |       0.12        |       0.00       |       0.00       
+5.00e-02  |        25         |       0.30        |       0.00       |       0.00       
+6.00e-02  |        25         |       0.30        |       0.00       |       0.00       
+7.00e-02  |        25         |       0.30        |       0.00       |       0.00       
+8.00e-02  |        25         |       0.30        |       0.00       |       0.00       
+9.00e-02  |        25         |       0.30        |       0.00       |       0.00       
+1.00e-01  |        25         |       0.30        |       0.00       |       0.00       
+1.10e-01  |        25         |       0.30        |       0.00       |       0.00       
+1.20e-01  |        24         |      416.00       |       0.00       |       0.00       
+---------------------------------------------
+DRGEP reduction complete.
+Skeletal model: 25 species and 180 reactions.
+Maximum error idt: 0.30%
+Maximum error psr: 0.00%
+Maximum error lbv: 0.00%
+Final reduced model saved as data/mechanisms/reduced/2026-09-22-ID001-Glarborg-2024-NH3-reduced_25.yaml
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Beginning DRGEP reduction loop
+---------------------------------------------
+Threshold | Number of species | Max error idt (%) | Max error psr (%) | Max error lbv (%)
+1.00e-02  |        27         |       0.12        |       0.00       |       0.00       
+2.00e-02  |        27         |       0.12        |       0.00       |       0.00       
+3.00e-02  |        27         |       0.12        |       0.00       |       0.00       
+4.00e-02  |        27         |       0.12        |       0.00       |       0.00       
+5.00e-02  |        25         |       0.30        |       0.00       |       0.00       
+6.00e-02  |        25         |       0.30        |       0.00       |       0.00       
+7.00e-02  |        25         |       0.30        |       0.00       |       0.00       
+8.00e-02  |        25         |       0.30        |       0.00       |       0.00       
+9.00e-02  |        25         |       0.30        |       0.00       |       0.00       
+1.00e-01  |        25         |       0.30        |       0.00       |       0.00       
+1.10e-01  |        25         |       0.30        |       0.00       |       0.00       
+1.20e-01  |        24         |      416.00       |       0.00       |       0.00       
+---------------------------------------------
+DRGEP reduction complete.
+Skeletal model: 25 species and 180 reactions.
+Maximum error idt: 0.30%
+Maximum error psr: 0.00%
+Maximum error lbv: 0.00%
+Final reduced model saved as data/mechanisms/reduced/2026-09-22-ID002-Glarborg-2024-NH3-reduced_25.yaml
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Maximum number of steps reached before convergence for ignition case 2
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Beginning DRGEP reduction loop
+---------------------------------------------
+Threshold | Number of species | Max error idt (%) | Max error psr (%) | Max error lbv (%)
+1.00e-02  |        15         |       0.12        |       0.00       |       0.00       
+2.00e-02  |        15         |       0.12        |       0.00       |       0.00       
+3.00e-02  |        15         |       0.12        |       0.00       |       0.00       
+4.00e-02  |        14         |       0.13        |       0.00       |       0.00       
+5.00e-02  |        14         |       0.13        |       0.00       |       0.00       
+6.00e-02  |        14         |       0.13        |       0.00       |       0.00       
+7.00e-02  |        13         |       0.11        |       0.00       |       0.00       
+8.00e-02  |        13         |       0.11        |       0.00       |       0.00       
+9.00e-02  |        12         |       0.10        |       0.00       |       0.00       
+1.00e-01  |        12         |       0.10        |       0.00       |       0.00       
+1.10e-01  |        11         |       0.08        |       0.00       |       0.00       
+1.20e-01  |        11         |       0.08        |       0.00       |       0.00       
+1.30e-01  |        11         |       0.08        |       0.00       |       0.00       
+1.40e-01  |        11         |       0.08        |       0.00       |       0.00       
+1.50e-01  |        11         |       0.08        |       0.00       |       0.00       
+1.60e-01  |        11         |       0.08        |       0.00       |       0.00       
+1.70e-01  |        11         |       0.08        |       0.00       |       0.00       
+1.80e-01  |        11         |       0.08        |       0.00       |       0.00       
+1.90e-01  |        11         |       0.08        |       0.00       |       0.00       
+2.00e-01  |        11         |       0.08        |       0.00       |       0.00       
+2.10e-01  |        11         |       0.08        |       0.00       |       0.00       
+2.20e-01  |        11         |       0.08        |       0.00       |       0.00       
+2.30e-01  |        11         |       0.08        |       0.00       |       0.00       
+2.40e-01  |        11         |       0.08        |       0.00       |       0.00       
+2.50e-01  |        11         |       0.08        |       0.00       |       0.00       
+2.60e-01  |        11         |       0.08        |       0.00       |       0.00       
+2.70e-01  |        11         |       0.08        |       0.00       |       0.00       
+2.80e-01  |        11         |       0.08        |       0.00       |       0.00       
+2.90e-01  |        11         |       0.08        |       0.00       |       0.00       
+3.00e-01  |        11         |       0.08        |       0.00       |       0.00       
+3.10e-01  |        11         |       0.08        |       0.00       |       0.00       
+3.20e-01  |        11         |       0.08        |       0.00       |       0.00       
+3.30e-01  |        11         |       0.08        |       0.00       |       0.00       
+3.40e-01  |        11         |       0.08        |       0.00       |       0.00       
+3.50e-01  |        11         |       0.08        |       0.00       |       0.00       
+3.60e-01  |        11         |       0.08        |       0.00       |       0.00       
+3.70e-01  |        11         |       0.08        |       0.00       |       0.00       
+3.80e-01  |        11         |       0.08        |       0.00       |       0.00       
+3.90e-01  |        11         |       0.08        |       0.00       |       0.00       
+4.00e-01  |        11         |       0.08        |       0.00       |       0.00       
+4.10e-01  |        11         |       0.08        |       0.00       |       0.00       
+4.20e-01  |        11         |       0.08        |       0.00       |       0.00       
+4.30e-01  |        11         |       0.08        |       0.00       |       0.00       
+4.40e-01  |        11         |       0.08        |       0.00       |       0.00       
+4.50e-01  |        11         |       0.08        |       0.00       |       0.00       
+4.60e-01  |        11         |       0.08        |       0.00       |       0.00       
+4.70e-01  |        11         |       0.08        |       0.00       |       0.00       
+4.80e-01  |        11         |       0.08        |       0.00       |       0.00       
+4.90e-01  |        11         |       0.08        |       0.00       |       0.00       
+5.00e-01  |        11         |       0.08        |       0.00       |       0.00       
+5.10e-01  |        11         |       0.08        |       0.00       |       0.00       
+5.20e-01  |        11         |       0.08        |       0.00       |       0.00       
+5.30e-01  |        11         |       0.08        |       0.00       |       0.00       
+5.40e-01  |        11         |       0.08        |       0.00       |       0.00       
+5.50e-01  |        11         |       0.08        |       0.00       |       0.00       
+5.60e-01  |        11         |       0.08        |       0.00       |       0.00       
+5.70e-01  |        11         |       0.08        |       0.00       |       0.00       
+5.80e-01  |        11         |       0.08        |       0.00       |       0.00       
+5.90e-01  |        10         |      465.14       |       0.00       |       0.00       
+---------------------------------------------
+DRGEP reduction complete.
+Skeletal model: 11 species and 33 reactions.
+Maximum error idt: 0.08%
+Maximum error psr: 0.00%
+Maximum error lbv: 0.00%
+Final reduced model saved as data/mechanisms/reduced/2026-09-23-ID001-Glarborg-2024-NH3-reduced_11.yaml
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Beginning DRGEP reduction loop
+---------------------------------------------
+Threshold | Number of species | Max error idt (%) | Max error psr (%) | Max error lbv (%)
+1.00e-02  |        15         |       0.12        |       0.00       |       0.00       
+2.00e-02  |        15         |       0.12        |       0.00       |       0.00       
+3.00e-02  |        15         |       0.12        |       0.00       |       0.00       
+4.00e-02  |        14         |       0.13        |       0.00       |       0.00       
+5.00e-02  |        14         |       0.13        |       0.00       |       0.00       
+6.00e-02  |        14         |       0.13        |       0.00       |       0.00       
+7.00e-02  |        13         |       0.11        |       0.00       |       0.00       
+8.00e-02  |        13         |       0.11        |       0.00       |       0.00       
+9.00e-02  |        12         |       0.10        |       0.00       |       0.00       
+1.00e-01  |        12         |       0.10        |       0.00       |       0.00       
+1.10e-01  |        11         |       0.08        |       0.00       |       0.00       
+1.20e-01  |        11         |       0.08        |       0.00       |       0.00       
+1.30e-01  |        11         |       0.08        |       0.00       |       0.00       
+1.40e-01  |        11         |       0.08        |       0.00       |       0.00       
+1.50e-01  |        11         |       0.08        |       0.00       |       0.00       
+1.60e-01  |        11         |       0.08        |       0.00       |       0.00       
+1.70e-01  |        11         |       0.08        |       0.00       |       0.00       
+1.80e-01  |        11         |       0.08        |       0.00       |       0.00       
+1.90e-01  |        11         |       0.08        |       0.00       |       0.00       
+2.00e-01  |        11         |       0.08        |       0.00       |       0.00       
+2.10e-01  |        11         |       0.08        |       0.00       |       0.00       
+2.20e-01  |        11         |       0.08        |       0.00       |       0.00       
+2.30e-01  |        11         |       0.08        |       0.00       |       0.00       
+2.40e-01  |        11         |       0.08        |       0.00       |       0.00       
+2.50e-01  |        11         |       0.08        |       0.00       |       0.00       
+2.60e-01  |        11         |       0.08        |       0.00       |       0.00       
+2.70e-01  |        11         |       0.08        |       0.00       |       0.00       
+2.80e-01  |        11         |       0.08        |       0.00       |       0.00       
+2.90e-01  |        11         |       0.08        |       0.00       |       0.00       
+3.00e-01  |        11         |       0.08        |       0.00       |       0.00       
+3.10e-01  |        11         |       0.08        |       0.00       |       0.00       
+3.20e-01  |        11         |       0.08        |       0.00       |       0.00       
+3.30e-01  |        11         |       0.08        |       0.00       |       0.00       
+3.40e-01  |        11         |       0.08        |       0.00       |       0.00       
+3.50e-01  |        11         |       0.08        |       0.00       |       0.00       
+3.60e-01  |        11         |       0.08        |       0.00       |       0.00       
+3.70e-01  |        11         |       0.08        |       0.00       |       0.00       
+3.80e-01  |        11         |       0.08        |       0.00       |       0.00       
+3.90e-01  |        11         |       0.08        |       0.00       |       0.00       
+4.00e-01  |        11         |       0.08        |       0.00       |       0.00       
+4.10e-01  |        11         |       0.08        |       0.00       |       0.00       
+4.20e-01  |        11         |       0.08        |       0.00       |       0.00       
+4.30e-01  |        11         |       0.08        |       0.00       |       0.00       
+4.40e-01  |        11         |       0.08        |       0.00       |       0.00       
+4.50e-01  |        11         |       0.08        |       0.00       |       0.00       
+4.60e-01  |        11         |       0.08        |       0.00       |       0.00       
+4.70e-01  |        11         |       0.08        |       0.00       |       0.00       
+4.80e-01  |        11         |       0.08        |       0.00       |       0.00       
+4.90e-01  |        11         |       0.08        |       0.00       |       0.00       
+5.00e-01  |        11         |       0.08        |       0.00       |       0.00       
+5.10e-01  |        11         |       0.08        |       0.00       |       0.00       
+5.20e-01  |        11         |       0.08        |       0.00       |       0.00       
+5.30e-01  |        11         |       0.08        |       0.00       |       0.00       
+5.40e-01  |        11         |       0.08        |       0.00       |       0.00       
+5.50e-01  |        11         |       0.08        |       0.00       |       0.00       
+5.60e-01  |        11         |       0.08        |       0.00       |       0.00       
+5.70e-01  |        11         |       0.08        |       0.00       |       0.00       
+5.80e-01  |        11         |       0.08        |       0.00       |       0.00       
+5.90e-01  |        10         |      465.14       |       0.00       |       0.00       
+---------------------------------------------
+DRGEP reduction complete.
+Skeletal model: 11 species and 33 reactions.
+Maximum error idt: 0.08%
+Maximum error psr: 0.00%
+Maximum error lbv: 0.00%
+Final reduced model saved as data/mechanisms/reduced/2026-09-23-ID002-Glarborg-2024-NH3-reduced_11.yaml
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Beginning DRGEP reduction loop
+---------------------------------------------
+Threshold | Number of species | Max error idt (%) | Max error psr (%) | Max error lbv (%)
+1.00e-02  |        10         |       0.00        |       0.00       |       0.00       
+2.00e-02  |        10         |       0.00        |       0.00       |       0.00       
+3.00e-02  |         9         |       0.00        |       0.00       |       0.00       
+4.00e-02  |         9         |       0.00        |       0.00       |       0.00       
+5.00e-02  |         9         |       0.00        |       0.00       |       0.00       
+6.00e-02  |         9         |       0.00        |       0.00       |       0.00       
+7.00e-02  |         9         |       0.00        |       0.00       |       0.00       
+8.00e-02  |         9         |       0.00        |       0.00       |       0.00       
+9.00e-02  |         9         |       0.00        |       0.00       |       0.00       
+1.00e-01  |         9         |       0.00        |       0.00       |       0.00       
+1.10e-01  |         9         |       0.00        |       0.00       |       0.00       
+1.20e-01  |         9         |       0.00        |       0.00       |       0.00       
+1.30e-01  |         9         |       0.00        |       0.00       |       0.00       
+1.40e-01  |         9         |       0.00        |       0.00       |       0.00       
+1.50e-01  |         9         |       0.00        |       0.00       |       0.00       
+1.60e-01  |         9         |       0.00        |       0.00       |       0.00       
+1.70e-01  |         9         |       0.00        |       0.00       |       0.00       
+1.80e-01  |         9         |       0.00        |       0.00       |       0.00       
+1.90e-01  |         9         |       0.00        |       0.00       |       0.00       
+2.00e-01  |         9         |       0.00        |       0.00       |       0.00       
+2.10e-01  |         9         |       0.00        |       0.00       |       0.00       
+2.20e-01  |         9         |       0.00        |       0.00       |       0.00       
+2.30e-01  |         9         |       0.00        |       0.00       |       0.00       
+2.40e-01  |         9         |       0.00        |       0.00       |       0.00       
+2.50e-01  |         9         |       0.00        |       0.00       |       0.00       
+2.60e-01  |         9         |       0.00        |       0.00       |       0.00       
+2.70e-01  |         9         |       0.00        |       0.00       |       0.00       
+2.80e-01  |         9         |       0.00        |       0.00       |       0.00       
+2.90e-01  |         9         |       0.00        |       0.00       |       0.00       
+3.00e-01  |         9         |       0.00        |       0.00       |       0.00       
+3.10e-01  |         9         |       0.00        |       0.00       |       0.00       
+3.20e-01  |         9         |       0.00        |       0.00       |       0.00       
+3.30e-01  |         9         |       0.00        |       0.00       |       0.00       
+3.40e-01  |         9         |       0.00        |       0.00       |       0.00       
+3.50e-01  |         9         |       0.00        |       0.00       |       0.00       
+3.60e-01  |         9         |       0.00        |       0.00       |       0.00       
+3.70e-01  |         9         |       0.00        |       0.00       |       0.00       
+3.80e-01  |         9         |       0.00        |       0.00       |       0.00       
+3.90e-01  |         9         |       0.00        |       0.00       |       0.00       
+4.00e-01  |         9         |       0.00        |       0.00       |       0.00       
+4.10e-01  |         9         |       0.00        |       0.00       |       0.00       
+4.20e-01  |         9         |       0.00        |       0.00       |       0.00       
+4.30e-01  |         9         |       0.00        |       0.00       |       0.00       
+4.40e-01  |         9         |       0.00        |       0.00       |       0.00       
+4.50e-01  |         9         |       0.00        |       0.00       |       0.00       
+4.60e-01  |         9         |       0.00        |       0.00       |       0.00       
+4.70e-01  |         9         |       0.00        |       0.00       |       0.00       
+4.80e-01  |         9         |       0.00        |       0.00       |       0.00       
+4.90e-01  |         9         |       0.00        |       0.00       |       0.00       
+5.00e-01  |         9         |       0.00        |       0.00       |       0.00       
+5.10e-01  |         9         |       0.00        |       0.00       |       0.00       
+5.20e-01  |         9         |       0.00        |       0.00       |       0.00       
+5.30e-01  |         9         |       0.00        |       0.00       |       0.00       
+5.40e-01  |         9         |       0.00        |       0.00       |       0.00       
+5.50e-01  |         9         |       0.00        |       0.00       |       0.00       
+5.60e-01  |         9         |       0.00        |       0.00       |       0.00       
+5.70e-01  |         9         |       0.00        |       0.00       |       0.00       
+5.80e-01  |         9         |       0.00        |       0.00       |       0.00       
+5.90e-01  |         9         |       0.00        |       0.00       |       0.00       
+6.00e-01  |         9         |       0.00        |       0.00       |       0.00       
+6.10e-01  |         9         |       0.00        |       0.00       |       0.00       
+6.20e-01  |         9         |       0.00        |       0.00       |       0.00       
+6.30e-01  |         9         |       0.00        |       0.00       |       0.00       
+6.40e-01  |         9         |       0.00        |       0.00       |       0.00       
+6.50e-01  |         9         |       0.00        |       0.00       |       0.00       
+6.60e-01  |         9         |       0.00        |       0.00       |       0.00       
+6.70e-01  |         9         |       0.00        |       0.00       |       0.00       
+6.80e-01  |         9         |       0.00        |       0.00       |       0.00       
+6.90e-01  |         9         |       0.00        |       0.00       |       0.00       
+7.00e-01  |         9         |       0.00        |       0.00       |       0.00       
+7.10e-01  |         9         |       0.00        |       0.00       |       0.00       
+7.20e-01  |         8         |      624.58       |       0.00       |       0.00       
+---------------------------------------------
+DRGEP reduction complete.
+Skeletal model: 9 species and 30 reactions.
+Maximum error idt: 0.00%
+Maximum error psr: 0.00%
+Maximum error lbv: 0.00%
+Final reduced model saved as data/mechanisms/reduced/2026-09-23-ID003-Glarborg-2024-NH3-reduced_9.yaml

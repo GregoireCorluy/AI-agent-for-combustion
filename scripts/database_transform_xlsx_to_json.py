@@ -29,7 +29,7 @@ def clean_value(value):
 # Read Excel
 # --------------------------------------------------
 
-df = pd.read_excel(INPUT_FILE, sheet_name = "v2.1 Modified")
+df = pd.read_excel(INPUT_FILE, sheet_name = "v2.2 Modified")
 
 
 # --------------------------------------------------

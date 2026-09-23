@@ -1,4 +1,5 @@
 import json
+from .database import MechanismDatabase
 
 def get_chat_prompt() -> str:
     return """
@@ -81,7 +82,11 @@ def get_chat_prompt() -> str:
             Therefore, output ONLY the natural-language response to the user.
             """
 
-def get_retrieve_prompt(schema: dict) -> str:
+def get_retrieve_prompt(schema: dict, database_path: str) -> str:
+
+    database = MechanismDatabase(database_path)
+    keywords_application_regime = database.get_unique_application_regime()
+
     return f"""
             You are an information extraction agent.
 
@@ -94,6 +99,21 @@ def get_retrieve_prompt(schema: dict) -> str:
             - If information is not provided, use null.
             - Return ONLY a JSON object.
             - Do not add explanations or any text outside the JSON object.
+            - Do not convert numerical values from one unit to another.
+
+            Application/regime keywords:
+            The `application_regime` field must contain ONLY keywords from the following list:
+            {json.dumps(keywords_application_regime, indent=2)}
+
+            If the user explicitly mentions an application or regime that corresponds
+            to one or more keywords in this list, return the matching keyword(s)
+            exactly as they appear in the list.
+
+            Important: return the keywords as a list of strings.
+
+            Do NOT invent application/regime keywords that are not present in the list.
+            If no keyword from the list is explicitly mentioned or clearly corresponds
+            to the user's wording, return null for `application_regime`.
 
             The JSON object must follow this schema:
 
@@ -123,7 +143,7 @@ def get_retrieve_prompt(schema: dict) -> str:
             }}
             """
 
-def get_verify_prompt() -> str:
+def get_verify_prompt(schema: dict) -> str:
     return f"""
             You are a critical verification agent for a combustion simulation assistant.
             Treat the message of the user as the ground truth and be critical with what the json contains.
@@ -143,6 +163,7 @@ def get_verify_prompt() -> str:
             - Check that numerical values are copied correctly.
             - Check that units are copied correctly.
             - Check that the value and its unit are consistent.
+            - Check that the retriever did not convert the numerical values, keep the exact values provided by the user.
             - Pay particular attention to temperature and pressure units.
             - If the extracted parameter is null and the user did not provide that parameter, this is correct.
             - If the extracted parameter contains information that the user did not provide, this is incorrect.
@@ -159,7 +180,7 @@ def get_verify_prompt() -> str:
             - For example:
                 - H2 → fuel: [{{"species: "H2", "fraction": 1.0}}]
                 - NH3 + H2 → fuel: [{{"species: "NH3", "fraction": 0.5}}, {{"species: "H2", "fraction": 0.5}}]
-                - NH3 + H2 + CH4 → fuel: [{{"species: "NH3", "fraction": 0.333}}, {{"species: "H2", "fraction": 0.3335}}, {{"species: "CH4", "fraction": 0.3335}}]
+                - NH3 + H2 + CH4 → fuel: [{{"species: "NH3", "fraction": 0.333}}, {{"species: "H2", "fraction": 0.333}}, {{"species: "CH4", "fraction": 0.333}}]
             - This exception applies only when the user provides the fuel species but does not provide their fractions.
             - If the user explicitly provides fuel fractions, those fractions must be copied exactly and must not be replaced by assumed equal fractions.
             - Do not add fuel species that were not explicitly provided by the user.
@@ -175,6 +196,10 @@ def get_verify_prompt() -> str:
             - what the corrected value should be.
 
             Do not recommend values that the user did not provide.
+
+            The JSON object must follow this schema:
+            
+            {json.dumps(schema, indent=2)}
 
             Return a concise verification report.
             """
@@ -416,84 +441,242 @@ def get_fill_prompt(schema: dict) -> str:
     return f"""
             You are the parameter completion agent of a combustion simulation assistant.
 
-            Your task is to complete CURRENT PARAMETERS using the MATCHING CASES as the
-            primary source of information.
+            Your task is to complete a partially filled set of combustion simulation parameters.
+
+            You are given:
+
+            1. CURRENT PARAMETERS
+            A JSON object containing the parameters currently known.
+            Parameters with the value null are unknown and may need to be filled.
+
+            2. MATCHING CASES
+            One or more JSON objects retrieved from a combustion database.
+            These cases were selected because they match some of the known
+            characteristics of the current user input.
+
+            Your task is to complete the CURRENT PARAMETERS using the
+            MATCHING CASES as the primary source of information.
 
             ============================================================
             RULES
             ============================================================
 
-            1. PRESERVE EXISTING VALUES — HIGHEST PRIORITY
+            1. PRESERVE KNOWN PARAMETERS FROM CURRENT PARAMETERS
 
-            CURRENT PARAMETERS is your ground truth and you have to fill in the missing fields from these parameters using the MATCHING CASES.
+            USE and COPY directly the values from CURRENT PARAMETERS.
 
-            NEVER change, replace, normalize, or remove a parameter whose value is NOT null in CURRENT PARAMETERS.
+            NEVER modify a parameter whose value is not null.
 
-            Copy every existing non-null value EXACTLY from CURRENT PARAMETERS, including:
-            - numbers and units
+            Preserve its value exactly, including:
+            - numerical values
+            - units
             - lists
             - fuel species and fractions
-            - mechanisms
-            - species names
 
-            ONLY fill parameters that are currently null.
+            Only parameters with a null value may be filled.
 
-            2. USE ALL MATCHING CASES
+            2. USE MATCHING CASES AS THE PRIMARY SOURCE
 
-            Inspect ALL matching cases before filling missing parameters.
-            The cases are combined evidence, not alternatives. Their order has no meaning.
+            When a missing parameter from CURRENT PARAMETERS can be inferred from the MATCHING CASES,
+            use the information provided by those cases.
 
-            For RANGE parameters:
-            - pressure_start/end
-            - temperature_start/end
-            - equivalence_ratio_start/end
+            Do not use general combustion knowledge when the database provides
+            sufficient information.
 
-            take the minimum start value and maximum end value across ALL matching cases.
+            3. MULTIPLE MATCHING CASES — AGGREGATE ALL CASES
 
-            For other parameters:
-            - if all cases agree, use that value;
-            - if they differ, use the value best supported by the cases;
-            - if no defensible value can be determined, keep null.
+            When MATCHING CASES contains multiple cases, you MUST inspect ALL matching
+            cases before filling any missing parameter.
 
-            3. FILLING MISSING PARAMETERS
+            NEVER simply copy the values from the first matching case.
 
-            For each null parameter:
+            Treat every matching case as evidence. The order of the cases has NO meaning
+            and must NOT influence the result.
 
-            - First use information supported by the MATCHING CASES.
-            - If the cases do not provide enough information, a conventional combustion
-            default may be used when clearly appropriate.
-            - Otherwise, keep the parameter null.
-            - Never invent database information or unsupported specific values.
+            For each missing parameter:
 
-            For fuel, preserve any existing composition exactly. Only fill a null fuel field.
+            - First collect the corresponding value from EVERY matching case.
+            - Then determine the output value from the complete set of values.
 
-            For application_regime, retained_species, and target_species, use the matching
-            cases when available; otherwise use only reasonable conventional information.
+            For RANGE PARAMETERS:
 
-            For numerical values with units:
-            - preserve existing units;
-            - do not convert existing values;
-            - when both value and unit are missing, use the convention found in the
-            relevant matching cases.
+            The following parameters are range parameters:
+            - pressure_start / pressure_end
+            - temperature_start / temperature_end
+            - equivalence_ratio_start / equivalence_ratio_end
 
-            4. OUTPUT
+            For these parameters, ALWAYS aggregate the ranges across ALL matching cases:
+
+                output_start = minimum of ALL case start values
+                output_end   = maximum of ALL case end values
+
+            For example, if the matching cases contain:
+
+            Case 1:
+                temperature: 300-500 K
+
+            Case 2:
+                temperature: 400-800 K
+
+            Case 3:
+                temperature: 350-700 K
+
+            then the output MUST be:
+
+                temperature_start = 300
+                temperature_end   = 800
+                temperature_unit  = K
+
+            NOT:
+
+                temperature_start = 300
+                temperature_end   = 500
+
+            and NOT the range of whichever case appears first.
+
+            Another example:
+
+            Case 1:
+                equivalence_ratio: 0.5-1.5
+
+            Case 2:
+                equivalence_ratio: 0.3-2.0
+
+            Case 3:
+                equivalence_ratio: 0.7-1.2
+
+            The output MUST be:
+
+                equivalence_ratio_start = 0.3
+                equivalence_ratio_end   = 2.0
+
+            This aggregation rule is mandatory whenever multiple matching cases
+            provide the relevant range.
+
+            IMPORTNAT:
+            Use this rule only if the range values are missing in CURRENT PARAMETERS.
+            In case values are provided by CURRENT PARAMETERS, use and copy directly the values from CURRENT PARAMETERS.
+
+            For NON-RANGE PARAMETERS:
+
+            Inspect ALL matching cases.
+
+            - If all cases have the same value, use that value.
+            - If cases contain different values, use the value that is most consistently
+            supported across the cases.
+            - Do not select a value simply because it appears in the first case.
+            - If no defensible value can be determined from the cases, keep the parameter
+            null or use the fallback rule below.
+
+            IMPORTANT:
+            The matching cases are NOT alternatives from which to choose one case.
+            They form a combined set of evidence from which missing parameters must be
+            aggregated.
+
+            4. DO NOT INVENT DATABASE INFORMATION
+
+            Do not claim that a value comes from the database if it is not
+            supported by the MATCHING CASES.
+
+            If a missing parameter cannot reasonably be determined from the
+            MATCHING CASES, keep it null unless a conventional default is
+            clearly appropriate.
+
+            5. FALLBACK TO GENERAL KNOWLEDGE
+
+            Only when the MATCHING CASES do not provide sufficient information,
+            you may use general combustion knowledge to fill a missing parameter.
+
+            Prefer conventional and commonly used values.
+
+            Do not invent unusual, highly specific, or arbitrary values.
+
+            If no reasonable value can be determined, keep the parameter null.
+
+            6. UNITS
+
+            For parameters involving a numerical value and a unit:
+
+            - Keep existing values and units unchanged.
+            - If a value is missing but its unit is known, provide a value
+                consistent with that unit.
+            - If both the value and unit are missing, use the unit and value
+                found in the most relevant matching cases.
+            - Do NOT convert an existing value into another unit.
+
+            7. FUEL
+
+            The fuel field contains FuelComponent objects.
+
+            Preserve any existing fuel species and fractions exactly.
+
+            Do not modify the fuel composition if it is already non-null.
+
+            8. LIST PARAMETERS
+
+            For application_regime, retained_species, and target_species,
+            use information from the matching cases when these parameters
+            are missing.
+
+            Do not add species or application keywords without a reasonable
+            basis in the matching cases or conventional combustion knowledge.
+
+            9. OUTPUT STRUCTURE
+
+            Do not add fields that are not part of the schema.
+
+            The output must contain ALL fields defined by the schema,
+            even when some values remain null.
+
+            10. OUTPUT FORMAT
 
             Return ONLY a valid JSON object.
 
-            - Include ALL fields defined by the schema.
-            - Do NOT add fields.
-            - Fields must be directly at the top level.
-            - Keep unresolved fields null.
-            - No Markdown, explanations, comments, or additional text.
+            Do not return Markdown.
+            Do not return ```json.
+            Do not provide explanations.
+            Do not provide comments.
+            Do not add text before or after the JSON object.
 
             ============================================================
             OUTPUT SCHEMA
             ============================================================
 
+            The JSON object must follow this schema:
+
             {json.dumps(schema, indent=2)}
 
-            Return the complete JSON object with missing parameters filled.
+            IMPORTANT:
+
+            The schema above describes the structure of the output.
+            Do NOT put the fields inside a "properties" object.
+
+            Your final response must have the fields directly at the top level.
+
+            For example:
+
+            {{
+                "mechanism": null,
+                "application_regime": null,
+                "fuel": null,
+                "pressure_start": null,
+                "pressure_end": null,
+                "pressure_unit": null,
+                "temperature_start": null,
+                "temperature_end": null,
+                "temperature_unit": null,
+                "equivalence_ratio_start": null,
+                "equivalence_ratio_end": null,
+                "retained_species": null,
+                "target_species": null
+            }}
+
+            Return the complete JSON object keeping the exact values provided by CURRENT PARAMETERS and with the missing parameters filled
+            using the MATCHING CASES whenever possible.
             """
+
+
+
 
 def get_router_prompt() -> str:
     return """

@@ -118,6 +118,9 @@ class AgentToolMechReduction():
         self.safe_species=inputs.safe_species
         self.error_limit = inputs.error
 
+        print("model file")
+        print(self.model_file)
+
         data_pickle = {
             "model_file": self.model_file,
             "psr_conditions": self.psr_conditions,
