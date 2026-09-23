@@ -61,7 +61,7 @@ class ConversationLLM(LLM):
         self.history = [{"role": "system", "content": model_preprompt},
                         {"role": "assistant", "content": model_opening_message},]
 
-    def generate(self, message: str, max_new_tokens: int = 500, do_sample: bool = True) -> str:
+    def generate(self, message: str, max_new_tokens: int = 5000, do_sample: bool = True) -> str:
 
         self.history.append({"role": "user", "content": message})
 
@@ -154,7 +154,7 @@ class FillLLM(LLM):
 
         self.database_path = database_path
 
-    def fill_missing_information(self, current_input_parameters: InputParameters, max_new_tokens: int = 2000) -> tuple[str, InputParameters]:#previously 500 
+    def fill_missing_information(self, current_input_parameters: InputParameters, max_new_tokens: int = 5000) -> tuple[str, InputParameters]:#previously 500 
 
         database = MechanismDatabase(self.database_path)
 
