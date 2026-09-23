@@ -139,9 +139,9 @@ class AgentGraph:
         #input_parameters_updated = self.remove_duplicate_species(input_parameters_updated)
 
         # Remove species which are not in the mechanism
-        if input_parameters.mechanism is not None:
-            input_parameters, message_species_validation = self.validate_species(input_parameters)
-            history_entries.extend(message_species_validation)
+        
+        input_parameters, message_species_validation = self.validate_species(input_parameters)
+        history_entries.extend(message_species_validation)
 
         print(f"Input parameters after normalization: {input_parameters}")
 
@@ -318,6 +318,9 @@ class AgentGraph:
 
         messages = []
 
+        if input_parameters.mechanism is None:
+            return input_parameters, messages
+
         path = "data/mechanisms/detailed/"
         gas = ct.Solution(path + input_parameters.mechanism + ".yaml")
         mechanism_species = set(gas.species_names)
@@ -346,7 +349,7 @@ class AgentGraph:
             setattr(
                 input_parameters,
                 field_name,
-                valid_species,
+                valid_species if valid_species else None,
             )
 
             if removed_species:
