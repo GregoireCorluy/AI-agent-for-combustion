@@ -211,7 +211,7 @@ class FillLLM(LLM):
                     """
 
         filled_json = self.generate(message, max_new_tokens=max_new_tokens, do_sample=True, enable_thinking=True) #true instead of false with llama
-
+        print(filled_json)
         data = json.loads(filled_json)
 
         filled_input_parameters = InputParameters.model_validate(data)

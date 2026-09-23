@@ -139,6 +139,9 @@ class AgentGraph:
         #input_parameters_updated = self.remove_duplicate_species(input_parameters_updated)
 
         # Remove species which are not in the mechanism
+        if input_parameters.mechanism is not None:
+            input_parameters, message_species_validation = self.validate_species(input_parameters)
+            history_entries.extend(message_species_validation)
 
         print(f"Input parameters after normalization: {input_parameters}")
 
