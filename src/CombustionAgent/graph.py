@@ -257,7 +257,63 @@ class AgentGraph:
 
         return input_parameters
 
-    def validate_species(self, input_parameters: InputParameters
+    # Did not consider the case where the list was currently None and which needed to stay None
+    # def validate_species(self, input_parameters: InputParameters
+    #                     ) -> tuple[InputParameters, list[str]]:
+
+    #     messages = []
+
+    #     path = "data/mechanisms/detailed/"
+    #     gas = ct.Solution(path + input_parameters.mechanism + ".yaml")
+    #     mechanism_species = set(gas.species_names)
+
+    #     retained_species = input_parameters.retained_species or []
+    #     target_species = input_parameters.target_species or []
+
+    #     valid_retained = [
+    #         species
+    #         for species in retained_species
+    #         if species in mechanism_species
+    #     ]
+
+    #     valid_target = [
+    #         species
+    #         for species in target_species
+    #         if species in mechanism_species
+    #     ]
+
+    #     removed_retained = [
+    #         species
+    #         for species in retained_species
+    #         if species not in mechanism_species
+    #     ]
+
+    #     removed_target = [
+    #         species
+    #         for species in target_species
+    #         if species not in mechanism_species
+    #     ]
+
+    #     input_parameters.retained_species = valid_retained
+    #     input_parameters.target_species = valid_target
+
+    #     if removed_retained:
+    #         messages.append(
+    #             f"Removed retained species not present in mechanism: "
+    #             f"{removed_retained}"
+    #         )
+
+    #     if removed_target:
+    #         messages.append(
+    #             f"Removed target species not present in mechanism: "
+    #             f"{removed_target}"
+    #         )
+
+    #     return input_parameters, messages
+
+    def validate_species(
+                            self,
+                            input_parameters: InputParameters,
                         ) -> tuple[InputParameters, list[str]]:
 
         messages = []
@@ -266,47 +322,38 @@ class AgentGraph:
         gas = ct.Solution(path + input_parameters.mechanism + ".yaml")
         mechanism_species = set(gas.species_names)
 
-        retained_species = input_parameters.retained_species or []
-        target_species = input_parameters.target_species or []
+        for field_name in ["retained_species", "target_species"]:
 
-        valid_retained = [
-            species
-            for species in retained_species
-            if species in mechanism_species
-        ]
+            species_list = getattr(input_parameters, field_name)
 
-        valid_target = [
-            species
-            for species in target_species
-            if species in mechanism_species
-        ]
+            # Keep None as None
+            if species_list is None:
+                continue
 
-        removed_retained = [
-            species
-            for species in retained_species
-            if species not in mechanism_species
-        ]
+            valid_species = []
+            removed_species = []
 
-        removed_target = [
-            species
-            for species in target_species
-            if species not in mechanism_species
-        ]
+            for species in species_list:
 
-        input_parameters.retained_species = valid_retained
-        input_parameters.target_species = valid_target
+                if species in mechanism_species:
+                    valid_species.append(species)
+                else:
+                    removed_species.append(species)
 
-        if removed_retained:
-            messages.append(
-                f"Removed retained species not present in mechanism: "
-                f"{removed_retained}"
+            # Remove duplicates while preserving order
+            valid_species = list(dict.fromkeys(valid_species))
+
+            setattr(
+                input_parameters,
+                field_name,
+                valid_species,
             )
 
-        if removed_target:
-            messages.append(
-                f"Removed target species not present in mechanism: "
-                f"{removed_target}"
-            )
+            if removed_species:
+                messages.append(
+                    f"Removed species from {field_name.replace('_', ' ')} because not present "
+                    f"in mechanism: {list(dict.fromkeys(removed_species))}"
+                )
 
         return input_parameters, messages
 
