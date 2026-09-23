@@ -465,7 +465,7 @@ def get_fill_prompt(schema: dict) -> str:
 
             USE and COPY directly the values from CURRENT PARAMETERS.
 
-            NEVER modify a parameter whose value is not null.
+            NEVER modify a parameter whose value is not null, None or empty.
 
             Preserve its value exactly, including:
             - numerical values
@@ -473,7 +473,7 @@ def get_fill_prompt(schema: dict) -> str:
             - lists
             - fuel species and fractions
 
-            Only parameters with a null value may be filled.
+            Only parameters with a null, None or empty value may be filled.
 
             2. USE MATCHING CASES AS THE PRIMARY SOURCE
 
