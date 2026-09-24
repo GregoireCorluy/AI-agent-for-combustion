@@ -261,60 +261,6 @@ class AgentGraph:
 
         return input_parameters
 
-    # Did not consider the case where the list was currently None and which needed to stay None
-    # def validate_species(self, input_parameters: InputParameters
-    #                     ) -> tuple[InputParameters, list[str]]:
-
-    #     messages = []
-
-    #     path = "data/mechanisms/detailed/"
-    #     gas = ct.Solution(path + input_parameters.mechanism + ".yaml")
-    #     mechanism_species = set(gas.species_names)
-
-    #     retained_species = input_parameters.retained_species or []
-    #     target_species = input_parameters.target_species or []
-
-    #     valid_retained = [
-    #         species
-    #         for species in retained_species
-    #         if species in mechanism_species
-    #     ]
-
-    #     valid_target = [
-    #         species
-    #         for species in target_species
-    #         if species in mechanism_species
-    #     ]
-
-    #     removed_retained = [
-    #         species
-    #         for species in retained_species
-    #         if species not in mechanism_species
-    #     ]
-
-    #     removed_target = [
-    #         species
-    #         for species in target_species
-    #         if species not in mechanism_species
-    #     ]
-
-    #     input_parameters.retained_species = valid_retained
-    #     input_parameters.target_species = valid_target
-
-    #     if removed_retained:
-    #         messages.append(
-    #             f"Removed retained species not present in mechanism: "
-    #             f"{removed_retained}"
-    #         )
-
-    #     if removed_target:
-    #         messages.append(
-    #             f"Removed target species not present in mechanism: "
-    #             f"{removed_target}"
-    #         )
-
-    #     return input_parameters, messages
-
     def validate_species(
                             self,
                             input_parameters: InputParameters,
@@ -666,20 +612,26 @@ class AgentGraph:
                 continue
 
             standardized_species = []
+            not_recognized_species = []
 
             for species in species_list:
                 result = standardize_species_name(species)
 
                 if result is not None:
                     standardized_species.extend(result)
+                else:
+                    not_recognized_species.append(species)
 
             # Remove duplicates while preserving order
             standardized_species = list(dict.fromkeys(standardized_species))
 
             # TO MODIFY: only if standardized species is not None4
             # TO CHECK if correct (when empty)
+            if standardized_species:
+                messages.append(f"List of species provided by the user {standardized_species} recognized for {field_name}")
+            if not_recognized_species:
+                messages.append(f"List of species provided by the user {not_recognized_species} not recognized for {field_name}")
 
-            messages.append(f"List of species provided by the user {standardized_species}{' ' if standardized_species else 'not'} recognized for {field_name}")
             setattr(
                 input_parameters,
                 field_name,
