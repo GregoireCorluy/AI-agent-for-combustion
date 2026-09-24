@@ -117,23 +117,27 @@ class AgentGraph:
         # Check for consistency in retrieved data
 
         # Convert the name of the chemical mechanism
-        input_parameters, messages_mechanism = self.convert_mechanism_name(input_parameters)
+        input_parameters, message_mechanism = self.convert_mechanism_name(input_parameters)
 
-        history_entries.extend(messages_mechanism)
+        history_entries.extend(message_mechanism)
 
         # Check for keywords corresponding to regime/application
         database = MechanismDatabase(self.database_path)
         input_parameters.application_regime = match_application_regimes(input_parameters.application_regime, database.get_unique_application_regime())
 
         # Convert pressure and temperature to bar and Kelvin if necessary
-        input_parameters, messages_unit = self.convert_units(input_parameters)
+        input_parameters, message_unit = self.convert_units(input_parameters)
 
-        history_entries.extend(messages_unit)
+        history_entries.extend(message_unit)
+
+        # Standardize for fuel too, check if in the list
+        # ...
 
         # Check for species correspond to mechanism + check species names are chemical species names
         # Combine fuzzy and then convert
         # convert fuel, targeted and retained species names
-        input_parameters = self.standardize_species(input_parameters)
+        input_parameters, message_standardize_species = self.standardize_species(input_parameters)
+        history_entries.extend(message_standardize_species)
 
         # remove duplicates - this is already done in the standardize_species function
         #input_parameters_updated = self.remove_duplicate_species(input_parameters_updated)
@@ -416,6 +420,8 @@ class AgentGraph:
                         "The agent must ask the user to clarify the temperature unit."
                     )
 
+                    input_parameters.temperature_unit = None
+
                 elif unit in ["k"]:
                     input_parameters.temperature_unit = "K"
 
@@ -574,6 +580,8 @@ class AgentGraph:
                         "The agent must ask the user to clarify the pressure unit."
                     )
 
+                    input_parameters.pressure_unit = None
+
                 elif unit in ["bar"]:
                     input_parameters.pressure_unit = "bar"
                     
@@ -645,8 +653,10 @@ class AgentGraph:
 
         return input_parameters, messages
 
-    def standardize_species(self, input_parameters: InputParameters,
+    def standardize_species(self, input_parameters: InputParameters, messages: list[str]
                             ) -> InputParameters:
+
+        messages = []
 
         for field_name in ["retained_species", "target_species"]:
 
@@ -666,13 +676,18 @@ class AgentGraph:
             # Remove duplicates while preserving order
             standardized_species = list(dict.fromkeys(standardized_species))
 
+            # TO MODIFY: only if standardized species is not None4
+            # TO CHECK if correct (when empty)
+
+            messages.extend(f"List of species provided by the user {standardized_species}{' ' if standardized_species else 'not'} recognized for {field_name}")
             setattr(
                 input_parameters,
                 field_name,
-                standardized_species,
+                standardized_species if standardized_species else None,
             )
+                 
 
-        return input_parameters
+        return input_parameters, messages
 
 def normalize_name(name: str) -> str:
     name = unicodedata.normalize("NFKD", name)
@@ -759,6 +774,9 @@ def match_application_regimes(
             matched_keywords.append(
                 normalized_keywords[matched_normalized]
             )
+
+    if not matched_keywords:
+        return None
 
     return matched_keywords
 
