@@ -1,6 +1,6 @@
 from .state import AgentState
 from langgraph.graph import StateGraph, START, END
-from .parameters import InputParameters
+from .parameters import InputParameters, FuelComponent
 import re
 import unicodedata
 from rapidfuzz import process, fuzz
@@ -131,16 +131,14 @@ class AgentGraph:
         history_entries.extend(message_unit)
 
         # Standardize for fuel too, check if in the list
-        # ...
+        input_parameters, message_convert_fuel_name = self.convert_fuel_names(input_parameters)
+        history_entries.extend(message_convert_fuel_name)
 
         # Check for species correspond to mechanism + check species names are chemical species names
         # Combine fuzzy and then convert
-        # convert fuel, targeted and retained species names
+        # convert fuel, targeted and retained species names and removes duplicates
         input_parameters, message_standardize_species = self.standardize_species(input_parameters)
         history_entries.extend(message_standardize_species)
-
-        # remove duplicates - this is already done in the standardize_species function
-        #input_parameters_updated = self.remove_duplicate_species(input_parameters_updated)
 
         # Remove species which are not in the mechanism
         
@@ -641,6 +639,134 @@ class AgentGraph:
 
         return input_parameters, messages
 
+    def convert_fuel_names(self, input_parameters):
+
+        messages = []
+
+        # No fuel provided by the user
+        if not input_parameters.fuel:
+            return input_parameters, messages
+
+        database = MechanismDatabase(self.database_path)
+
+        # Get all fuel species occurring in the database
+        database_fuels = {
+            fuel.strip().upper()
+            for case in database.cases
+            for fuel in case.get("fuel", [])
+        }
+
+        # --------------------------------------------------------
+        # 1. Standardize fuel species names
+        # --------------------------------------------------------
+
+        standardized_fuel = []
+
+        for component in input_parameters.fuel:
+
+            user_species = component.species
+
+            if user_species is None:
+                messages.append(
+                    "FUEL: A fuel component has no species name."
+                )
+                continue
+
+            standardized_species = standardize_fuel_species(
+                user_species
+            )
+
+            if standardized_species is None:
+                messages.append(
+                    f"FUEL: The fuel species '{user_species}' "
+                    f"could not be recognized."
+                )
+                continue
+
+            if user_species.strip() != standardized_species:
+                messages.append(
+                    f"FUEL: The fuel species '{user_species}' "
+                    f"was standardized to '{standardized_species}'."
+                )
+
+            standardized_fuel.append(
+                FuelComponent(
+                    species=standardized_species,
+                    fraction=component.fraction,
+                )
+            )
+
+        # If one or more species could not be standardized
+        if len(standardized_fuel) != len(input_parameters.fuel):
+            input_parameters.fuel = None
+            return input_parameters, messages
+
+        input_parameters.fuel = standardized_fuel
+
+        # --------------------------------------------------------
+        # 2. Check whether fuel species occur in the database
+        # --------------------------------------------------------
+
+        for component in input_parameters.fuel:
+
+            species = component.species
+
+            if species not in database_fuels:
+
+                messages.append(
+                    f"FUEL: The fuel species '{species}' "
+                    f"is not present in the mechanism database. "
+                    f"The fuel parameter has been set to None "
+                    f"and must be provided again by the user."
+                )
+
+                input_parameters.fuel = None
+                return input_parameters, messages
+
+        # --------------------------------------------------------
+        # 3. Check whether fuel species exist in the mechanism
+        # --------------------------------------------------------
+
+        if input_parameters.mechanism is not None:
+
+            path = "data/mechanisms/detailed/"
+
+            try:
+                gas = ct.Solution(
+                    path + input_parameters.mechanism + ".yaml"
+                )
+
+                mechanism_species = set(gas.species_names)
+
+            except Exception as e:
+
+                messages.append(
+                    f"FUEL: Could not load the mechanism "
+                    f"'{input_parameters.mechanism}' to verify "
+                    f"the fuel species."
+                )
+
+                return input_parameters, messages
+
+            for component in input_parameters.fuel:
+
+                species = component.species
+
+                if species not in mechanism_species:
+
+                    messages.append(
+                        f"FUEL: The fuel species '{species}' "
+                        f"is not present in the mechanism "
+                        f"'{input_parameters.mechanism}'. "
+                        f"The fuel parameter has been set to None "
+                        f"and must be provided again by the user."
+                    )
+
+                    input_parameters.fuel = None
+                    return input_parameters, messages
+
+        return input_parameters, messages
+
 def normalize_name(name: str) -> str:
     name = unicodedata.normalize("NFKD", name)
     name = name.lower()
@@ -858,3 +984,31 @@ def standardize_species_name(
         return [SPECIES_ALIASES[matched_name]]
 
     return SPECIES_GROUPS[matched_name].copy()
+
+def standardize_fuel_species(
+                                species: str,
+                                threshold: int = 70,
+                            ) -> str | None:
+
+    normalized = normalize_name(species)
+
+    # Exact species alias
+    if normalized in SPECIES_ALIASES:
+        return SPECIES_ALIASES[normalized]
+
+    # Fuzzy matching against species aliases only
+    result = process.extractOne(
+        normalized,
+        SPECIES_ALIASES.keys(),
+        scorer=fuzz.WRatio,
+    )
+
+    if result is None:
+        return None
+
+    matched_name, score, _ = result
+
+    if score < threshold:
+        return None
+
+    return SPECIES_ALIASES[matched_name]
