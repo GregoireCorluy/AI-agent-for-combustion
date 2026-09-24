@@ -459,10 +459,25 @@ class MechanismDatabase:
     @staticmethod
     def case_to_prompt_format(case: dict) -> dict:
 
+        database_fuel = case.get("fuel") or []
+
+        if database_fuel:
+            fuel_fraction = 1.0 / len(database_fuel)
+
+            formatted_fuel = [
+                {
+                    "species": species,
+                    "fraction": fuel_fraction,
+                }
+                for species in database_fuel
+            ]
+        else:
+            formatted_fuel = None
+
         return {
             "mechanism": case.get("mechanism"),
             "application_regime": case.get("application_regime"),
-            "fuel": case.get("fuel"),
+            "fuel": formatted_fuel,
 
             "pressure_start": case.get("pressure", {}).get("min"),
             "pressure_end": case.get("pressure", {}).get("max"),

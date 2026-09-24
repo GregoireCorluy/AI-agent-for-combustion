@@ -103,7 +103,7 @@ def get_retrieve_prompt(schema: dict, database_path: str) -> str:
 
             Exception:
             You can assume equal fraction for the fuel species in case the user mentions fuel species without specifying the corresponding fractions.
-            The fuel fraction need to sum to 1.
+            The fuel fractions need to sum to 1.
 
             Application/regime keywords:
             The `application_regime` field must contain ONLY keywords from the following list:

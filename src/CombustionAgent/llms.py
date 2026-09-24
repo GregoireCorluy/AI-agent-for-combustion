@@ -176,7 +176,9 @@ class FillLLM(LLM):
         matched_cases = [database.case_to_prompt_format(case)
                                         for case in matched_results]
 
-
+        print("matched cases")
+        print(matched_cases)
+        
         current_input_parameters_json = current_input_parameters.model_dump_json(indent=2)
 
         matched_cases_json = json.dumps(matched_cases, indent=2)
