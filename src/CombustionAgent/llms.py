@@ -154,7 +154,7 @@ class FillLLM(LLM):
 
         self.database_path = database_path
 
-    def fill_missing_information(self, current_input_parameters: InputParameters, max_new_tokens: int = 5000) -> tuple[str, InputParameters]:#previously 500 
+    def fill_missing_information(self, current_input_parameters: InputParameters, max_new_tokens: int = 10000) -> tuple[str, InputParameters]:#previously 500 
 
         database = MechanismDatabase(self.database_path)
 

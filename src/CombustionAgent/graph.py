@@ -630,7 +630,7 @@ class AgentGraph:
             if standardized_species:
                 messages.append(f"List of species provided by the user {standardized_species} recognized for {field_name}")
             if not_recognized_species:
-                messages.append(f"List of species provided by the user {not_recognized_species} not recognized for {field_name}")
+                messages.append(f"List of species provided by the user {not_recognized_species} not recognized as chemical species for {field_name}")
 
             setattr(
                 input_parameters,
