@@ -679,7 +679,7 @@ class AgentGraph:
             # TO MODIFY: only if standardized species is not None4
             # TO CHECK if correct (when empty)
 
-            messages.extend(f"List of species provided by the user {standardized_species}{' ' if standardized_species else 'not'} recognized for {field_name}")
+            messages.append(f"List of species provided by the user {standardized_species}{' ' if standardized_species else 'not'} recognized for {field_name}")
             setattr(
                 input_parameters,
                 field_name,
