@@ -157,7 +157,7 @@ class AgentGraph:
                         )
         elif all(value is None for value in input_parameters.model_dump().values()):
             history_entry_retrieval = (
-                            "RETRIEVAL RESULT: None of the input parameters have been retrieved from the user's message, all parameters will be inferred by the fill in function."
+                            "RETRIEVAL RESULT: None of the input parameters have been retrieved from the user's message, all parameters will be inferred by the fill-in function."
                         )
         else:
             filled_fields = [
@@ -166,7 +166,7 @@ class AgentGraph:
                         if value is not None
                     ]
             history_entry_retrieval = (
-                            f"RETRIEVAL RESULT: The fields {filled_fields} of the input parameters have been retrieved from the user's message, the remaining ones will be retrieved by the fill in function."
+                            f"RETRIEVAL RESULT: The fields {filled_fields} of the input parameters have been retrieved from the user's message, the remaining ones will be retrieved by the fill-in function."
                         )
             
         history_entries.append(history_entry_retrieval)

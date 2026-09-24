@@ -101,6 +101,10 @@ def get_retrieve_prompt(schema: dict, database_path: str) -> str:
             - Do not add explanations or any text outside the JSON object.
             - Do not convert numerical values from one unit to another.
 
+            Exception:
+            You can assume equal fraction for the fuel species in case the user mentions fuel species without specifying the corresponding fractions.
+            The fuel fraction need to sum to 1.
+
             Application/regime keywords:
             The `application_regime` field must contain ONLY keywords from the following list:
             {json.dumps(keywords_application_regime, indent=2)}
