@@ -116,9 +116,12 @@ class AgentGraph:
 
         # Check for consistency in retrieved data
 
+        ########################################
+        # Standardization/normalization/checks #
+        ########################################
+
         # Convert the name of the chemical mechanism
         input_parameters, message_mechanism = self.convert_mechanism_name(input_parameters)
-
         history_entries.extend(message_mechanism)
 
         # Check for keywords corresponding to regime/application
@@ -127,7 +130,6 @@ class AgentGraph:
 
         # Convert pressure and temperature to bar and Kelvin if necessary
         input_parameters, message_unit = self.convert_units(input_parameters)
-
         history_entries.extend(message_unit)
 
         # Standardize for fuel too, check if in the list
@@ -144,6 +146,10 @@ class AgentGraph:
         
         input_parameters, message_species_validation = self.validate_species(input_parameters)
         history_entries.extend(message_species_validation)
+
+        ############
+        # Messages #
+        ############
 
         print(f"Input parameters after normalization: {input_parameters}")
 
@@ -169,7 +175,7 @@ class AgentGraph:
             
         history_entries.append(history_entry_retrieval)
 
-        print("total history entries retrieval")
+        print("Total history entries after retrieval normalization:")
         print(history_entries)
 
         return {"input_parameters": input_parameters,
@@ -201,18 +207,28 @@ class AgentGraph:
         print(f"\nAgent has filled in the missing fields using the database: {LLM_fill_reply}")
         print(f"Input parameters after LLM_fill: {input_parameters_filled}")
 
-        previous = state["input_parameters"].model_dump()
-        filled = input_parameters_filled.model_dump()
+        ########################################
+        # Standardization/normalization/checks #
+        ########################################
 
-        newly_filled_fields = [
-            field_name
-            for field_name, old_value in previous.items()
-            if old_value is None and filled[field_name] is not None
-        ]
+        # Check mechanism name
+        input_parameters_filled, message_mechanism = self.convert_mechanism_name(input_parameters_filled)
+        history_entries.extend(message_mechanism)
+        
+        # Check fuel species
+        input_parameters_filled, message_convert_fuel_name = self.convert_fuel_names(input_parameters_filled)
+        history_entries.extend(message_convert_fuel_name)
+
+        # Convert ranges of temperature and pressure
+        input_parameters_filled, message_unit = self.convert_units(input_parameters_filled)
+        history_entries.extend(message_unit)
+
+        # Check regime/application keywords (although shoudn't be necessary in theory)
+        database = MechanismDatabase(self.database_path)
+        input_parameters_filled.application_regime = match_application_regimes(input_parameters_filled.application_regime, database.get_unique_application_regime())
 
         # Remove duplicate species
         input_parameters_filled = self.remove_duplicate_species(input_parameters_filled)
-        print(f"Input parameters after removal duplicate species: {input_parameters_filled}")
 
         # Function to reset the values from the user?
         # ... (Now the agent sets the values based on the database)
@@ -222,15 +238,31 @@ class AgentGraph:
         input_parameters_filled, message_species_validation = self.validate_species(input_parameters_filled)
         history_entries.extend(message_species_validation)
 
-        print(f"Input parameters after removal non-existant species: {input_parameters_filled}")
+        print(f"Input parameters after normalization: {input_parameters_filled}")
+
+        ############
+        # Messages #
+        ############
 
         matched_cases_ID = [case.get("id") for case in matched_results]
+
+        previous = state["input_parameters"].model_dump()
+        filled = input_parameters_filled.model_dump()
+        
+        newly_filled_fields = [
+            field_name
+            for field_name, old_value in previous.items()
+            if old_value is None and filled[field_name] is not None
+        ]
 
         history_entry_fill = (
                         f"FILL RESULT: The fields {newly_filled_fields} of the input parameters, that were missing from the user's message, have been filled based on the context provided by the user and combined with the retrieval from a combustion database. The fields {newly_filled_fields} were filled based on cases with ID {matched_cases_ID} from the combustion database. The agent should present the extracted parameters to the user and ask for confirmation."
                     )
 
         history_entries.append(history_entry_fill)
+
+        print("Total history entries after fill normalization:")
+        print(history_entries)
 
         return {"input_parameters": input_parameters_filled,
                 "process_history": state["process_history"] + history_entries}
@@ -259,9 +291,8 @@ class AgentGraph:
 
         return input_parameters
 
-    def validate_species(
-                            self,
-                            input_parameters: InputParameters,
+    def validate_species(self,
+                        input_parameters: InputParameters,
                         ) -> tuple[InputParameters, list[str]]:
 
         messages = []
