@@ -77,10 +77,24 @@ class ConversationLLM(LLM):
                                 do_sample=do_sample,
                             )
 
-        LLM_reply = self.model_manager.tokenizer.decode(
-                                outputs[0][inputs["input_ids"].shape[-1]:],
-                                skip_special_tokens=True,
-                            )
+        # LLM_reply = self.model_manager.tokenizer.decode(
+        #                         outputs[0][inputs["input_ids"].shape[-1]:],
+        #                         skip_special_tokens=True,
+        #                     )
+
+        output_ids = outputs[0][inputs["input_ids"].shape[-1]:].tolist()
+        
+        # parsing thinking content
+        try:
+            # rindex finding 151668 (</think>)
+            index = len(output_ids) - output_ids[::-1].index(151668)
+        except ValueError:
+            index = 0
+
+        thinking_content = self.model_manager.tokenizer.decode(output_ids[:index], skip_special_tokens=True).strip("\n")
+        LLM_reply = self.model_manager.tokenizer.decode(output_ids[index:], skip_special_tokens=True).strip("\n")
+
+        print(f"Thinking: {thinking_content}")
 
         self.history.append({"role": "assistant", "content": LLM_reply})
 
