@@ -653,7 +653,7 @@ class AgentGraph:
 
         return input_parameters, messages
 
-    def standardize_species(self, input_parameters: InputParameters, messages: list[str]
+    def standardize_species(self, input_parameters: InputParameters
                             ) -> InputParameters:
 
         messages = []
