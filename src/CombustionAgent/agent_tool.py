@@ -29,7 +29,7 @@ class AgentToolMechReduction():
         ## Inputs
 
         self.path = 'data/detailed_mechanisms/'
-        self.max_error_IDT = 15 #%
+        self.max_error_IDT = [5, 10, 20] #%
         self.oxidizer = {'O2': 1.0, 'N2': 3.76}
         self.autoignition_kind = 'constant volume'
         self.num_threads=1
@@ -42,6 +42,7 @@ class AgentToolMechReduction():
         """Create required directories and clean temporary files."""
 
         os.makedirs("outputs/reduced_mechanisms/meta", exist_ok=True)
+        os.makedirs("outputs/reduced_mechanisms/metrics", exist_ok=True)
         os.makedirs("temp", exist_ok=True)
 
         # Clean temporary files from previous runs
@@ -103,49 +104,53 @@ class AgentToolMechReduction():
                         }
                     cond_list_IDT.append(condition)
             
+        data_list = []
 
-        data = { 'model': model,
-                    'targets': targets, 
-                    'retained-species': retained, 
-                    'method': self.method,
-                    'error': self.max_error_IDT,
-                    'sensitivity-analysis': self.sensitivity,
-                    'autoignition-conditions':  cond_list_IDT
-                    } 
+        for error_IDT in self.max_error_IDT:
+            data = { 'model': model,
+                        'targets': targets, 
+                        'retained-species': retained, 
+                        'method': self.method,
+                        'error': error_IDT,
+                        'sensitivity-analysis': self.sensitivity,
+                        'autoignition-conditions':  cond_list_IDT
+                        }
+            data_list.append(data)
 
-        return data
+        return data_list
             
     def run_dgrep(self, input_parameters: InputParameters):
 
-        self.data = self.get_data_IDT(input_parameters)
-
-        inputs = pymars.parse_inputs(self.data)
-        self.model_file = inputs.model
-        self.psr_conditions = inputs.psr_conditions
-        self.flame_conditions = inputs.plflame_conditions
-        self.ignition_conditions = inputs.ignition_conditions
-        self.upper_threshold=inputs.upper_threshold
-        self.target_species=inputs.target_species
-        self.safe_species=inputs.safe_species
-        self.error_limit = inputs.error
-
-        data_pickle = {
-            "model_file": self.model_file,
-            "psr_conditions": self.psr_conditions,
-            "flame_conditions": self.flame_conditions,
-            "ignition_conditions": self.ignition_conditions,
-            "upper_threshold": self.upper_threshold,
-            "target_species": self.target_species,
-            "safe_species": self.safe_species,
-            "error_limit": self.error_limit,
-        }
+        self.data_list = self.get_data_IDT(input_parameters)
 
         path = "outputs/reduced_mechanisms/meta/"
         today = date.today().strftime("%Y-%m-%d")
         ID = retrieve_next_ID()
 
-        with open(path + today + f"-{ID}-" + input_parameters.mechanism + "-meta.pkl", "wb") as f:
-            pickle.dump(data_pickle, f)
-    
-        drgep.run_drgep(self.model_file, self.ignition_conditions, self.psr_conditions, self.flame_conditions, 
-                        self.error_limit, self.target_species, self.safe_species, threshold_upper=None, num_threads=self.num_threads, path='temp/')
+        for data in self.data_list:
+            inputs = pymars.parse_inputs(data)
+            self.model_file = inputs.model
+            self.psr_conditions = inputs.psr_conditions
+            self.flame_conditions = inputs.plflame_conditions
+            self.ignition_conditions = inputs.ignition_conditions
+            self.upper_threshold=inputs.upper_threshold
+            self.target_species=inputs.target_species
+            self.safe_species=inputs.safe_species
+            self.error_limit = inputs.error
+
+            data_pickle = {
+                "model_file": self.model_file,
+                "psr_conditions": self.psr_conditions,
+                "flame_conditions": self.flame_conditions,
+                "ignition_conditions": self.ignition_conditions,
+                "upper_threshold": self.upper_threshold,
+                "target_species": self.target_species,
+                "safe_species": self.safe_species,
+                "error_limit": self.error_limit,
+            }
+
+            with open(path + today + f"-{ID}-" + input_parameters.mechanism + f"-error{self.error_limit}-meta.pkl", "wb") as f:
+                pickle.dump(data_pickle, f)
+        
+            drgep.run_drgep(self.model_file, self.ignition_conditions, self.psr_conditions, self.flame_conditions, 
+                            self.error_limit, self.target_species, self.safe_species, threshold_upper=None, num_threads=self.num_threads, path='temp/', id = ID)

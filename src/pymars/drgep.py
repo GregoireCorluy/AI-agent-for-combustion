@@ -8,6 +8,7 @@ from collections import deque
 from heapq import heappush, heappop
 from itertools import count
 import psutil
+import pickle
 
 import numpy as np
 import networkx
@@ -278,7 +279,7 @@ def get_importance_coeffs(species_names, target_species, matrices):
 
 
 def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, ignition_conditions, psr_conditions, plflame_conditions,
-                 sampled_metrics_idt, sampled_metrics_psr, sampled_metrics_plflame, phase_name='', previous_model=None, num_threads=1, path=''
+                 sampled_metrics_idt, sampled_metrics_psr, sampled_metrics_plflame, phase_name='', previous_model=None, num_threads=1, path='', id='', error_limit=None
                  ):
 
     #print('safe:', species_safe)
@@ -355,10 +356,9 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, ignitio
     #print(reduced_model.n_species, reduced_model.n_reactions)
     #print(solution.n_species, solution.n_reactions)
     today = date.today().strftime("%Y-%m-%d")
-    ID = retrieve_next_ID()
     
     path_reduced_model = 'outputs/reduced_mechanisms/'
-    reduced_model_filename = path_reduced_model + today + f"-{ID}-" +  f'{model_file.removeprefix("data/detailed_mechanisms/").removesuffix(".yaml")}-' + f'reduced_{reduced_model.n_species}.yaml'
+    reduced_model_filename = path_reduced_model + today + f"-{id}-" +  f'{model_file.removeprefix("data/detailed_mechanisms/").removesuffix(".yaml")}-error{error_limit}-reduced_{reduced_model.n_species}.yaml'
     reduced_model.write_yaml(reduced_model_filename)
     #print('------', reduced_model_filename)
 
@@ -393,7 +393,7 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, ignitio
 
 def run_drgep(model_file, ignition_conditions, psr_conditions, plflame_conditions, 
               error_limit, species_targets, species_safe, phase_name='',
-              threshold_upper=None, num_threads=1, path=''
+              threshold_upper=None, num_threads=1, path='', id = ''
               ):
     """Main function for running DRGEP reduction.
     
@@ -433,6 +433,9 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, plflame_condition
     """
     solution = ct.Solution(model_file, phase_name)
     assert species_targets, 'Need to specify at least one target species.'
+
+    nbr_species_start = solution.n_species
+    nbr_reactions_start = solution.n_reactions
 
     # first, sample thermochemical data and generate metrics for measuring error
     # (e.g, ignition delays). Also produce adjacency matrices for graphs, which
@@ -477,7 +480,7 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, plflame_condition
         reduced_model = reduce_drgep(
             model_file, species_safe, threshold, importance_coeffs, ignition_conditions, psr_conditions, plflame_conditions,
             sampled_metrics_idt, sampled_metrics_psr, sampled_metrics_plflame, phase_name=phase_name, previous_model=previous_model, 
-            num_threads=num_threads, path=path
+            num_threads=num_threads, path=path, id=id, error_limit=error_limit
             )
         error_current_idt = reduced_model.error_idt
         error_current_psr = reduced_model.error_psr
@@ -522,7 +525,7 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, plflame_condition
         threshold -= (2 * threshold_increment)
         reduced_model = reduce_drgep(
             model_file, species_safe, threshold, importance_coeffs, ignition_conditions, psr_conditions, plflame_conditions,
-            sampled_metrics_idt, sampled_metrics_psr,  sampled_metrics_plflame, phase_name=phase_name, num_threads=num_threads, path=path
+            sampled_metrics_idt, sampled_metrics_psr,  sampled_metrics_plflame, phase_name=phase_name, num_threads=num_threads, path=path, id=id, error_limit=error_limit
             )
     else:
         #soln2cti.write(reduced_model, f'reduced_{reduced_model.model.n_species}.cti', path=path)
@@ -552,6 +555,22 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, plflame_condition
 
 
     logging.info('Final reduced model saved as ' + reduced_model.filename)
+
+    ################
+    # Save metrics #
+    ################
+    metrics_pickle = {
+                    "max error idt": reduced_model.error_idt,
+                    "perc nbr species": reduced_model.model.n_species/nbr_species_start,
+                    "perc nbr reactions": reduced_model.model.n_reactions/nbr_reactions_start,
+                }
+
+    today = date.today().strftime("%Y-%m-%d")
+
+    
+    with open("outputs/reduced_mechanisms/metrics/" + today + f"-{id}-" + model_file.removeprefix("data/detailed_mechanisms/").removesuffix(".yaml") + f"-error{error_limit}-metrics.pkl", "wb") as f:
+                    pickle.dump(metrics_pickle, f)
+    
     return reduced_model
 
 def retrieve_next_ID():
