@@ -28,7 +28,7 @@ class AgentToolMechReduction():
              
         ## Inputs
 
-        self.path = 'data/mechanisms/detailed/'
+        self.path = 'data/detailed_mechanisms/'
         self.max_error_IDT = 15 #%
         self.oxidizer = {'O2': 1.0, 'N2': 3.76}
         self.autoignition_kind = 'constant volume'
@@ -36,6 +36,17 @@ class AgentToolMechReduction():
         self.method='DRGEP'
         self.sensitivity=False
 
+        self.setup_directories()
+
+    def setup_directories(self):
+        """Create required directories and clean temporary files."""
+
+        os.makedirs("outputs/reduced_mechanisms/meta", exist_ok=True)
+        os.makedirs("temp", exist_ok=True)
+
+        # Clean temporary files from previous runs
+        for item in os.listdir("temp"):
+            os.remove(os.path.join("temp", item))
 
     def get_data_IDT(self, input_parameters: InputParameters):
                 # Create inputs dictionary
@@ -129,7 +140,7 @@ class AgentToolMechReduction():
             "error_limit": self.error_limit,
         }
 
-        path = "data/mechanisms/reduced/meta/"
+        path = "outputs/reduced_mechanisms/meta/"
         today = date.today().strftime("%Y-%m-%d")
         ID = retrieve_next_ID()
 
@@ -137,4 +148,4 @@ class AgentToolMechReduction():
             pickle.dump(data_pickle, f)
     
         drgep.run_drgep(self.model_file, self.ignition_conditions, self.psr_conditions, self.flame_conditions, 
-                        self.error_limit, self.target_species, self.safe_species, threshold_upper=None, num_threads=self.num_threads, path='data/temp/')
+                        self.error_limit, self.target_species, self.safe_species, threshold_upper=None, num_threads=self.num_threads, path='temp/')

@@ -1,0 +1,878 @@
+{
+  "cases": [
+    {
+      "id": "H2-01",
+      "fuel": [
+        "H2"
+      ],
+      "oxidizer": [
+        "air"
+      ],
+      "application_regime": [
+        "atmospheric",
+        "premixed",
+        "flame speed",
+        "flame structure"
+      ],
+      "temperature": {
+        "min": 298,
+        "max": 500,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.4,
+        "max": 2.0
+      },
+      "pressure": {
+        "min": 1,
+        "max": 1,
+        "unit": "bar"
+      },
+      "mechanism": "Burke-2012-H2-N2",
+      "retained_species": [
+        "H2",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "H2"
+      ]
+    },
+    {
+      "id": "H2-02",
+      "fuel": [
+        "H2"
+      ],
+      "oxidizer": [
+        "air"
+      ],
+      "application_regime": [
+        "high-pressure",
+        "premixed",
+        "flame speed"
+      ],
+      "temperature": {
+        "min": 300,
+        "max": 800,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.4,
+        "max": 2.0
+      },
+      "pressure": {
+        "min": 5,
+        "max": 30,
+        "unit": "bar"
+      },
+      "mechanism": "Burke-2012-H2-N2",
+      "retained_species": [
+        "H2",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "H2"
+      ]
+    },
+    {
+      "id": "H2-03",
+      "fuel": [
+        "H2"
+      ],
+      "oxidizer": [
+        "O2/diluent"
+      ],
+      "application_regime": [
+        "ignition",
+        "autoignition",
+        "IDT"
+      ],
+      "temperature": {
+        "min": 700,
+        "max": 1500,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.5,
+        "max": 2.0
+      },
+      "pressure": {
+        "min": 10,
+        "max": 100,
+        "unit": "bar"
+      },
+      "mechanism": "Burke-2012-H2-N2",
+      "retained_species": [
+        "H2",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "H2"
+      ]
+    },
+    {
+      "id": "H2-04",
+      "fuel": [
+        "H2"
+      ],
+      "oxidizer": [
+        "air"
+      ],
+      "application_regime": [
+        "premixed",
+        "gas turbine",
+        "NOx"
+      ],
+      "temperature": {
+        "min": 300,
+        "max": 800,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.3,
+        "max": 1.5
+      },
+      "pressure": {
+        "min": 5,
+        "max": 30,
+        "unit": "bar"
+      },
+      "mechanism": "Konnov-2025-NH3",
+      "retained_species": [
+        "H2",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "H2",
+        "NO",
+        "NO2",
+        "N2O"
+      ]
+    },
+    {
+      "id": "H2-05",
+      "fuel": [
+        "H2"
+      ],
+      "oxidizer": [
+        "air"
+      ],
+      "application_regime": [
+        "lean",
+        "stability"
+      ],
+      "temperature": {
+        "min": 300,
+        "max": 700,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.2,
+        "max": 0.7
+      },
+      "pressure": {
+        "min": 1,
+        "max": 20,
+        "unit": "bar"
+      },
+      "mechanism": "Burke-2012-H2-N2",
+      "retained_species": [
+        "H2",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "H2"
+      ]
+    },
+    {
+      "id": "NH3-01",
+      "fuel": [
+        "NH3"
+      ],
+      "oxidizer": [
+        "air"
+      ],
+      "application_regime": [
+        "atmospheric",
+        "premixed",
+        "flame speed"
+      ],
+      "temperature": {
+        "min": 298,
+        "max": 500,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.6,
+        "max": 1.4
+      },
+      "pressure": {
+        "min": 1,
+        "max": 1,
+        "unit": "bar"
+      },
+      "mechanism": "Konnov-2025-NH3",
+      "retained_species": [
+        "NH3",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "NH3"
+      ]
+    },
+    {
+      "id": "NH3-02",
+      "fuel": [
+        "NH3"
+      ],
+      "oxidizer": [
+        "air"
+      ],
+      "application_regime": [
+        "rich",
+        "NH3 conversion",
+        "NOx"
+      ],
+      "temperature": {
+        "min": 500,
+        "max": 1000,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 1.0,
+        "max": 2.0
+      },
+      "pressure": {
+        "min": 1,
+        "max": 10,
+        "unit": "bar"
+      },
+      "mechanism": "Konnov-2025-NH3",
+      "retained_species": [
+        "NH3",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "NH3",
+        "NO",
+        "NO2",
+        "N2O"
+      ]
+    },
+    {
+      "id": "NH3-03",
+      "fuel": [
+        "NH3"
+      ],
+      "oxidizer": [
+        "air"
+      ],
+      "application_regime": [
+        "high-pressure",
+        "premixed",
+        "flame speed",
+        "NOx"
+      ],
+      "temperature": {
+        "min": 300,
+        "max": 800,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.7,
+        "max": 1.5
+      },
+      "pressure": {
+        "min": 5,
+        "max": 30,
+        "unit": "bar"
+      },
+      "mechanism": "Konnov-2025-NH3",
+      "retained_species": [
+        "NH3",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "NH3",
+        "NO",
+        "NO2",
+        "N2O"
+      ]
+    },
+    {
+      "id": "NH3-04",
+      "fuel": [
+        "NH3"
+      ],
+      "oxidizer": [
+        "O2/diluent"
+      ],
+      "application_regime": [
+        "low/intermediate-T",
+        "oxidation",
+        "ignition",
+        "IDT"
+      ],
+      "temperature": {
+        "min": 450,
+        "max": 1000,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.5,
+        "max": 3.0
+      },
+      "pressure": {
+        "min": 10,
+        "max": 100,
+        "unit": "bar"
+      },
+      "mechanism": "Glarborg-2024-NH3",
+      "retained_species": [
+        "NH3",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "NH3"
+      ]
+    },
+    {
+      "id": "NH3-05",
+      "fuel": [
+        "NH3"
+      ],
+      "oxidizer": [
+        "air"
+      ],
+      "application_regime": [
+        "engine",
+        "SI engine",
+        "spark-ignition engine",
+        "NOx"
+      ],
+      "temperature": {
+        "min": 600,
+        "max": 900,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.7,
+        "max": 1.3
+      },
+      "pressure": {
+        "min": 10,
+        "max": 30,
+        "unit": "bar"
+      },
+      "mechanism": "Konnov-2025-NH3",
+      "retained_species": [
+        "NH3",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "NH3"
+      ]
+    },
+    {
+      "id": "NH3-06",
+      "fuel": [
+        "NH3"
+      ],
+      "oxidizer": [
+        "air"
+      ],
+      "application_regime": [
+        "autoignition",
+        "HCCI",
+        "NOx"
+      ],
+      "temperature": {
+        "min": 700,
+        "max": 1200,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.2,
+        "max": 0.7
+      },
+      "pressure": {
+        "min": 10,
+        "max": 30,
+        "unit": "bar"
+      },
+      "mechanism": "Glarborg-2024-NH3",
+      "retained_species": [
+        "NH3",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "NH3",
+        "NO",
+        "NO2",
+        "N2O"
+      ]
+    },
+    {
+      "id": "NH3-H2-01",
+      "fuel": [
+        "H2",
+        "NH3"
+      ],
+      "oxidizer": [
+        "air"
+      ],
+      "application_regime": [
+        "premixed",
+        "flame speed",
+        "structure"
+      ],
+      "temperature": {
+        "min": 298,
+        "max": 500,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.5,
+        "max": 1.5
+      },
+      "pressure": {
+        "min": 1,
+        "max": 1,
+        "unit": "bar"
+      },
+      "mechanism": "Otomo-2018-NH3",
+      "retained_species": [
+        "H2",
+        "NH3",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "H2",
+        "NH3"
+      ]
+    },
+    {
+      "id": "NH3-H2-02",
+      "fuel": [
+        "H2",
+        "NH3"
+      ],
+      "oxidizer": [
+        "air"
+      ],
+      "application_regime": [
+        "lean",
+        "flame speed",
+        "stability"
+      ],
+      "temperature": {
+        "min": 300,
+        "max": 700,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.3,
+        "max": 0.8
+      },
+      "pressure": {
+        "min": 1,
+        "max": 10,
+        "unit": "bar"
+      },
+      "mechanism": "Otomo-2018-NH3",
+      "retained_species": [
+        "H2",
+        "NH3",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "H2",
+        "NH3"
+      ]
+    },
+    {
+      "id": "NH3-H2-03",
+      "fuel": [
+        "H2",
+        "NH3"
+      ],
+      "oxidizer": [
+        "air"
+      ],
+      "application_regime": [
+        "high-pressure",
+        "premixed",
+        "flame speed",
+        "NOx"
+      ],
+      "temperature": {
+        "min": 400,
+        "max": 900,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.5,
+        "max": 1.5
+      },
+      "pressure": {
+        "min": 5,
+        "max": 30,
+        "unit": "bar"
+      },
+      "mechanism": "Li-Konnov-2019-NH3",
+      "retained_species": [
+        "H2",
+        "NH3",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "H2",
+        "NH3",
+        "NO",
+        "NO2",
+        "N2O"
+      ]
+    },
+    {
+      "id": "NH3-H2-04",
+      "fuel": [
+        "H2",
+        "NH3"
+      ],
+      "oxidizer": [
+        "air"
+      ],
+      "application_regime": [
+        "engine",
+        "NOx"
+      ],
+      "temperature": {
+        "min": 600,
+        "max": 900,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.5,
+        "max": 1.2
+      },
+      "pressure": {
+        "min": 10,
+        "max": 30,
+        "unit": "bar"
+      },
+      "mechanism": "Li-Konnov-2019-NH3",
+      "retained_species": [
+        "H2",
+        "NH3",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "H2",
+        "NH3",
+        "NO",
+        "NO2",
+        "N2O"
+      ]
+    },
+    {
+      "id": "NH3-H2-05",
+      "fuel": [
+        "H2",
+        "NH3"
+      ],
+      "oxidizer": [
+        "air"
+      ],
+      "application_regime": [
+        "autoignition",
+        "HCCI"
+      ],
+      "temperature": {
+        "min": 700,
+        "max": 1200,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.1,
+        "max": 0.7
+      },
+      "pressure": {
+        "min": 10,
+        "max": 30,
+        "unit": "bar"
+      },
+      "mechanism": "Otomo-2018-NH3",
+      "retained_species": [
+        "H2",
+        "NH3",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "H2",
+        "NH3"
+      ]
+    },
+    {
+      "id": "NH3-H2-06",
+      "fuel": [
+        "H2",
+        "NH3"
+      ],
+      "oxidizer": [
+        "O2"
+      ],
+      "application_regime": [
+        "high-temperature",
+        "high-pressure",
+        "autoignition",
+        "ignition",
+        "IDT"
+      ],
+      "temperature": {
+        "min": 900,
+        "max": 1300,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.5,
+        "max": 2.0
+      },
+      "pressure": {
+        "min": 20,
+        "max": 100,
+        "unit": "bar"
+      },
+      "mechanism": "Glarborg-2024-NH3",
+      "retained_species": [
+        "H2",
+        "NH3",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "H2",
+        "NH3"
+      ]
+    },
+    {
+      "id": "NH3-H2-07",
+      "fuel": [
+        "H2",
+        "NH3"
+      ],
+      "oxidizer": [
+        "air"
+      ],
+      "application_regime": [
+        "gas-turbine",
+        "NOx"
+      ],
+      "temperature": {
+        "min": 300,
+        "max": 800,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.4,
+        "max": 1.2
+      },
+      "pressure": {
+        "min": 5,
+        "max": 30,
+        "unit": "bar"
+      },
+      "mechanism": "Li-Konnov-2019-NH3",
+      "retained_species": [
+        "H2",
+        "NH3",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "H2",
+        "NH3",
+        "NO",
+        "NO2",
+        "N2O"
+      ]
+    },
+    {
+      "id": "NH3-H2-08",
+      "fuel": [
+        "H2",
+        "NH3"
+      ],
+      "oxidizer": [
+        "O2/N2"
+      ],
+      "application_regime": [
+        "diluted",
+        "MILD",
+        "NOx"
+      ],
+      "temperature": {
+        "min": 800,
+        "max": 1400,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.4,
+        "max": 1.3
+      },
+      "pressure": {
+        "min": 1,
+        "max": 10,
+        "unit": "bar"
+      },
+      "mechanism": "Glarborg-2024-NH3",
+      "retained_species": [
+        "H2",
+        "NH3",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "H2",
+        "NH3",
+        "NO",
+        "NO2",
+        "N2O"
+      ]
+    },
+    {
+      "id": "NH3-H2-09",
+      "fuel": [
+        "H2",
+        "NH3"
+      ],
+      "oxidizer": [
+        "N2/air"
+      ],
+      "application_regime": [
+        "cracked-ammonia",
+        "NH3/H2 oxidation"
+      ],
+      "temperature": {
+        "min": 300,
+        "max": 1000,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.4,
+        "max": 1.2
+      },
+      "pressure": {
+        "min": 1,
+        "max": 10,
+        "unit": "bar"
+      },
+      "mechanism": "Li-Konnov-2019-NH3",
+      "retained_species": [
+        "H2",
+        "NH3",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "H2",
+        "NH3"
+      ]
+    },
+    {
+      "id": "NH3-H2-10",
+      "fuel": [
+        "H2",
+        "NH3"
+      ],
+      "oxidizer": [
+        "O2"
+      ],
+      "application_regime": [
+        "RCM",
+        "high-pressure",
+        "ignition"
+      ],
+      "temperature": {
+        "min": 950,
+        "max": 1200,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.5,
+        "max": 3.0
+      },
+      "pressure": {
+        "min": 20,
+        "max": 70,
+        "unit": "bar"
+      },
+      "mechanism": "Glarborg-2024-NH3",
+      "retained_species": [
+        "H2",
+        "NH3",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "H2",
+        "NH3"
+      ]
+    },
+    {
+      "id": "NH3-H2-11",
+      "fuel": [
+        "H2",
+        "NH3"
+      ],
+      "oxidizer": [
+        "air"
+      ],
+      "application_regime": [
+        "end-of-compression",
+        "engine",
+        "autoignition",
+        "knock"
+      ],
+      "temperature": {
+        "min": 900,
+        "max": 1000,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.5,
+        "max": 1.5
+      },
+      "pressure": {
+        "min": 30,
+        "max": 30,
+        "unit": "bar"
+      },
+      "mechanism": "Glarborg-2024-NH3",
+      "retained_species": [
+        "H2",
+        "NH3",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "H2",
+        "NH3"
+      ]
+    }
+  ]
+}

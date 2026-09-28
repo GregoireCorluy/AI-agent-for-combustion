@@ -357,8 +357,8 @@ def reduce_drgep(model_file, species_safe, threshold, importance_coeffs, ignitio
     today = date.today().strftime("%Y-%m-%d")
     ID = retrieve_next_ID()
     
-    path_reduced_model = 'data/mechanisms/reduced/'
-    reduced_model_filename = path_reduced_model + today + f"-{ID}-" +  f'{model_file.removeprefix("data/mechanisms/detailed/").removesuffix(".yaml")}-' + f'reduced_{reduced_model.n_species}.yaml'
+    path_reduced_model = 'outputs/reduced_mechanisms/'
+    reduced_model_filename = path_reduced_model + today + f"-{ID}-" +  f'{model_file.removeprefix("data/detailed_mechanisms/").removesuffix(".yaml")}-' + f'reduced_{reduced_model.n_species}.yaml'
     reduced_model.write_yaml(reduced_model_filename)
     #print('------', reduced_model_filename)
 
@@ -538,8 +538,8 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, plflame_condition
                 reduced_model.limbo_species.append(sp)
 
     # remove autoigintion data at the end of the mechanism reduction
-    os.remove('data/temp/ignition_data.dat')
-    os.remove('data/temp/ignition_output.txt')
+    os.remove('temp/ignition_data.dat')
+    os.remove('temp/ignition_output.txt')
 
     logging.info(45 * '-')
     logging.info('DRGEP reduction complete.')
@@ -556,7 +556,7 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, plflame_condition
 
 def retrieve_next_ID():
 
-    directory = "data/mechanisms/reduced/"
+    directory = "outputs/reduced_mechanisms/"
 
     today = date.today().strftime("%Y-%m-%d")
 

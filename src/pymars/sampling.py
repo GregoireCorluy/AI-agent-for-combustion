@@ -15,7 +15,7 @@ from .simulation import Simulation, Simulation_PSR, Simulation_PLFlame
 
 
 data_files = {
-    'data_ignition': 'data/temp/ignition_data.dat', 'output_ignition': 'data/temp/ignition_output.txt',
+    'data_ignition': 'temp/ignition_data.dat', 'output_ignition': 'temp/ignition_output.txt',
     'data_psr': 'psr_data.dat', 'output_psr': 'psr_output.txt',
     'data_plflame': 'plflame_data.dat', 'output_plflame': 'plflame_output.txt'
     }

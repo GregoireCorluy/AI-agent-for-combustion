@@ -300,7 +300,7 @@ class AgentGraph:
         if input_parameters.mechanism is None:
             return input_parameters, messages
 
-        path = "data/mechanisms/detailed/"
+        path = "data/detailed_mechanisms/"
         gas = ct.Solution(path + input_parameters.mechanism + ".yaml")
         mechanism_species = set(gas.species_names)
 
@@ -760,7 +760,7 @@ class AgentGraph:
 
         if input_parameters.mechanism is not None:
 
-            path = "data/mechanisms/detailed/"
+            path = "data/detailed_mechanisms/"
 
             try:
                 gas = ct.Solution(

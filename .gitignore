@@ -1,4 +1,5 @@
 bash/
-data/
 models/
 old/
+outputs/
+temp/
