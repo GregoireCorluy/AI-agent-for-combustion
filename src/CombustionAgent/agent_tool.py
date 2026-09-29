@@ -71,9 +71,9 @@ class AgentToolMechReduction():
 
         #Here for the moment can only handle one mixture
         fuel = [{component.species: component.fraction for component in input_parameters.fuel}] #Need to modify later to explore different fuel compositions
-        temperature_IDT = (np.array([temperature_start]) if temperature_start == temperature_end else np.linspace(temperature_start, temperature_end, 10))
-        pressure = (np.array([pressure_start]) if pressure_start == pressure_end else np.linspace(pressure_start, pressure_end, 10))
-        equivalence_ratio = (np.array([equivalence_ratio_start]) if equivalence_ratio_start == equivalence_ratio_end else np.linspace(equivalence_ratio_start, equivalence_ratio_end, 10))
+        temperature_IDT = (np.array([temperature_start]) if temperature_start == temperature_end else np.linspace(temperature_start, temperature_end, 5))
+        pressure = (np.array([pressure_start]) if pressure_start == pressure_end else np.linspace(pressure_start, pressure_end, 5))
+        equivalence_ratio = (np.array([equivalence_ratio_start]) if equivalence_ratio_start == equivalence_ratio_end else np.linspace(equivalence_ratio_start, equivalence_ratio_end, 5))
 
         print("\n" + "=" * 60)
         print("DRGEP REDUCTION CONDITIONS")

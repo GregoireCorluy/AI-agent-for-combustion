@@ -308,10 +308,11 @@ class SelectMechLLM(LLM):
                     LIST OF MECHANISMS WITH CORRESPONDING METRICS:
                     {mechanism_metrics_json}
 
-                    .... INSTRUCTIONS ...
+                    Select the mechanism that provides the best trade-off between IDT accuracy, species reduction, and reaction reduction, according to the relative importance specified by the user in the criteria parameters.
+                    Lower values are better for all three metrics. Return the name of the selected mechanism and a brief explanation of the choice.
                     """
 
-        selected_mechanism = self.generate(message, max_new_tokens=max_new_tokens, do_sample=True, enable_thinking=True) #true instead of false with llama
+        reply_selection_mechanism = self.generate(message, max_new_tokens=max_new_tokens, do_sample=True, enable_thinking=True) #true instead of false with llama
         
 
-        return selected_mechanism
+        return reply_selection_mechanism
