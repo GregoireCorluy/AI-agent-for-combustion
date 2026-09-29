@@ -64,11 +64,14 @@ database_path = "data/database/2026-09-14-database-mechanisms-H2-NH3-preliminary
 opening_message = ("\nHello, I'm your combustion mechanism consultant.\n"
                    "I will try to provide you the best chemical mechanism for your application.\n"
                    "Can you describe the simulation you would like to perform?")
+opening_message_criteria = ("\nNow that the input parameters have been retrieved\n"
+                            "Could you indicate which aspect of the reduced mechanism is important to you?\n"
+                            "It can be related to the accuracy, the stability or the size of the mechanism.")
 
 agent = Agent(model_id, [get_chat_prompt(), get_retrieve_prompt(schema_input, database_path),
                                   get_verify_prompt(schema_input), get_update_prompt(schema_input),
                                   get_fill_input_prompt(schema_input), get_router_prompt(),
-                                  get_fill_criteria_prompt(schema_criteria)], opening_message, database_path)
+                                  get_fill_criteria_prompt(schema_criteria)], opening_message, opening_message_criteria, database_path)
 
 def main():
     agent.workflow()

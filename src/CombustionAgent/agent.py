@@ -8,7 +8,7 @@ from CombustionAgent.agent_tool import AgentToolMechReduction
 
 class Agent:
 
-    def __init__(self, model_name: str, model_preprompts: list[str], model_opening_message: str, database_path: str) -> None:
+    def __init__(self, model_name: str, model_preprompts: list[str], model_opening_message: str, model_opening_message_criteria: str, database_path: str) -> None:
 
         self.model_manager = ModelManager(model_name)
         
@@ -21,6 +21,7 @@ class Agent:
         self.LLM_fill_criteria = FillCriteriaLLM(self.model_manager, model_preprompts[6])
 
         self.model_opening_message = model_opening_message
+        self.model_opening_message_criteria = model_opening_message_criteria
 
         self.input_graph = AgentInputGraph(self, database_path)
 
@@ -31,9 +32,9 @@ class Agent:
         print("Complete history")
         print(process_history)
 
-        #criteria_parameters, process_history = self.run_criteria_graph()
+        criteria_parameters, process_history = self.run_criteria_graph()
 
-        list_mechanisms = self.run_mechanism_reduction(input_parameters)
+        #list_mechanisms = self.run_mechanism_reduction(input_parameters)
 
         #selected_mechanism = self.select_mechanism(list_mechanisms, criteria_parameters)
 
@@ -41,7 +42,7 @@ class Agent:
 
         sys.exit()
 
-    def run_input_graph(self):
+    def run_input_graph(self) -> tuple[InputParameters, list[str]]:
 
         # complete process of input graph
 
@@ -55,7 +56,6 @@ class Agent:
             }
 
         print(f"\nAgent: {self.model_opening_message}")
-
         state["process_history"].append(f"Agent: {self.model_opening_message}")
 
         while True:
@@ -87,6 +87,25 @@ class Agent:
                 sys.exit()
 
         return state["input_parameters"], state["process_history"]
+
+    def run_criteria_graph(self) -> tuple[CriteriaParameters, list[str]]:
+
+        process_history = []
+
+        print(f"\nAgent: {self.model_opening_message_criteria}")
+        process_history.append(f"Agent: {self.model_opening_message_criteria}")
+ 
+        try:
+            user_input = input("\nYou: ")
+            if user_input.lower() in ["exit", "quit"]: sys.exit()
+
+            LLM_fill_criteria_reply, criteria_parameters = self.LLM_fill_criteria.fill_criteria(user_input)
+
+        except KeyboardInterrupt:
+            sys.exit()
+
+        return criteria_parameters, process_history
+
 
     def run_mechanism_reduction(self, input_parameters: InputParameters) -> list[str]:
 

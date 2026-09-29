@@ -56,3 +56,9 @@ class CriteriaParameters(BaseModel):
     reactions_reduction: float | None = Field(default=None, description="Weight between 0 and 1 representing the importance of "
                                                                         "reducing the number of reactions. "
                                                                         "0 means not important and 1 means extremely important.")
+
+class MechanismMetrics(BaseModel):
+    mechanism: str
+    maximum_idt_error_percent: float
+    remaining_species_percent: float
+    remaining_reactions_percent: float

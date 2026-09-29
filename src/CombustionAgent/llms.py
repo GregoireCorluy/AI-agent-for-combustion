@@ -1,7 +1,8 @@
 from .models import ModelManager
-from .parameters import InputParameters, CriteriaParameters
+from .parameters import InputParameters, CriteriaParameters, MechanismMetrics
 from .database import MechanismDatabase
 import json
+import pickle
 
 class LLM:
 
@@ -283,13 +284,30 @@ class SelectMechLLM(LLM):
 
         # Load metrics given mechanism names
 
-        # ...
+        mechanism_metrics = []
+        for mechanism_name in list_mechanisms:
+
+            with open(f"outputs/reduced_mechanisms/metrics/{mechanism_name}.pkl", "rb") as f:
+                metrics = pickle.load(f)
+
+            mechanism_metrics.append(
+                MechanismMetrics(
+                    mechanism=mechanism_name,
+                    **metrics
+                )
+            )
+
+        mechanism_metrics_json = json.dumps(
+            [m.model_dump() for m in mechanism_metrics],
+            indent=2
+        )
+
 
         message = f"""CRITERIA PARAMETERS:
                     {current_criteria_parameters_json}
 
                     LIST OF MECHANISMS WITH CORRESPONDING METRICS:
-                    {current_input_parameters_json}
+                    {mechanism_metrics_json}
 
                     .... INSTRUCTIONS ...
                     """
