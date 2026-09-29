@@ -27,12 +27,16 @@ class Agent:
 
     def workflow(self) -> None:
 
-        input_parameters, process_history = self.run_input_graph()
+        input_parameters, process_history_input = self.run_input_graph()
 
         print("Complete history")
-        print(process_history)
+        print(process_history_input)
 
-        criteria_parameters, process_history = self.run_criteria_graph()
+        criteria_parameters, process_history_criteria = self.run_criteria_graph()
+
+        print(f"Criteria: {criteria_parameters}")
+        print("History criteria retrieval process")
+        print(process_history_criteria)
 
         #list_mechanisms = self.run_mechanism_reduction(input_parameters)
 
@@ -99,7 +103,11 @@ class Agent:
             user_input = input("\nYou: ")
             if user_input.lower() in ["exit", "quit"]: sys.exit()
 
+            process_history.append(f"User: {user_input}")
+
             LLM_fill_criteria_reply, criteria_parameters = self.LLM_fill_criteria.fill_criteria(user_input)
+
+            process_history.append(f"FILL CRITERIA PARAMETERS: the agent has filled the criteria parameters and has assigned the weights as follows: {criteria_parameters}")
 
         except KeyboardInterrupt:
             sys.exit()
