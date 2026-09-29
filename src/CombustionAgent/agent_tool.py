@@ -119,13 +119,15 @@ class AgentToolMechReduction():
 
         return data_list
             
-    def run_dgrep(self, input_parameters: InputParameters):
+    def run_drgep(self, input_parameters: InputParameters) -> list[str]:
 
         self.data_list = self.get_data_IDT(input_parameters)
 
         path = "outputs/reduced_mechanisms/meta/"
         today = date.today().strftime("%Y-%m-%d")
         ID = retrieve_next_ID()
+
+        list_mechanisms = []
 
         for data in self.data_list:
             inputs = pymars.parse_inputs(data)
@@ -149,8 +151,13 @@ class AgentToolMechReduction():
                 "error_limit": self.error_limit,
             }
 
-            with open(path + today + f"-{ID}-" + input_parameters.mechanism + f"-error{self.error_limit}-meta.pkl", "wb") as f:
+            name_mechanism = today + f"-{ID}-" + input_parameters.mechanism + f"-error{self.error_limit}"
+            list_mechanisms.append(name_mechanism)
+
+            with open(path + name_mechanism + "-meta.pkl", "wb") as f:
                 pickle.dump(data_pickle, f)
         
             drgep.run_drgep(self.model_file, self.ignition_conditions, self.psr_conditions, self.flame_conditions, 
                             self.error_limit, self.target_species, self.safe_species, threshold_upper=None, num_threads=self.num_threads, path='temp/', id = ID)
+
+            return list_mechanisms

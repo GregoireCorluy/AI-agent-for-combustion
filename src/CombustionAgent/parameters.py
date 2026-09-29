@@ -44,9 +44,15 @@ class InputParameters(BaseModel):
 
     #     return value
 
-    class CriteriaParameters(BaseModel):
-        """Parameters describing the relative importance between the different metrics."""
+class CriteriaParameters(BaseModel):
+    """Parameters describing the relative importance between the different metrics."""
 
-        IDT_accuracy: float | None = Field(default=None, description="Number between 0 and 1 indicating the importance of the ignition time delay accuracy, i.e., the accuracy of the simulation. 0 indicates that the accuracy is not important at all and 1 indicates that the accuracy is very important.")
-        species_reduction: float | None = Field(default=None, description="Number between 0 and 1 indicating the importance of the reduction in number of species. 0 indicates that it is not important to reduce the number of species and 1 indicates that species reduction is very important.")
-        reactions_reduction: float | None = Field(default=None, description="Number between 0 and 1 indicating the importance of the reduction in number of reactions. 0 indicates that it is not important to reduce the number of reactions and 1 indicates that reaction reduction is very important.")
+    IDT_accuracy: float | None = Field(default=None, description=   "Weight between 0 and 1 representing the importance of "
+                                                                    "preserving ignition delay time accuracy. "
+                                                                    "0 means not important and 1 means extremely important.")
+    species_reduction: float | None = Field(default=None, description=  "Weight between 0 and 1 representing the importance of "
+                                                                        "reducing the number of species. "
+                                                                        "0 means not important and 1 means extremely important.")
+    reactions_reduction: float | None = Field(default=None, description="Weight between 0 and 1 representing the importance of "
+                                                                        "reducing the number of reactions. "
+                                                                        "0 means not important and 1 means extremely important.")

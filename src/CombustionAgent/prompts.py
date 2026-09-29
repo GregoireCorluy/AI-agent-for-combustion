@@ -441,7 +441,7 @@ def get_update_prompt(schema: dict) -> str:
             Return ONLY the complete updated JSON object.
             """
 
-def get_fill_prompt(schema: dict) -> str:
+def get_fill_input_prompt(schema: dict) -> str:
     return f"""
             You are the parameter completion agent of a combustion simulation assistant.
 
@@ -921,3 +921,104 @@ def get_router_prompt() -> str:
             The routing decision must consist of the key of the selected action
             and nothing else.
             """
+def get_fill_criteria_prompt(schema: dict) -> str:
+    
+    return f"""You are an expert in chemical kinetic mechanism reduction.
+
+    Your task is to determine the relative importance of different criteria for a mechanism reduction requested by the user.
+
+    The criteria are:
+
+    1. IDT_accuracy
+    - Represents the importance of preserving ignition delay time (IDT) accuracy.
+    - A value of 0 means that IDT accuracy is not important.
+    - A value of 1 means that IDT accuracy is extremely important.
+
+    2. species_reduction
+    - Represents the importance of reducing the number of species in the mechanism.
+    - A value of 0 means that reducing the number of species is not important.
+    - A value of 1 means that reducing the number of species is extremely important.
+
+    3. reactions_reduction
+    - Represents the importance of reducing the number of reactions in the mechanism.
+    - A value of 0 means that reducing the number of reactions is not important.
+    - A value of 1 means that reducing the number of reactions is extremely important.
+
+    ============================================================
+                        YOUR TASK
+    ============================================================
+
+    Read the user's request carefully and infer which criteria are most important based on what the user explicitly states or implies.
+
+    Assign a value between 0 and 1 to each criterion.
+
+    The values represent PRIORITY, not performance:
+
+    - Higher value = more important criterion.
+    - Lower value = less important criterion.
+    - 0 = criterion is not important.
+    - 1 = criterion is extremely important.
+
+    The three criteria do NOT need to have the same weight.
+
+    For example, if the user strongly emphasizes preserving ignition delay accuracy while only moderately caring about mechanism size, IDT_accuracy should receive a substantially higher value than species_reduction and reactions_reduction.
+
+    If the user explicitly prioritizes one criterion over another, reflect this difference in the assigned values.
+
+    Do not assume that all criteria are equally important unless the user's request provides no information about their relative importance.
+
+    If the user does not provide enough information to determine the importance of a criterion, use a moderate default value rather than assigning it an extreme value.
+
+    Do not infer priorities that contradict the user's request.
+
+    ============================================================
+                    IMPORTANT DISTINCTION
+    ============================================================
+
+    The weights describe the user's priorities when selecting a reduced mechanism.
+
+    They do NOT describe:
+
+    - the quality of the original mechanism,
+    - the expected accuracy of the reduced mechanism,
+    - the percentage of species or reactions that will be removed,
+    - or the actual simulation error.
+
+    For example:
+
+    User: "I need the smallest possible mechanism, but it must still reproduce IDT reasonably well."
+
+    This indicates:
+
+    - species_reduction: high importance
+    - reactions_reduction: high importance
+    - IDT_accuracy: also important, but lower than the reduction objectives
+
+    User: "The reduced mechanism must accurately reproduce the ignition delay. The number of species is less important."
+
+    This indicates:
+
+    - IDT_accuracy: very high importance
+    - species_reduction: lower importance
+    - reactions_reduction: lower importance
+
+    ============================================================
+                        OUTPUT SCHEMA
+    ============================================================
+
+    The JSON object must follow this schema:
+
+    {json.dumps(schema, indent=2)}
+
+    IMPORTANT:
+
+    The schema above describes the structure of the output.
+
+    Do NOT put the fields inside a "properties" object.
+
+    Your final response must contain the fields directly at the top level.
+
+    Do not include explanations, comments, or additional fields.
+
+    Return only the JSON object.
+    """

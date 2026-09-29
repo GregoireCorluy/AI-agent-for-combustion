@@ -7,7 +7,7 @@ from rapidfuzz import process, fuzz
 from .database import MechanismDatabase
 import cantera as ct
 
-class AgentGraph:
+class AgentInputGraph:
 
     def __init__(self, agent, database_path):
 
@@ -21,7 +21,7 @@ class AgentGraph:
         self.graph.add_node("retrieve", self.retrieve_node)
         #self.graph.add_node("verify", self.verify_node)
         self.graph.add_node("update", self.update_node)
-        self.graph.add_node("fill", self.fill_node)
+        self.graph.add_node("fill", self.fill_input_node)
 
         self.graph.add_edge(START, "router")
         self.graph.add_conditional_edges(
@@ -73,7 +73,7 @@ class AgentGraph:
                     {state["user_message"]}
 
                     PROCESS HISTORY:
-                    {state["process_history"]}
+                    {state["working_history"]}
 
                     CURRENT INPUT PARAMETERS:
                     {state["input_parameters"]}
@@ -90,7 +90,8 @@ class AgentGraph:
         response = self.agent.LLM_conversation.generate(message)
 
         return {
-            "response": response
+            "response": response,
+            "process_history": state["process_history"] + [state["user_message"], response]
         }
 
     def retrieve_node(self, state: AgentState):
@@ -179,7 +180,8 @@ class AgentGraph:
         print(history_entries)
 
         return {"input_parameters": input_parameters,
-                "process_history": state["process_history"] + history_entries}
+                "process_history": state["process_history"] + history_entries,
+                "working_history": state["working_history"] + history_entries}
 
     # def verify_node(self, state: AgentState):
     #     result = self.agent.verify(...)
@@ -196,16 +198,17 @@ class AgentGraph:
                     )
 
         return {"input_parameters": input_parameters_filled,
-                "process_history": state["process_history"] + [history_entry]}
+                "process_history": state["process_history"] + [history_entry],
+                "working_history": state["working_history"] + [history_entry]}
 
-    def fill_node(self, state: AgentState):
+    def fill_input_node(self, state: AgentState):
 
         history_entries = []
 
-        LLM_fill_reply, input_parameters_filled, matched_results = self.agent.LLM_fill.fill_missing_information(state["input_parameters"])
+        LLM_fill_input_reply, input_parameters_filled, matched_results = self.agent.LLM_fill_input.fill_missing_information(state["input_parameters"])
         
-        print(f"\nAgent has filled in the missing fields using the database: {LLM_fill_reply}")
-        print(f"Input parameters after LLM_fill: {input_parameters_filled}")
+        print(f"\nAgent has filled in the missing fields using the database: {LLM_fill_input_reply}")
+        print(f"Input parameters after LLM_fill_input: {input_parameters_filled}")
 
         ########################################
         # Standardization/normalization/checks #
@@ -265,7 +268,8 @@ class AgentGraph:
         print(history_entries)
 
         return {"input_parameters": input_parameters_filled,
-                "process_history": state["process_history"] + history_entries}
+                "process_history": state["process_history"] + history_entries,
+                "working_history": state["working_history"] + history_entries,}
     
     def route_after_router(self, state: AgentState):
         return state["route"]

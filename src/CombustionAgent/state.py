@@ -10,6 +10,9 @@ class AgentState(TypedDict):
     # History of all the process
     process_history: list[str] | None
 
+    # History of the current cycle
+    working_history: list[str] | None
+
     # Current extracted parameters
     # None means that no parameters have been established yet
     input_parameters: InputParameters | None

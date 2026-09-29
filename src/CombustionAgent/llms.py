@@ -1,5 +1,5 @@
 from .models import ModelManager
-from .parameters import InputParameters
+from .parameters import InputParameters, CriteriaParameters
 from .database import MechanismDatabase
 import json
 
@@ -160,7 +160,7 @@ class UpdateLLM(LLM):
 
         return updated_json, updated_input_parameters
 
-class FillLLM(LLM):
+class FillInputLLM(LLM):
 
     def __init__(self, model_manager: ModelManager, model_preprompt: str, database_path: str) -> None:
 
@@ -260,3 +260,44 @@ class RouterLLM(LLM):
             raise ValueError(f"LLM selected invalid route '{chosen_route}'. Expected one of: {list_of_possible_routes}.")
 
         return chosen_route
+
+class FillCriteriaLLM(LLM):
+
+    def fill_criteria(self, message: str, max_new_tokens: int = 10000) -> tuple[str, CriteriaParameters]:#previously 500 
+
+        filled_json = self.generate(message, max_new_tokens=max_new_tokens, do_sample=True, enable_thinking=True) #true instead of false with llama
+        print(filled_json)
+        data = json.loads(filled_json)
+
+        filled_criteria_parameters = CriteriaParameters.model_validate(data)
+
+        return filled_json, filled_criteria_parameters
+
+class SelectMechLLM(LLM):
+
+    def select_mechanism(self, current_criteria_parameters: CriteriaParameters, list_mechanisms: list[str], max_new_tokens: int = 10000) -> tuple[str, InputParameters]:#previously 500 
+
+        # Name of the mechanism + explanation
+
+        current_criteria_parameters_json = current_criteria_parameters.model_dump_json(indent=2)
+
+        # Load metrics given mechanism names
+
+        # ...
+
+        message = f"""CRITERIA PARAMETERS:
+                    {current_criteria_parameters_json}
+
+                    LIST OF MECHANISMS WITH CORRESPONDING METRICS:
+                    {current_input_parameters_json}
+
+                    .... INSTRUCTIONS ...
+                    """
+
+        filled_json = self.generate(message, max_new_tokens=max_new_tokens, do_sample=True, enable_thinking=True) #true instead of false with llama
+        print(filled_json)
+        data = json.loads(filled_json)
+
+        filled_input_parameters = InputParameters.model_validate(data)
+
+        return filled_json, filled_input_parameters

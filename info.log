@@ -2919,3 +2919,9 @@ Maximum error idt: 0.10%
 Maximum error psr: 0.00%
 Maximum error lbv: 0.00%
 Final reduced model saved as outputs/reduced_mechanisms/2026-09-28-ID009-Glarborg-2024-NH3-error20-reduced_11.yaml
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.

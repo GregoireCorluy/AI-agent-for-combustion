@@ -560,9 +560,9 @@ def run_drgep(model_file, ignition_conditions, psr_conditions, plflame_condition
     # Save metrics #
     ################
     metrics_pickle = {
-                    "max error idt": reduced_model.error_idt,
-                    "perc nbr species": reduced_model.model.n_species/nbr_species_start,
-                    "perc nbr reactions": reduced_model.model.n_reactions/nbr_reactions_start,
+                    "max error ignition delay time (IDT)": reduced_model.error_idt,
+                    "percentage number of species left": reduced_model.model.n_species/nbr_species_start,
+                    "percentage number of reactions left": reduced_model.model.n_reactions/nbr_reactions_start,
                 }
 
     today = date.today().strftime("%Y-%m-%d")
