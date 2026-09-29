@@ -286,7 +286,7 @@ class SelectMechLLM(LLM):
 
         mechanism_metrics = []
         for mechanism_name in list_mechanisms:
-            print(mechanism_name)
+            
             with open(f"outputs/reduced_mechanisms/metrics/{mechanism_name}-metrics.pkl", "rb") as f:
                 metrics = pickle.load(f)
 
