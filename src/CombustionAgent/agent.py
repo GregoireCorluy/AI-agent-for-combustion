@@ -61,7 +61,9 @@ class Agent:
 
         # list_mechanisms = self.run_mechanism_reduction(input_parameters)
 
-        list_mechanisms = ["2026-09-28-ID001-Glarborg-2024-NH3-error5-reduced_8.yaml", "2026-09-28-ID002-Glarborg-2024-NH3-error10-reduced_19.yaml", "2026-09-29-ID003-Glarborg-2024-NH3-error20-reduced_11.yaml"]
+        criteria_parameters = CriteriaParameters(IDT_accuracy = 1, species_reduction = 0.5, reactions_reduction = 0.5)
+
+        list_mechanisms = ["2026-09-29-ID002-Glarborg-2024-NH3-error5-reduced_12", "2026-09-28-ID002-Glarborg-2024-NH3-error10-reduced_19", "2026-09-29-ID003-Glarborg-2024-NH3-error20-reduced_11"]
 
         reply_selection_mechanism = self.select_mechanism(criteria_parameters, list_mechanisms)
 
