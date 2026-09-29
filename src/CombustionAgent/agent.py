@@ -56,6 +56,8 @@ class Agent:
 
         print(f"\nAgent: {self.model_opening_message}")
 
+        state["process_history"].append(f"Agent: {self.model_opening_message}")
+
         while True:
             try:
                 user_input = input("\nYou: ")
@@ -67,6 +69,8 @@ class Agent:
 
                 # Update only the part of the state that changes
                 state["user_message"] = user_input
+
+                state["process_history"].append(f"User: {user_input}")
 
                 # Run the LangGraph
                 state = self.input_graph.app.invoke(state)

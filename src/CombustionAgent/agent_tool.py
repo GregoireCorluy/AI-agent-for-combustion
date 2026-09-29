@@ -160,4 +160,4 @@ class AgentToolMechReduction():
             drgep.run_drgep(self.model_file, self.ignition_conditions, self.psr_conditions, self.flame_conditions, 
                             self.error_limit, self.target_species, self.safe_species, threshold_upper=None, num_threads=self.num_threads, path='temp/', id = ID)
 
-            return list_mechanisms
+        return list_mechanisms

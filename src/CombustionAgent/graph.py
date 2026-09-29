@@ -91,7 +91,7 @@ class AgentInputGraph:
 
         return {
             "response": response,
-            "process_history": state["process_history"] + [state["user_message"], response]
+            "process_history": state["process_history"] + [f"Agent: {response}"]
         }
 
     def retrieve_node(self, state: AgentState):
