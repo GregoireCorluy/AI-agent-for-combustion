@@ -1022,3 +1022,10 @@ def get_fill_criteria_prompt(schema: dict) -> str:
 
     Return only the JSON object.
     """
+
+def get_select_mechanism_prompt() -> str:
+    return f"""
+
+
+    
+    """

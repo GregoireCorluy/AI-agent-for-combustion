@@ -302,7 +302,6 @@ class SelectMechLLM(LLM):
             indent=2
         )
 
-
         message = f"""CRITERIA PARAMETERS:
                     {current_criteria_parameters_json}
 
@@ -312,10 +311,7 @@ class SelectMechLLM(LLM):
                     .... INSTRUCTIONS ...
                     """
 
-        filled_json = self.generate(message, max_new_tokens=max_new_tokens, do_sample=True, enable_thinking=True) #true instead of false with llama
-        print(filled_json)
-        data = json.loads(filled_json)
+        selected_mechanism = self.generate(message, max_new_tokens=max_new_tokens, do_sample=True, enable_thinking=True) #true instead of false with llama
+        
 
-        filled_input_parameters = InputParameters.model_validate(data)
-
-        return filled_json, filled_input_parameters
+        return selected_mechanism
