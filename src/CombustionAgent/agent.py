@@ -33,37 +33,37 @@ class Agent:
         # print("Complete history")
         # print(process_history_input)
 
-        criteria_parameters, process_history_criteria = self.run_criteria_graph()
+        # criteria_parameters, process_history_criteria = self.run_criteria_graph()
 
-        print(f"Criteria: {criteria_parameters}")
-        print("History criteria retrieval process")
-        print(process_history_criteria)
+        # print(f"Criteria: {criteria_parameters}")
+        # print("History criteria retrieval process")
+        # print(process_history_criteria)
 
-        # self.model_manager.unload_model() #To do or not?
+        # # self.model_manager.unload_model() #To do or not?
 
-        input_parameters = InputParameters(
-            mechanism="Glarborg-2024-NH3",
-            application_regime=None,
-            fuel=[
-                FuelComponent(species="H2", fraction=1.0)
-            ],
-            pressure_start=0.5,
-            pressure_end=10.0,
-            pressure_unit="bar",
-            temperature_start=900.0,
-            temperature_end=2000.0,
-            temperature_unit="K",
-            equivalence_ratio_start=0.5,
-            equivalence_ratio_end=5.5,
-            retained_species=["H2", "N2", "O2"],
-            target_species=["H2"],
-        )
+        # input_parameters = InputParameters(
+        #     mechanism="Glarborg-2024-NH3",
+        #     application_regime=None,
+        #     fuel=[
+        #         FuelComponent(species="H2", fraction=1.0)
+        #     ],
+        #     pressure_start=0.5,
+        #     pressure_end=10.0,
+        #     pressure_unit="bar",
+        #     temperature_start=900.0,
+        #     temperature_end=2000.0,
+        #     temperature_unit="K",
+        #     equivalence_ratio_start=0.5,
+        #     equivalence_ratio_end=5.5,
+        #     retained_species=["H2", "N2", "O2"],
+        #     target_species=["H2"],
+        # )
 
-        list_mechanisms = self.run_mechanism_reduction(input_parameters)
+        # list_mechanisms = self.run_mechanism_reduction(input_parameters)
 
-        # criteria_parameters = CriteriaParameters(IDT_accuracy = 1, species_reduction = 0.5, reactions_reduction = 0.5)
+        criteria_parameters = CriteriaParameters(IDT_accuracy = 1, species_reduction = 0.5, reactions_reduction = 0.5)
 
-        # list_mechanisms = ["2026-09-29-ID002-Glarborg-2024-NH3-error5", "2026-09-29-ID004-Glarborg-2024-NH3-error5", "2026-09-29-ID003-Glarborg-2024-NH3-error20"]
+        list_mechanisms = ["2026-09-29-ID005-Glarborg-2024-NH3-error5", "2026-09-29-ID004-Glarborg-2024-NH3-error5", "2026-09-29-ID003-Glarborg-2024-NH3-error20"]
 
         reply_selection_mechanism = self.select_mechanism(criteria_parameters, list_mechanisms)
 
