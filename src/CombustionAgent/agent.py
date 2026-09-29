@@ -63,7 +63,7 @@ class Agent:
 
         criteria_parameters = CriteriaParameters(IDT_accuracy = 1, species_reduction = 0.5, reactions_reduction = 0.5)
 
-        list_mechanisms = ["2026-09-29-ID002-Glarborg-2024-NH3-error5-reduced_12", "2026-09-28-ID002-Glarborg-2024-NH3-error10-reduced_19", "2026-09-29-ID003-Glarborg-2024-NH3-error20-reduced_11"]
+        list_mechanisms = ["2026-09-29-ID002-Glarborg-2024-NH3-error5", "2026-09-28-ID002-Glarborg-2024-NH3-error10", "2026-09-29-ID003-Glarborg-2024-NH3-error20"]
 
         reply_selection_mechanism = self.select_mechanism(criteria_parameters, list_mechanisms)
 
