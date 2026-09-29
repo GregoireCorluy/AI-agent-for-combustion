@@ -33,11 +33,11 @@ class Agent:
         # print("Complete history")
         # print(process_history_input)
 
-        criteria_parameters, process_history_criteria = self.run_criteria_graph()
+        # criteria_parameters, process_history_criteria = self.run_criteria_graph()
 
-        print(f"Criteria: {criteria_parameters}")
-        print("History criteria retrieval process")
-        print(process_history_criteria)
+        # print(f"Criteria: {criteria_parameters}")
+        # print("History criteria retrieval process")
+        # print(process_history_criteria)
 
         # self.model_manager.unload_model() #To do or not?
 
