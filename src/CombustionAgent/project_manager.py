@@ -13,6 +13,7 @@ class ProjectManager:
     def select_project(self):
 
         projects = self.get_projects()
+        new_project = False
 
         choices = [
             questionary.Choice(
@@ -43,7 +44,9 @@ class ProjectManager:
 
             selected_project_id = self.create_new_project(project_name)
 
-        return selected_project_id
+            new_project = True
+
+        return selected_project_id, new_project
 
     def get_projects(self):
 

@@ -36,10 +36,7 @@ class Agent:
             self.workflow()
 
         else:
-            print()
-
-
-
+            print("Start old project")
 
     def workflow(self) -> None:
 
