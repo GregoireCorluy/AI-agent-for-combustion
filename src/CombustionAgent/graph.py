@@ -6,7 +6,7 @@ import unicodedata
 from rapidfuzz import process, fuzz
 from .database import MechanismDatabase
 import cantera as ct
-from .console import logger
+from .console import console, logger
 
 class AgentInputGraph:
 
@@ -50,6 +50,8 @@ class AgentInputGraph:
         self.app = self.graph.compile()
 
     def router_node(self, state: AgentState):
+
+        console.print("[cyan]Agent is interpreting the message.[/cyan]")
 
         possible_actions = ["CHAT"]
 
