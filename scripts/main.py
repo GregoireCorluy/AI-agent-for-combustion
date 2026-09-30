@@ -61,6 +61,7 @@ model_id = "models/Qwen3-8B" #"models/Llama-3.1-8B-Instruct"
 schema_input = InputParameters.model_json_schema()
 schema_criteria = CriteriaParameters.model_json_schema()
 database_path = "data/database/2026-09-14-database-mechanisms-H2-NH3-preliminary.json"
+project_path = "projects/"
 opening_message = ("\nHello, I'm your combustion mechanism consultant.\n"
                    "I will try to provide you the best chemical mechanism for your application.\n"
                    "Can you describe the simulation you would like to perform?")
@@ -72,10 +73,10 @@ agent = Agent(model_id, [get_chat_prompt(), get_retrieve_prompt(schema_input, da
                                   get_verify_prompt(schema_input), get_update_prompt(schema_input),
                                   get_fill_input_prompt(schema_input), get_router_prompt(),
                                   get_fill_criteria_prompt(schema_criteria), get_select_mechanism_prompt()],
-                                  opening_message, opening_message_criteria, database_path)
+                                  opening_message, opening_message_criteria, database_path, project_path)
 
 def main():
-    agent.workflow()
+    agent.main()
 
 if __name__ == "__main__":
     main()

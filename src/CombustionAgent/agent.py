@@ -2,14 +2,16 @@ import sys
 
 from .graph import AgentInputGraph
 from .llms import ConversationLLM, RetrievalLLM, VerifyLLM, UpdateLLM, FillInputLLM, RouterLLM, FillCriteriaLLM, SelectMechLLM
-from .models import ModelManager
+from .model_manager import ModelManager
+from .project_manager import ProjectManager
 from .parameters import InputParameters, CriteriaParameters, FuelComponent
 from CombustionAgent.agent_tool import AgentToolMechReduction
 
 class Agent:
 
-    def __init__(self, model_name: str, model_preprompts: list[str], model_opening_message: str, model_opening_message_criteria: str, database_path: str) -> None:
+    def __init__(self, model_name: str, model_preprompts: list[str], model_opening_message: str, model_opening_message_criteria: str, database_path: str, project_path: str) -> None:
 
+        self.project_manager = ProjectManager(project_path)
         self.model_manager = ModelManager(model_name)
         
         self.LLM_conversation = ConversationLLM(self.model_manager, model_preprompts[0], model_opening_message)
@@ -25,6 +27,19 @@ class Agent:
         self.model_opening_message_criteria = model_opening_message_criteria
 
         self.input_graph = AgentInputGraph(self, database_path)
+
+    def main(self) -> None:
+
+        selected_project_ID, new_project = self.project_manager.select_project()
+
+        if(new_project):
+            self.workflow()
+
+        else:
+            print()
+
+
+
 
     def workflow(self) -> None:
 

@@ -1,4 +1,4 @@
-from .models import ModelManager
+from .model_manager import ModelManager
 from .parameters import InputParameters, CriteriaParameters, MechanismMetrics
 from .database import MechanismDatabase
 import json

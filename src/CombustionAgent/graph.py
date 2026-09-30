@@ -155,7 +155,6 @@ class AgentInputGraph:
         print(f"Input parameters after normalization: {input_parameters}")
 
         if all(value is not None  for field, value in input_parameters.model_dump().items() if field != "application_regime"):
-            print("Entry in correct if-statement")
             history_entry_retrieval = (
                             "RETRIEVAL RESULT: All required input parameters are currently filled. "
                             "The agent should present the extracted parameters to the user and "
@@ -166,7 +165,6 @@ class AgentInputGraph:
                             "RETRIEVAL RESULT: None of the input parameters have been retrieved from the user's message, all parameters will be inferred by the fill-in function."
                         )
         else:
-            print("Wrong if-statement")
             filled_fields = [
                         field_name
                         for field_name, value in input_parameters.model_dump().items()
