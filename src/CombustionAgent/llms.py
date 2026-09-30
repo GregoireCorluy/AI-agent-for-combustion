@@ -1,6 +1,7 @@
 from .model_manager import ModelManager
 from .parameters import InputParameters, CriteriaParameters, MechanismMetrics
 from .database import MechanismDatabase
+from .console import logger
 import json
 import pickle
 
@@ -49,7 +50,7 @@ class LLM:
         #                                     skip_special_tokens=True,
         #                                 )
 
-        print(f"Thinking: {thinking_content}")
+        logger.debug(f"Thinking: {thinking_content}")
 
         return LLM_reply
 
@@ -95,7 +96,7 @@ class ConversationLLM(LLM):
         thinking_content = self.model_manager.tokenizer.decode(output_ids[:index], skip_special_tokens=True).strip("\n")
         LLM_reply = self.model_manager.tokenizer.decode(output_ids[index:], skip_special_tokens=True).strip("\n")
 
-        print(f"Thinking: {thinking_content}")
+        logger.debug(f"Thinking: {thinking_content}")
 
         self.history.append({"role": "assistant", "content": LLM_reply})
 
@@ -179,13 +180,13 @@ class FillInputLLM(LLM):
                     )
 
         # Report from database retrieval
-        # print(f"Number of matches: {results['n_matches']}")
+        # logger.debug(f"Number of matches: {results['n_matches']}")
 
         matched_results = results["matches"]
 
-        print("Matched results:")
+        logger.debug("Matched results:")
         for case in matched_results:
-            print(f"ID:       {case.get('id')}")
+            logger.debug(f"ID:       {case.get('id')}")
 
         
         matched_cases = [database.case_to_prompt_format(case)
@@ -225,7 +226,7 @@ class FillInputLLM(LLM):
                     """
 
         filled_json = self.generate(message, max_new_tokens=max_new_tokens, do_sample=True, enable_thinking=True) #true instead of false with llama
-        print(filled_json)
+        logger.debug(filled_json)
         data = json.loads(filled_json)
 
         filled_input_parameters = InputParameters.model_validate(data)
@@ -267,7 +268,7 @@ class FillCriteriaLLM(LLM):
     def fill_criteria(self, message: str, max_new_tokens: int = 10000) -> tuple[str, CriteriaParameters]:#previously 500 
 
         filled_json = self.generate(message, max_new_tokens=max_new_tokens, do_sample=True, enable_thinking=True) #true instead of false with llama
-        print(filled_json)
+        logger.debug(filled_json)
         data = json.loads(filled_json)
 
         filled_criteria_parameters = CriteriaParameters.model_validate(data)

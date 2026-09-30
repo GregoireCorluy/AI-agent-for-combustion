@@ -62,10 +62,10 @@ schema_input = InputParameters.model_json_schema()
 schema_criteria = CriteriaParameters.model_json_schema()
 database_path = "data/database/2026-09-14-database-mechanisms-H2-NH3-preliminary.json"
 project_path = "projects/"
-opening_message = ("\nHello, I'm your combustion mechanism consultant.\n"
+opening_message = ("Hello, I'm your combustion mechanism consultant.\n"
                    "I will try to provide you the best chemical mechanism for your application.\n"
                    "Can you describe the simulation you would like to perform?")
-opening_message_criteria = ("\nNow that the input parameters have been retrieved,\n"
+opening_message_criteria = ("Now that the input parameters have been retrieved,\n"
                             "could you indicate which aspect of the reduced mechanism is important to you?\n"
                             "It can be related to the accuracy, the stability or the size of the mechanism.")
 

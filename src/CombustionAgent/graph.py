@@ -6,6 +6,7 @@ import unicodedata
 from rapidfuzz import process, fuzz
 from .database import MechanismDatabase
 import cantera as ct
+from .console import logger
 
 class AgentInputGraph:
 
@@ -62,7 +63,7 @@ class AgentInputGraph:
 
         selected_route = self.agent.LLM_router.define_route(state["response"], state["user_message"], state["input_parameters"], possible_actions)
 
-        print(f"Selected route: {selected_route}")
+        logger.debug(f"Selected route: {selected_route}")
 
         return {"route": selected_route}
 
@@ -100,20 +101,20 @@ class AgentInputGraph:
 
         LLM_retrieval_reply, input_parameters = self.agent.LLM_retrieval.retrieve_information(state["user_message"])
 
-        print(f"\nAgent has retrieved from the user input: {LLM_retrieval_reply}")
-        print(f"Input parameters from LLM_retrieval: {input_parameters}")
+        logger.debug(f"\nAgent has retrieved from the user input: {LLM_retrieval_reply}")
+        logger.debug(f"Input parameters from LLM_retrieval: {input_parameters}")
 
         # Provide the information of which input parameters retrieved
         history_entries.extend([f"Retrieved parameters from the user input: {input_parameters}"])
 
         # LLM_verification_reply = self.agent.LLM_verification.verify_information(state["user_message"], input_parameters)
 
-        # print(f"\nVerification by the agent: {LLM_verification_reply}")
+        # logger.debug(f"\nVerification by the agent: {LLM_verification_reply}")
 
         # LLM_update_reply, input_parameters_updated = self.agent.LLM_update.update_information(LLM_verification_reply, input_parameters)
         
-        # print(f"\nUpdate by the agent: {LLM_update_reply}")
-        # print(f"Input parameters after LLM_update: {input_parameters_updated}")
+        # logger.debug(f"\nUpdate by the agent: {LLM_update_reply}")
+        # logger.debug(f"Input parameters after LLM_update: {input_parameters_updated}")
 
         # Check for consistency in retrieved data
 
@@ -152,7 +153,7 @@ class AgentInputGraph:
         # Messages #
         ############
 
-        print(f"Input parameters after normalization: {input_parameters}")
+        logger.debug(f"Input parameters after normalization: {input_parameters}")
 
         if all(value is not None  for field, value in input_parameters.model_dump().items() if field != "application_regime"):
             history_entry_retrieval = (
@@ -176,8 +177,7 @@ class AgentInputGraph:
             
         history_entries.append(history_entry_retrieval)
 
-        print("Total history entries after retrieval normalization:")
-        print(history_entries)
+        logger.debug(f"History entries after retrieval normalization:\n{history_entries}")
 
         return {"input_parameters": input_parameters,
                 "process_history": state["process_history"] + history_entries,
@@ -191,7 +191,7 @@ class AgentInputGraph:
 
         LLM_reply, input_parameters_filled = self.agent.LLM_update.update_information(state["user_message"], state["input_parameters"])
         
-        print(f"\nAgent: {LLM_reply}")
+        logger.debug(f"\nInput parameters after update:\n{LLM_reply}")
 
         history_entry = (
                         "UPDATE RESULT: The input parameters have been updated according to the user's request. The agent should present the extracted parameters to the user and ask for confirmation."
@@ -207,8 +207,7 @@ class AgentInputGraph:
 
         LLM_fill_input_reply, input_parameters_filled, matched_results = self.agent.LLM_fill_input.fill_missing_information(state["input_parameters"])
         
-        print(f"\nAgent has filled in the missing fields using the database: {LLM_fill_input_reply}")
-        print(f"Input parameters after LLM_fill_input: {input_parameters_filled}")
+        logger.debug(f"Input parameters after LLM_fill_input: {input_parameters_filled}")
 
         ########################################
         # Standardization/normalization/checks #
@@ -241,7 +240,7 @@ class AgentInputGraph:
         input_parameters_filled, message_species_validation = self.validate_species(input_parameters_filled)
         history_entries.extend(message_species_validation)
 
-        print(f"Input parameters after normalization: {input_parameters_filled}")
+        logger.debug(f"Input parameters after normalization:\n{input_parameters_filled}")
 
         ############
         # Messages #
@@ -264,8 +263,7 @@ class AgentInputGraph:
 
         history_entries.append(history_entry_fill)
 
-        print("Total history entries after fill normalization:")
-        print(history_entries)
+        logger.debug(f"History entries after fill normalization:\n{history_entries}")
 
         return {"input_parameters": input_parameters_filled,
                 "process_history": state["process_history"] + history_entries,

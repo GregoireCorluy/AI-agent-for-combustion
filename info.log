@@ -2951,3 +2951,5 @@ Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing 
 NumExpr defaulting to 16 threads.
 Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
 NumExpr defaulting to 16 threads.
+Note: NumExpr detected 32 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+NumExpr defaulting to 16 threads.
