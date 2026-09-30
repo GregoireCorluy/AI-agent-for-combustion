@@ -176,6 +176,8 @@ class Agent:
 
             process_history.append(f"User: {user_input}")
 
+            console.print("[bold cyan]Agent is retrieving the criteria parameters.[/bold cyan]")
+
             LLM_fill_criteria_reply, criteria_parameters = self.LLM_fill_criteria.fill_criteria(user_input)
 
             process_history.append(f"FILL CRITERIA PARAMETERS: the agent has filled the criteria parameters and has assigned the weights as follows: {criteria_parameters}")
@@ -189,6 +191,8 @@ class Agent:
 
     def run_mechanism_reduction(self, input_parameters: InputParameters) -> list[str]:
 
+        console.print("[bold]Launch DRGEP...[/bold]")
+
         agent_tool_mechanism_reduction = AgentToolMechReduction()
         
         list_mechanisms = agent_tool_mechanism_reduction.run_drgep(input_parameters)
@@ -199,6 +203,8 @@ class Agent:
     def select_mechanism(self, criteria_paramters: CriteriaParameters, list_mechanisms: list[str]) -> str:
 
         # Provide mechanism + explanation
+
+        console.print("[bold cyan]Agent is selecting the most suitable mechanism.[/bold cyan]")
 
         reply_selected_mechanism = self.LLM_select_mechanism.select_mechanism(criteria_paramters, list_mechanisms)
 

@@ -51,7 +51,7 @@ class AgentInputGraph:
 
     def router_node(self, state: AgentState):
 
-        console.print("[cyan]Agent is interpreting the message.[/cyan]")
+        console.print("[bold cyan]Agent is interpreting the message.[/bold cyan]")
 
         possible_actions = ["CHAT"]
 
@@ -98,6 +98,8 @@ class AgentInputGraph:
         }
 
     def retrieve_node(self, state: AgentState):
+
+        console.print("[bold cyan]Agent is retrieving the parameters.[/bold cyan]")
 
         history_entries = []
 
@@ -191,6 +193,8 @@ class AgentInputGraph:
 
     def update_node(self, state: AgentState):
 
+        console.print("[bold cyan]Agent is updating the input parameters.[/bold cyan]")
+
         LLM_reply, input_parameters_filled = self.agent.LLM_update.update_information(state["user_message"], state["input_parameters"])
         
         logger.debug(f"\nInput parameters after update:\n{LLM_reply}")
@@ -204,6 +208,8 @@ class AgentInputGraph:
                 "working_history": state["working_history"] + [history_entry]}
 
     def fill_input_node(self, state: AgentState):
+
+        console.print("[bold cyan]Agent is filling the missing input parameters using the database.[/bold cyan]")
 
         history_entries = []
 
