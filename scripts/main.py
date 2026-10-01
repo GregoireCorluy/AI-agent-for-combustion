@@ -68,12 +68,13 @@ opening_message = ("Hello, I'm your combustion mechanism consultant.\n"
 opening_message_criteria = ("Now that the input parameters have been retrieved,\n"
                             "could you indicate which aspect of the reduced mechanism is important to you?\n"
                             "It can be related to the accuracy, the stability or the size of the mechanism.")
+opening_messag_iteration = ("Tell me what went wrong.")
 
 agent = Agent(model_id, [get_chat_prompt(), get_retrieve_prompt(schema_input, database_path),
                                   get_verify_prompt(schema_input), get_update_prompt(schema_input),
                                   get_fill_input_prompt(schema_input), get_router_prompt(),
-                                  get_fill_criteria_prompt(schema_criteria), get_select_mechanism_prompt()],
-                                  opening_message, opening_message_criteria, database_path, project_path)
+                                  get_fill_criteria_prompt(schema_criteria), get_select_mechanism_prompt(), get_refine_parameters_prompt()],
+                                  opening_message, opening_message_criteria, opening_messag_iteration, database_path, project_path)
 
 def main():
     agent.main()

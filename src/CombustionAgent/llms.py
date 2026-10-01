@@ -323,3 +323,32 @@ class SelectMechLLM(LLM):
         
 
         return reply_selection_mechanism
+
+class RefineParametersLLM(LLM):
+
+    def refine_parameters(self, message:str, history: str, current_input_parameters: InputParameters, current_criteria_parameters: CriteriaParameters, list_mechanisms: list[str], max_new_tokens: int = 10000) -> tuple[str, InputParameters]:#previously 500 
+
+        # Name of the mechanism + explanation
+        
+        current_criteria_parameters_json = current_criteria_parameters.model_dump_json(indent=2)
+
+        current_criteria_parameters_json = current_criteria_parameters.model_dump_json(indent=2)
+
+        message = f"""USER MESSAGE:
+                    {message}
+
+                    HISTORY:
+                    {history}
+        
+                    INPUT PARAMETERS:
+                    {current_criteria_parameters_json}
+                    
+                    CRITERIA PARAMETERS:
+                    {current_criteria_parameters_json}
+
+                    ..........
+                    """
+
+        reply_refine_parameters = self.generate(message, max_new_tokens=max_new_tokens, do_sample=True, enable_thinking=True) #true instead of false with llama
+        
+        return reply_refine_parameters

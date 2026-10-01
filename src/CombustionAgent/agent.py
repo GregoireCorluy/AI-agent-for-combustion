@@ -1,7 +1,7 @@
 import sys
 
 from .graph import AgentInputGraph
-from .llms import ConversationLLM, RetrievalLLM, VerifyLLM, UpdateLLM, FillInputLLM, RouterLLM, FillCriteriaLLM, SelectMechLLM
+from .llms import ConversationLLM, RetrievalLLM, VerifyLLM, UpdateLLM, FillInputLLM, RouterLLM, FillCriteriaLLM, SelectMechLLM, RefineParametersLLM
 from .model_manager import ModelManager
 from .project_manager import ProjectManager
 from .parameters import InputParameters, CriteriaParameters, FuelComponent
@@ -13,7 +13,7 @@ import questionary
 
 class Agent:
 
-    def __init__(self, model_name: str, model_preprompts: list[str], model_opening_message: str, model_opening_message_criteria: str, database_path: str, project_path: str) -> None:
+    def __init__(self, model_name: str, model_preprompts: list[str], model_opening_message: str, model_opening_message_criteria: str, model_opening_message_iteration: str, database_path: str, project_path: str) -> None:
 
         self.project_manager = ProjectManager(project_path)
         self.model_manager = ModelManager(model_name)
@@ -26,9 +26,11 @@ class Agent:
         self.LLM_router = RouterLLM(self.model_manager, model_preprompts[5])
         self.LLM_fill_criteria = FillCriteriaLLM(self.model_manager, model_preprompts[6])
         self.LLM_select_mechanism = SelectMechLLM(self.model_manager, model_preprompts[7])
+        self.LLM_refine_parameters = RefineParametersLLM(self.model_manager, model_preprompts[8])
 
         self.model_opening_message = model_opening_message
         self.model_opening_message_criteria = model_opening_message_criteria
+        self.model_opening_message_iteration = model_opening_message_iteration
 
         self.input_graph = AgentInputGraph(self, database_path)
 
@@ -37,12 +39,12 @@ class Agent:
         selected_project_ID, new_project = self.project_manager.select_project()
 
         if(new_project):
-            self.workflow()
+            self.workflow_first_interaction()
 
         else:
-            print("Start old project")
+            self.workflow_iteration()
 
-    def workflow(self) -> None:
+    def workflow_first_interaction(self) -> None:
 
         input_parameters, process_history_input = self.run_input_graph()
 
@@ -53,8 +55,6 @@ class Agent:
 
         logger.debug(f"Criteria parameters: {criteria_parameters}")
         logger.debug(f"Criteria process history:\n{process_history_criteria}")
-
-        # # self.model_manager.unload_model() #To do or not?
 
         # input_parameters = InputParameters(
         #     mechanism="Glarborg-2024-NH3",
@@ -92,7 +92,56 @@ class Agent:
             )
         )
 
+        self.model_manager.unload_model()
         sys.exit()
+
+    def workflow_iteration(self) -> None:
+
+        # Check empty projects and remove them?
+
+        # Present message with what has been done previous time
+        console.print(
+            Panel(
+                self.model_opening_message_iteration,
+                title="Agent",
+                border_style="cyan"
+            )
+        )
+
+        # Get input of user
+        user_input = questionary.text("You:").ask()
+        
+        if user_input is None or user_input.lower() in ["exit", "quit"]:
+            self.model_manager.unload_model()
+            sys.exit()
+
+        # Understand user message and change input parameters and/or criteria parameters
+
+        input_parameters, criteria_parameters = self.LLM_refine_parameters.refine_parameters() #ADD REQUIRED INPUTS
+
+        # Run DRGEP again
+
+        input_parameters = None
+
+        list_mechanisms = self.run_mechanism_reduction(input_parameters)
+
+        # Select best mechanism
+        criteria_parameters = None
+        reply_selection_mechanism = self.select_mechanism(criteria_parameters, list_mechanisms)
+
+        # Provide history of what has been done since then
+        console.print(
+        Panel(
+            reply_selection_mechanism,
+            title="Agent",
+            border_style="cyan"
+        )
+    )
+
+        # Check if better than previous mechanism
+
+        return None
+
 
     def run_input_graph(self) -> tuple[InputParameters, list[str]]:
 
