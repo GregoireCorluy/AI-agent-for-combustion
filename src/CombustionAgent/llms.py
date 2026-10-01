@@ -273,6 +273,8 @@ class FillCriteriaLLM(LLM):
 
         filled_criteria_parameters = CriteriaParameters.model_validate(data)
 
+        logger.debug(f"Critera parameters filled by LLM:\n{filled_criteria_parameters}")
+
         return filled_json, filled_criteria_parameters
 
 class SelectMechLLM(LLM):
@@ -283,7 +285,7 @@ class SelectMechLLM(LLM):
 
         current_criteria_parameters_json = current_criteria_parameters.model_dump_json(indent=2)
 
-        logger.debug(f"Criteria parameters (json):\n{current_criteria_parameters}")
+        logger.debug(f"Criteria parameters (json):\n{current_criteria_parameters_json}")
 
         # Load metrics given mechanism names
 
