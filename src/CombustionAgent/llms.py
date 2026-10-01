@@ -283,6 +283,8 @@ class SelectMechLLM(LLM):
 
         current_criteria_parameters_json = current_criteria_parameters.model_dump_json(indent=2)
 
+        logger.debug(f"Criteria parameters (json):\n{current_criteria_parameters}")
+
         # Load metrics given mechanism names
 
         mechanism_metrics = []
@@ -302,6 +304,8 @@ class SelectMechLLM(LLM):
             [m.model_dump() for m in mechanism_metrics],
             indent=2
         )
+
+        logger.debug(f"mechanism metrics (json):\n{mechanism_metrics_json}")
 
         message = f"""CRITERIA PARAMETERS:
                     {current_criteria_parameters_json}
