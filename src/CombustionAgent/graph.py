@@ -842,6 +842,8 @@ def match_mechanism_name(
         for name in mechanisms
     }
 
+    print(normalized_mechanisms)
+
     result = process.extractOne(
         normalized_user,
         normalized_mechanisms.keys(),
