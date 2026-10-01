@@ -1,7 +1,7 @@
 import json
 from CombustionAgent.agent import Agent
 from CombustionAgent.parameters import InputParameters, CriteriaParameters
-from CombustionAgent.prompts import get_chat_prompt, get_fill_input_prompt, get_retrieve_prompt, get_router_prompt, get_update_prompt, get_verify_prompt, get_fill_criteria_prompt, get_select_mechanism_prompt
+from CombustionAgent.prompts import get_chat_prompt, get_fill_input_prompt, get_retrieve_prompt, get_router_prompt, get_update_prompt, get_verify_prompt, get_fill_criteria_prompt, get_select_mechanism_prompt, get_refine_parameters_prompt
 
 # TO DO:
 # - Fourth model for suggestions
