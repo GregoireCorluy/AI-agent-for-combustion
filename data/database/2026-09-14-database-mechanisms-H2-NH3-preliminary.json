@@ -873,6 +873,46 @@
         "H2",
         "NH3"
       ]
+    },
+    {
+      "id": "NH3-H2-11",
+      "fuel": [
+        "H2",
+        "NH3"
+      ],
+      "oxidizer": [
+        "air"
+      ],
+      "application_regime": [
+        "autoignition",
+        "ignition",
+        "IDT"
+      ],
+      "temperature": {
+        "min": 1100,
+        "max": 1500,
+        "unit": "K"
+      },
+      "equivalence_ratio": {
+        "min": 0.5,
+        "max": 1.5
+      },
+      "pressure": {
+        "min": 1,
+        "max": 30,
+        "unit": "bar"
+      },
+      "mechanism": "C3MechLiteV4.0.1",
+      "retained_species": [
+        "H2",
+        "NH3",
+        "O2",
+        "N2"
+      ],
+      "target_species": [
+        "H2",
+        "NH3"
+      ]
     }
   ]
 }
