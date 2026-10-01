@@ -86,7 +86,7 @@ class Agent:
 
         console.print(
             Panel(
-                reply_selection_mechanism,
+                Markdown(reply_selection_mechanism),
                 title="Agent",
                 border_style="cyan"
             )
@@ -132,7 +132,7 @@ class Agent:
         # Provide history of what has been done since then
         console.print(
         Panel(
-            reply_selection_mechanism,
+            Markdown(reply_selection_mechanism),
             title="Agent",
             border_style="cyan"
         )
