@@ -46,40 +46,19 @@ class Agent:
 
     def workflow_first_interaction(self) -> None:
 
-        input_parameters, process_history_input = self.run_input_graph()
+        input_parameters, process_history_input, message_history_input, behind_the_scene_history_input = self.run_input_graph()
 
         logger.debug(f"Input parameters: {input_parameters}")
         logger.debug(f"Input process history:\n{process_history_input}")
 
-        criteria_parameters, process_history_criteria = self.run_criteria_graph()
+        criteria_parameters, process_history_criteria, message_history_criteria, behind_the_scene_history_criteria = self.run_criteria_graph()
 
         logger.debug(f"Criteria parameters: {criteria_parameters}")
         logger.debug(f"Criteria process history:\n{process_history_criteria}")
 
-        # input_parameters = InputParameters(
-        #     mechanism="Glarborg-2024-NH3",
-        #     application_regime=None,
-        #     fuel=[
-        #         FuelComponent(species="H2", fraction=1.0)
-        #     ],
-        #     pressure_start=0.5,
-        #     pressure_end=10.0,
-        #     pressure_unit="bar",
-        #     temperature_start=900.0,
-        #     temperature_end=2000.0,
-        #     temperature_unit="K",
-        #     equivalence_ratio_start=0.5,
-        #     equivalence_ratio_end=5.5,
-        #     retained_species=["H2", "N2", "O2"],
-        #     target_species=["H2"],
-        # )
-
         list_mechanisms = self.run_mechanism_reduction(input_parameters)
 
         criteria_parameters = CriteriaParameters(IDT_accuracy = 1, species_reduction = 0.5, reactions_reduction = 0.5)
-
-        # for testing the selection mechanism separately
-        #list_mechanisms = ["2026-09-29-ID005-Glarborg-2024-NH3-error5", "2026-09-29-ID004-Glarborg-2024-NH3-error5", "2026-09-29-ID003-Glarborg-2024-NH3-error20"]
 
         reply_selection_mechanism = self.select_mechanism(criteria_parameters, list_mechanisms)
         # Add to history?, Use user input?
@@ -91,6 +70,19 @@ class Agent:
                 border_style="cyan"
             )
         )
+
+        # Function or script to save all this
+        # all messages history
+        # input parameters
+        # criteria parameters
+        # behind the scene history (+range conditions?)
+        # list of mechanisms with their metrics
+        # Selection: how to handle the choice (exact know which one?)
+        # Create summary for the agent
+
+        # one json file for each iteration
+
+        # how to handle default ranges and steps in ranges, and default species?
 
         self.model_manager.unload_model()
         sys.exit()
@@ -140,6 +132,8 @@ class Agent:
 
         # Check if better than previous mechanism
 
+        # Save all history ......
+
         return None
 
 
@@ -151,6 +145,8 @@ class Agent:
                 "user_message": "",
                 "process_history": [],
                 "working_history": [],
+                "message_history": [],
+                "behind_the_scene_history": [],
                 "input_parameters": InputParameters(),
                 "route": None,
                 "response": None,
@@ -164,6 +160,7 @@ class Agent:
             )
         )
         state["process_history"].append(f"Agent: {self.model_opening_message}")
+        state["message_history"].append(f"Agent: {self.model_opening_message}")
 
         while True:
             try:
@@ -181,6 +178,7 @@ class Agent:
                 state["user_message"] = user_input
 
                 state["process_history"].append(f"User: {user_input}")
+                state["message_history"].append(f"User: {user_input}")
 
                 # Run the LangGraph
                 state = self.input_graph.app.invoke(state)
@@ -202,11 +200,13 @@ class Agent:
                 self.model_manager.unload_model()
                 sys.exit()
 
-        return state["input_parameters"], state["process_history"]
+        return state["input_parameters"], state["process_history"], state["message_history"], state["behind_the_scene_history"]
 
     def run_criteria_graph(self) -> tuple[CriteriaParameters, list[str]]:
 
         process_history = []
+        message_history = []
+        behind_the_scene_history = []
 
         console.print(
             Panel(
@@ -216,6 +216,7 @@ class Agent:
             )
         )
         process_history.append(f"Agent: {self.model_opening_message_criteria}")
+        message_history.append(f"Agent: {self.model_opening_message_criteria}")
  
         try:
             user_input = questionary.text("You:").ask()
@@ -230,12 +231,13 @@ class Agent:
             LLM_fill_criteria_reply, criteria_parameters = self.LLM_fill_criteria.fill_criteria(user_input)
 
             process_history.append(f"FILL CRITERIA PARAMETERS: the agent has filled the criteria parameters and has assigned the weights as follows: {criteria_parameters}")
+            behind_the_scene_history.append(f"FILL CRITERIA PARAMETERS: the agent has filled the criteria parameters and has assigned the weights as follows: {criteria_parameters}")
 
         except KeyboardInterrupt:
             self.model_manager.unload_model()
             sys.exit()
 
-        return criteria_parameters, process_history
+        return criteria_parameters, process_history, process_history, behind_the_scene_history
 
 
     def run_mechanism_reduction(self, input_parameters: InputParameters) -> list[str]:

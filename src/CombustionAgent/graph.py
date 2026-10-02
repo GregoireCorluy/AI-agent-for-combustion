@@ -94,7 +94,8 @@ class AgentInputGraph:
 
         return {
             "response": response,
-            "process_history": state["process_history"] + [f"Agent: {response}"]
+            "process_history": state["process_history"] + [f"Agent: {response}"],
+            "message_history": state["message_history"] + [f"Agent: {response}"]
         }
 
     def retrieve_node(self, state: AgentState):
@@ -185,7 +186,8 @@ class AgentInputGraph:
 
         return {"input_parameters": input_parameters,
                 "process_history": state["process_history"] + history_entries,
-                "working_history": state["working_history"] + history_entries}
+                "working_history": state["working_history"] + history_entries,
+                "behind_the_scene_history": state["behind_the_scene_history"] + history_entries}
 
     # def verify_node(self, state: AgentState):
     #     result = self.agent.verify(...)
@@ -205,7 +207,8 @@ class AgentInputGraph:
 
         return {"input_parameters": input_parameters_filled,
                 "process_history": state["process_history"] + [history_entry],
-                "working_history": state["working_history"] + [history_entry]}
+                "working_history": state["working_history"] + [history_entry],
+                "behind_the_scene_history": state["behind_the_scene_history"] + [history_entry]}
 
     def fill_input_node(self, state: AgentState):
 
@@ -275,7 +278,8 @@ class AgentInputGraph:
 
         return {"input_parameters": input_parameters_filled,
                 "process_history": state["process_history"] + history_entries,
-                "working_history": state["working_history"] + history_entries,}
+                "working_history": state["working_history"] + history_entries,
+                "behind_the_scene_history": state["behind_the_scene_history"] + history_entries}
     
     def route_after_router(self, state: AgentState):
         return state["route"]
