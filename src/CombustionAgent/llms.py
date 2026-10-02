@@ -156,6 +156,8 @@ class UpdateLLM(LLM):
 
         updated_json = self.generate(message, max_new_tokens=max_new_tokens, do_sample=True) #true instead of false for llama
 
+        print(f"Updated json:\n{updated_json}")
+
         data = json.loads(updated_json)
 
         updated_input_parameters = InputParameters.model_validate(data)

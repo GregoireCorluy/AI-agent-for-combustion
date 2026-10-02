@@ -220,6 +220,8 @@ class AgentInputGraph:
         
         logger.debug(f"Input parameters after LLM_fill_input: {input_parameters_filled}")
 
+        # Function to secure elements that the agent already retrieved (?)
+
         ########################################
         # Standardization/normalization/checks #
         ########################################
