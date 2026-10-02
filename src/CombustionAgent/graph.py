@@ -268,9 +268,21 @@ class AgentInputGraph:
             if old_value is None and filled[field_name] is not None
         ]
 
-        history_entry_fill = (
-                        f"FILL RESULT: The fields {newly_filled_fields} of the input parameters, that were missing from the user's message, have been filled based on the context provided by the user and combined with the retrieval from a combustion database. The fields {newly_filled_fields} were filled based on cases with ID {matched_cases_ID} from the combustion database. The agent should present the extracted parameters to the user and ask for confirmation."
-                    )
+        missing_fields = [
+                            field_name
+                            for field_name, value in input_parameters_filled.model_dump().items()
+                            if value is None and field_name != "application_regime"
+                        ]
+        
+        if not missing_fields:
+            history_entry_fill = (
+                            f"FILL RESULT: The fields {newly_filled_fields} of the input parameters, that were missing from the user's message, have been filled based on the context provided by the user and combined with the retrieval from a combustion database. The fields {newly_filled_fields} were filled based on cases with ID {matched_cases_ID} from the combustion database. The agent should present the extracted parameters to the user and ask for confirmation."
+                        )
+        else:
+            history_entry_fill = (
+                            f"FILL RESULT: The fields {newly_filled_fields} of the input parameters, that were missing from the user's message, have been filled based on the context provided by the user and combined with the retrieval from a combustion database. The fields {newly_filled_fields} were filled based on cases with ID {matched_cases_ID} from the combustion database."
+                            f"However, the fields {missing_fields} are still missing. The agent should ask the user which values to fill in for these fields."
+                        )
 
         history_entries.append(history_entry_fill)
 
@@ -845,8 +857,6 @@ def match_mechanism_name(
         normalize_name(name): name
         for name in mechanisms
     }
-
-    print(normalized_mechanisms)
 
     result = process.extractOne(
         normalized_user,
