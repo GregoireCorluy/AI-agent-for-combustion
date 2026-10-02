@@ -150,7 +150,48 @@ class Agent:
 
         # Select best mechanism
         criteria_parameters = None
-        reply_selection_mechanism = self.select_mechanism(criteria_parameters, list_mechanisms)
+        reply_selection_mechanism = self.select_mechanism(criteria_parameters, list_mechanisms) # Add extra context for the selection?
+
+        ########################################################################################################"
+        # 
+        # #list_mechanisms = self.run_mechanism_reduction(input_parameters)
+        list_mechanisms = ["2026-09-29-ID005-Glarborg-2024-NH3-error5", "2026-09-29-ID004-Glarborg-2024-NH3-error5", "2026-09-29-ID003-Glarborg-2024-NH3-error20"]
+        list_mechanisms_metrics_json = self.LLM_select_mechanism.get_mechanism_metrics_json(list_mechanisms)
+
+        # reply_selection_mechanism = self.select_mechanism(criteria_parameters, list_mechanisms)
+
+        ########################################################
+        # # Add to history?, Use user input?
+
+        input_parameters = InputParameters(
+            mechanism="Glarborg-2024-NH3",
+            application_regime=None,
+            fuel=[
+                FuelComponent(species="H2", fraction=1.0)
+            ],
+            pressure_start=0.5,
+            pressure_end=20.0,
+            pressure_unit="bar",
+            temperature_start=900.0,
+            temperature_end=1500.0,
+            temperature_unit="K",
+            equivalence_ratio_start=0.5,
+            equivalence_ratio_end=1.5,
+            retained_species=["H2", "N2", "O2"],
+            target_species=["H2"],
+        )
+
+        criteria_parameters = CriteriaParameters(IDT_accuracy = 1, species_reduction = 0.5, reactions_reduction = 0.5)
+
+        reply_selection_mechanism = "We selected this new mechanism for these other reasons..."
+
+        ##########################
+
+        messages_history = ["This didn't work"] #message_history_input + message_history_criteria
+        behind_the_scene_history = ["We refined the parameters as following"] #behind_the_scene_history_input + behind_the_scene_history_criteria
+
+        self.project_manager.save_data(messages_history, behind_the_scene_history, input_parameters, criteria_parameters, list_mechanisms_metrics_json, reply_selection_mechanism)
+        #######################################################################################################
 
         # Provide history of what has been done since then
         console.print(
