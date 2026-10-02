@@ -7,7 +7,7 @@ from rich.logging import RichHandler
 console = Console()
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(message)s",
     handlers=[RichHandler()]
 )
