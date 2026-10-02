@@ -85,7 +85,7 @@ class Agent:
 
         criteria_parameters = CriteriaParameters(IDT_accuracy = 1, species_reduction = 0.5, reactions_reduction = 0.5)
 
-        reply_selection_mechanism = ["We selected this mechanism for these reasons..."]
+        reply_selection_mechanism = "We selected this mechanism for these reasons..."
 
         ##########################
 
