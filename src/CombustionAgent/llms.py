@@ -291,23 +291,7 @@ class SelectMechLLM(LLM):
 
         # Load metrics given mechanism names
 
-        mechanism_metrics = []
-        for mechanism_name in list_mechanisms:
-            
-            with open(f"outputs/reduced_mechanisms/metrics/{mechanism_name}-metrics.pkl", "rb") as f:
-                metrics = pickle.load(f)
-
-            mechanism_metrics.append(
-                MechanismMetrics(
-                    mechanism=mechanism_name,
-                    **metrics
-                )
-            )
-
-        mechanism_metrics_json = json.dumps(
-            [m.model_dump() for m in mechanism_metrics],
-            indent=2
-        )
+        mechanism_metrics_json = self.get_mechanism_metrics_json(list_mechanisms)   
 
         logger.debug(f"mechanism metrics (json):\n{mechanism_metrics_json}")
 
@@ -325,6 +309,29 @@ class SelectMechLLM(LLM):
         
 
         return reply_selection_mechanism
+
+    def get_mechanism_metrics_json(self, list_mechanisms: list[str]):
+
+        mechanism_metrics = []
+
+        for mechanism_name in list_mechanisms:
+                    
+            with open(f"outputs/reduced_mechanisms/metrics/{mechanism_name}-metrics.pkl", "rb") as f:
+                metrics = pickle.load(f)
+
+            mechanism_metrics.append(
+                MechanismMetrics(
+                    mechanism=mechanism_name,
+                    **metrics
+                )
+            )
+
+        mechanism_metrics_json = json.dumps(
+            [m.model_dump() for m in mechanism_metrics],
+            indent=2
+        )
+
+        return mechanism_metrics_json
 
 class RefineParametersLLM(LLM):
 

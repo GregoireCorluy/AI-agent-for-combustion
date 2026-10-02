@@ -1,7 +1,9 @@
 import questionary
 import json
+import re
 from pathlib import Path
 from datetime import datetime
+from .parameters import InputParameters, CriteriaParameters
 
 
 class ProjectManager:
@@ -10,7 +12,11 @@ class ProjectManager:
         self.project_path = Path(project_path)
         self.project_path.mkdir(parents=True, exist_ok=True)
 
+        self.selected_project_path: Path | None = None
+
     def select_project(self):
+
+        # clean and remove empty projects
 
         projects = self.get_projects()
         new_project = False
@@ -45,6 +51,8 @@ class ProjectManager:
             selected_project_id = self.create_new_project(project_name)
 
             new_project = True
+
+        self.selected_project_path = self.project_path / selected_project_id
 
         return selected_project_id, new_project
 
@@ -106,3 +114,74 @@ class ProjectManager:
             json.dump(project_data, f, indent=4)
 
         return project_id
+
+    def save_data(self, messages_history: list[str],
+                  behind_the_scene_history: list[str],
+                  input_parameters: InputParameters,
+                  criteria_parameters: CriteriaParameters,
+                  mechanisms_metrics_json: str,
+                  selection_mechanism: str) -> None:
+
+
+
+        # Directory containing the project files
+        project_dir = Path(self.selected_project_path)
+
+        # Find existing iteration files
+        iteration_files = list(project_dir.glob("iteration_*.json"))
+
+        # Determine next iteration number
+        if not iteration_files:
+            iteration_number = 1
+        else:
+            iteration_numbers = []
+
+            for file in iteration_files:
+                match = re.fullmatch(r"iteration_(\d+)\.json", file.name)
+
+                if match:
+                    iteration_numbers.append(int(match.group(1)))
+
+            iteration_number = max(iteration_numbers, default=0) + 1
+
+        # Create iteration filename
+        iteration_filename = f"iteration_{iteration_number:03d}.json"
+        iteration_path = project_dir / iteration_filename
+
+        # Convert Pydantic models to dictionaries
+        input_parameters_dict = input_parameters.model_dump()
+        criteria_parameters_dict = criteria_parameters.model_dump()
+
+        # Convert mechanisms metrics from JSON string to Python object
+        mechanisms_metrics = json.loads(mechanisms_metrics_json)
+
+        # Create summary for the future agent
+        summary = {
+            "input_parameters": input_parameters_dict,
+            "criteria_parameters": criteria_parameters_dict,
+            "mechanisms": mechanisms_metrics,
+            "selection": selection_mechanism
+        }
+
+        # Create complete iteration data
+        iteration_data = {
+            "iteration": iteration_number,
+            "discussion": messages_history,
+            "behind_the_scene": behind_the_scene_history,
+            "input_parameters": input_parameters_dict,
+            "criteria_parameters": criteria_parameters_dict,
+            "mechanisms": mechanisms_metrics,
+            "selection": selection_mechanism,
+            "summary": summary
+        }
+
+        # Save JSON
+        with open(iteration_path, "w", encoding="utf-8") as f:
+            json.dump(
+                iteration_data,
+                f,
+                indent=4,
+                ensure_ascii=False
+            )
+
+        return None
