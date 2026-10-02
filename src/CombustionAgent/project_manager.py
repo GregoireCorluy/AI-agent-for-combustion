@@ -1,4 +1,5 @@
 import questionary
+import shutil
 import json
 import re
 from pathlib import Path
@@ -17,6 +18,7 @@ class ProjectManager:
     def select_project(self):
 
         # clean and remove empty projects
+        self.clean_projects()
 
         projects = self.get_projects()
         new_project = False
@@ -115,6 +117,24 @@ class ProjectManager:
 
         return project_id
 
+    def clean_projects(self):
+
+        for project_dir in self.project_path.iterdir():
+
+            if not project_dir.is_dir():
+                continue
+
+            project_file = project_dir / "project.json"
+
+            if not project_file.is_file():
+                continue
+
+            iteration_files = list(project_dir.glob("iteration_*.json"))
+
+            if not iteration_files:
+                shutil.rmtree(project_dir)
+
+
     def save_data(self, messages_history: list[str],
                   behind_the_scene_history: list[str],
                   input_parameters: InputParameters,
@@ -156,6 +176,7 @@ class ProjectManager:
         mechanisms_metrics = json.loads(mechanisms_metrics_json)
 
         # Create summary for the future agent
+        # Save what has been modified vs previous iteration?
         summary = {
             "input_parameters": input_parameters_dict,
             "criteria_parameters": criteria_parameters_dict,

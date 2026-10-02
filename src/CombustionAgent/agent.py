@@ -120,8 +120,6 @@ class Agent:
 
     def workflow_iteration(self) -> None:
 
-        # Check empty projects and remove them?
-
         # Present message with what has been done previous time
         # console.print(
         #     Panel(
@@ -206,7 +204,8 @@ class Agent:
 
         # Save all history ......
 
-        return None
+        self.model_manager.unload_model()
+        sys.exit()
 
 
     def run_input_graph(self) -> tuple[InputParameters, list[str]]:
