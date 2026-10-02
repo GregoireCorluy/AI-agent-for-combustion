@@ -123,34 +123,34 @@ class Agent:
         # Check empty projects and remove them?
 
         # Present message with what has been done previous time
-        console.print(
-            Panel(
-                self.model_opening_message_iteration,
-                title="Agent",
-                border_style="cyan"
-            )
-        )
+        # console.print(
+        #     Panel(
+        #         self.model_opening_message_iteration,
+        #         title="Agent",
+        #         border_style="cyan"
+        #     )
+        # )
 
-        # Get input of user
-        user_input = questionary.text("You:").ask()
+        # # Get input of user
+        # user_input = questionary.text("You:").ask()
         
-        if user_input is None or user_input.lower() in ["exit", "quit"]:
-            self.model_manager.unload_model()
-            sys.exit()
+        # if user_input is None or user_input.lower() in ["exit", "quit"]:
+        #     self.model_manager.unload_model()
+        #     sys.exit()
 
-        # Understand user message and change input parameters and/or criteria parameters
+        # # Understand user message and change input parameters and/or criteria parameters
 
-        input_parameters, criteria_parameters = self.LLM_refine_parameters.refine_parameters() #ADD REQUIRED INPUTS
+        # input_parameters, criteria_parameters = self.LLM_refine_parameters.refine_parameters() #ADD REQUIRED INPUTS
 
-        # Run DRGEP again
+        # # Run DRGEP again
 
-        input_parameters = None
+        # input_parameters = None
 
-        list_mechanisms = self.run_mechanism_reduction(input_parameters)
+        # list_mechanisms = self.run_mechanism_reduction(input_parameters)
 
-        # Select best mechanism
-        criteria_parameters = None
-        reply_selection_mechanism = self.select_mechanism(criteria_parameters, list_mechanisms) # Add extra context for the selection?
+        # # Select best mechanism
+        # criteria_parameters = None
+        # reply_selection_mechanism = self.select_mechanism(criteria_parameters, list_mechanisms) # Add extra context for the selection?
 
         ########################################################################################################"
         # 
