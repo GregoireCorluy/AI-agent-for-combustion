@@ -16,7 +16,7 @@ class AgentState(TypedDict):
     # History of messages
     message_history: list[str] | None
 
-    behing_the_scene_history: list[str] | None
+    behind_the_scene_history: list[str] | None
 
     # Current extracted parameters
     # None means that no parameters have been established yet
