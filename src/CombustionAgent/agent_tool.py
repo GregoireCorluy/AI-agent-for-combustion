@@ -21,6 +21,16 @@ from pymars.drgep import retrieve_next_ID
 
 logging.basicConfig(level=logging.INFO)
 
+def create_range(start, end, step):
+    if start == end:
+        return np.array([start])
+
+    values = np.arange(start, end, step)
+
+    if values[-1] != end:
+        values = np.append(values, end)
+
+    return values
 
 class AgentToolMechReduction():
 
@@ -68,12 +78,17 @@ class AgentToolMechReduction():
         model = self.path + mechanism + '.yaml'
         targets = input_parameters.target_species
         retained = input_parameters.retained_species
+        # add fuel, N2, Ar and He as default retained species (check if in mechanism)
 
         #Here for the moment can only handle one mixture
+        # sweep every 25% if two fuels defined
         fuel = [{component.species: component.fraction for component in input_parameters.fuel}] #Need to modify later to explore different fuel compositions
-        temperature_IDT = (np.array([temperature_start]) if temperature_start == temperature_end else np.linspace(temperature_start, temperature_end, 5))
-        pressure = (np.array([pressure_start]) if pressure_start == pressure_end else np.linspace(pressure_start, pressure_end, 5))
-        equivalence_ratio = (np.array([equivalence_ratio_start]) if equivalence_ratio_start == equivalence_ratio_end else np.linspace(equivalence_ratio_start, equivalence_ratio_end, 5))
+        # steps of 200K
+        temperature_IDT = create_range(temperature_start, temperature_end, 200)
+        #steps of 5 or 10 bar, is smaller just take two extrimities
+        pressure = create_range(pressure_start, pressure_end, 10)
+        # steps of 0.5 and take extrimities if less than that
+        equivalence_ratio = create_range(equivalence_ratio_start, equivalence_ratio_end, 0.5)
 
         print("\n" + "=" * 60)
         print("DRGEP REDUCTION CONDITIONS")

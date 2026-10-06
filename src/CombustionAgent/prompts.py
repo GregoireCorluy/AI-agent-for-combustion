@@ -1099,6 +1099,26 @@ def get_select_mechanism_prompt() -> str:
 def get_refine_parameters_prompt():
     return """
 
+        **first sketch**
+
+        Consider refining input parameters, refining criteria parameters
+        or select another mechanism from the previous turn
+
+        default temperature, pressure and equivalence ratio for certain fuel and application
+        Retrieve from database? (hydrogen, ammonia, hydrogen/ammonia, hydrogen/methane)
+
+        Default range of temperature is from 800 to 1600 K
+
+
+        Rules:
+        To refine the ranges, first temperature (most sensitive, especially lowerbound)
+        then refine equivalence ratio, then pressure
+
+        If simulation is not working, narrow conditions
+
+        Nbr of species too large, narrow conditions
+
+        Predictions too bad, widen conditions
 
         #Check if results make sense: metrics improved accordingly
         """
