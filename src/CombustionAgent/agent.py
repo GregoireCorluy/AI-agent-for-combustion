@@ -46,51 +46,51 @@ class Agent:
 
     def workflow_first_interaction(self) -> None:
 
-        # input_parameters, process_history_input, message_history_input, behind_the_scene_history_input = self.run_input_graph()
+        input_parameters, process_history_input, message_history_input, behind_the_scene_history_input = self.run_input_graph()
 
-        # logger.debug(f"Input parameters: {input_parameters}")
-        # logger.debug(f"Input process history:\n{process_history_input}")
+        logger.debug(f"Input parameters: {input_parameters}")
+        logger.debug(f"Input process history:\n{process_history_input}")
 
-        # criteria_parameters, process_history_criteria, message_history_criteria, behind_the_scene_history_criteria = self.run_criteria_graph()
+        criteria_parameters, process_history_criteria, message_history_criteria, behind_the_scene_history_criteria = self.run_criteria_graph()
 
-        # logger.debug(f"Criteria parameters: {criteria_parameters}")
-        # logger.debug(f"Criteria process history:\n{process_history_criteria}")
+        logger.debug(f"Criteria parameters: {criteria_parameters}")
+        logger.debug(f"Criteria process history:\n{process_history_criteria}")
 
-        #list_mechanisms = self.run_mechanism_reduction(input_parameters)
-        list_mechanisms = ["2026-09-29-ID005-Glarborg-2024-NH3-error5", "2026-09-29-ID004-Glarborg-2024-NH3-error5", "2026-09-29-ID003-Glarborg-2024-NH3-error20"]
+        list_mechanisms = self.run_mechanism_reduction(input_parameters)
+        # list_mechanisms = ["2026-09-29-ID005-Glarborg-2024-NH3-error5", "2026-09-29-ID004-Glarborg-2024-NH3-error5", "2026-09-29-ID003-Glarborg-2024-NH3-error20"]
         list_mechanisms_metrics_json = self.LLM_select_mechanism.get_mechanism_metrics_json(list_mechanisms)
 
-        # reply_selection_mechanism = self.select_mechanism(criteria_parameters, list_mechanisms)
+        reply_selection_mechanism = self.select_mechanism(criteria_parameters, list_mechanisms)
 
         ########################################################
         # # Add to history?, Use user input?
 
-        input_parameters = InputParameters(
-            mechanism="Glarborg-2024-NH3",
-            application_regime=None,
-            fuel=[
-                FuelComponent(species="H2", fraction=1.0)
-            ],
-            pressure_start=0.5,
-            pressure_end=10.0,
-            pressure_unit="bar",
-            temperature_start=900.0,
-            temperature_end=2000.0,
-            temperature_unit="K",
-            equivalence_ratio_start=0.5,
-            equivalence_ratio_end=5.5,
-            retained_species=["H2", "N2", "O2"],
-            target_species=["H2"],
-        )
+        # input_parameters = InputParameters(
+        #     mechanism="Glarborg-2024-NH3",
+        #     application_regime=None,
+        #     fuel=[
+        #         FuelComponent(species="H2", fraction=1.0)
+        #     ],
+        #     pressure_start=0.5,
+        #     pressure_end=10.0,
+        #     pressure_unit="bar",
+        #     temperature_start=900.0,
+        #     temperature_end=2000.0,
+        #     temperature_unit="K",
+        #     equivalence_ratio_start=0.5,
+        #     equivalence_ratio_end=5.5,
+        #     retained_species=["H2", "N2", "O2"],
+        #     target_species=["H2"],
+        # )
 
-        criteria_parameters = CriteriaParameters(IDT_accuracy = 1, species_reduction = 0.5, reactions_reduction = 0.5)
+        # criteria_parameters = CriteriaParameters(IDT_accuracy = 1, species_reduction = 0.5, reactions_reduction = 0.5)
 
-        reply_selection_mechanism = "We selected this mechanism for these reasons..."
+        # reply_selection_mechanism = "We selected this mechanism for these reasons..."
 
         ##########################
 
-        messages_history = ["Test"] #message_history_input + message_history_criteria
-        behind_the_scene_history = ["Test 2"] #behind_the_scene_history_input + behind_the_scene_history_criteria
+        messages_history = message_history_input + message_history_criteria
+        behind_the_scene_history = behind_the_scene_history_input + behind_the_scene_history_criteria
 
         self.project_manager.save_data(messages_history, behind_the_scene_history, input_parameters, criteria_parameters, list_mechanisms_metrics_json, reply_selection_mechanism)
 
@@ -101,17 +101,6 @@ class Agent:
                 border_style="cyan"
             )
         )
-
-        # Function or script to save all this
-        # all messages history
-        # input parameters
-        # criteria parameters
-        # behind the scene history (+range conditions?)
-        # list of mechanisms with their metrics
-        # Selection: how to handle the choice (exact know which one?)
-        # Create summary for the agent
-
-        # one json file for each iteration
 
         # how to handle default ranges and steps in ranges, and default species?
 
