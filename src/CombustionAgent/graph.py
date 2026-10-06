@@ -222,6 +222,7 @@ class AgentInputGraph:
 
         # Function to secure elements that the agent already retrieveds
         input_parameters_filled = self.preserve_existing_parameters(state["input_parameters"], input_parameters_filled)
+        logger.debug(f"Previously filled: {state['input_parameters']}\nInput parameters filled (after preservation function): {input_parameters_filled}")
 
         ########################################
         # Standardization/normalization/checks #
