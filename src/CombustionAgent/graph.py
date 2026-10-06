@@ -220,7 +220,8 @@ class AgentInputGraph:
         
         logger.debug(f"Input parameters after LLM_fill_input: {input_parameters_filled}")
 
-        # Function to secure elements that the agent already retrieved (?)
+        # Function to secure elements that the agent already retrieveds
+        input_parameters_filled = self.preserve_existing_parameters(state["input_parameters"], input_parameters_filled)
 
         ########################################
         # Standardization/normalization/checks #
@@ -1071,3 +1072,16 @@ def standardize_fuel_species(
         return None
 
     return SPECIES_ALIASES[matched_name]
+
+def preserve_existing_parameters(self,
+                                original: InputParameters,
+                                filled: InputParameters,
+                            ) -> InputParameters:
+
+    for field_name in original.model_fields:
+        original_value = getattr(original, field_name)
+
+        if original_value is not None:
+            setattr(filled, field_name, original_value)
+
+    return filled
