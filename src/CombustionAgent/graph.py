@@ -1074,8 +1074,7 @@ def standardize_fuel_species(
 
     return SPECIES_ALIASES[matched_name]
 
-def preserve_existing_parameters(self,
-                                original: InputParameters,
+def preserve_existing_parameters(original: InputParameters,
                                 filled: InputParameters,
                             ) -> InputParameters:
 
