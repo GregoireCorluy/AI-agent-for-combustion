@@ -569,7 +569,7 @@ class AgentInputGraph:
         # Add N2, He and Ar if present in the mechanism
         default_species.extend(
             species
-            for species in ["N2", "He", "Ar"]
+            for species in ["N2", "O2", "He", "Ar"]
             if species in mechanism_species
         )
 

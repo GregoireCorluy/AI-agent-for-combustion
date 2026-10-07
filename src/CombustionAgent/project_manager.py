@@ -206,3 +206,26 @@ class ProjectManager:
             )
 
         return None
+
+    def get_previous_summaries(self) -> list[dict]:
+
+        project_dir = Path(self.selected_project_path)
+
+        iteration_files = sorted(
+            project_dir.glob("iteration_*.json"),
+            key=lambda path: int(
+                re.fullmatch(r"iteration_(\d+)\.json", path.name).group(1)
+            )
+        )
+
+        summaries = []
+
+        for iteration_file in iteration_files:
+
+            with iteration_file.open("r", encoding="utf-8") as f:
+                iteration_data = json.load(f)
+
+            if "summary" in iteration_data:
+                summaries.append(iteration_data["summary"])
+
+        return summaries

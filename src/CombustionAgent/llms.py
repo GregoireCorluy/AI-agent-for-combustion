@@ -121,7 +121,7 @@ class RetrievalLLM(LLM):
 
 class UpdateLLM(LLM):
 
-    def update_information(self, message_update: str, current_input_parameters: InputParameters, max_new_tokens: int = 500) -> tuple[str, InputParameters]:
+    def update_information(self, message_update: str, current_input_parameters: InputParameters, max_new_tokens: int = 5000) -> tuple[str, InputParameters]:
 
         current_input_parameters_json = current_input_parameters.model_dump_json(indent=2)
 
@@ -291,6 +291,25 @@ class SelectMechLLM(LLM):
 
         return reply_selection_mechanism
 
+class RefineParametersLLM(LLM):
+
+    def refine_parameters(self, message:str, history_of_summaries: list[str], max_new_tokens: int = 10000) -> tuple[str, InputParameters]:#previously 500 
+
+        # Name of the mechanism + explanation
+
+        message = f"""USER MESSAGE:
+                    {message}
+
+                    Summary of prvious iterations:
+                    {history_of_summaries}
+
+                    ..........
+                    """
+
+        reply_refine_parameters = self.generate(message, max_new_tokens=max_new_tokens, do_sample=True, enable_thinking=True) #true instead of false with llama
+        
+        return reply_refine_parameters
+
     def get_mechanism_metrics_json(self, list_mechanisms: list[str]):
 
         mechanism_metrics = []
@@ -313,32 +332,3 @@ class SelectMechLLM(LLM):
         )
 
         return mechanism_metrics_json
-
-class RefineParametersLLM(LLM):
-
-    def refine_parameters(self, message:str, history: str, current_input_parameters: InputParameters, current_criteria_parameters: CriteriaParameters, list_mechanisms: list[str], max_new_tokens: int = 10000) -> tuple[str, InputParameters]:#previously 500 
-
-        # Name of the mechanism + explanation
-        
-        current_criteria_parameters_json = current_criteria_parameters.model_dump_json(indent=2)
-
-        current_criteria_parameters_json = current_criteria_parameters.model_dump_json(indent=2)
-
-        message = f"""USER MESSAGE:
-                    {message}
-
-                    HISTORY:
-                    {history}
-        
-                    INPUT PARAMETERS:
-                    {current_criteria_parameters_json}
-                    
-                    CRITERIA PARAMETERS:
-                    {current_criteria_parameters_json}
-
-                    ..........
-                    """
-
-        reply_refine_parameters = self.generate(message, max_new_tokens=max_new_tokens, do_sample=True, enable_thinking=True) #true instead of false with llama
-        
-        return reply_refine_parameters

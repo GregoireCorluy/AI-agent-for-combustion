@@ -113,39 +113,36 @@ class Agent:
     def workflow_iteration(self) -> None:
 
         # Present message with what has been done previous time
-        # console.print(
-        #     Panel(
-        #         self.model_opening_message_iteration,
-        #         title="Agent",
-        #         border_style="cyan"
-        #     )
-        # )
+        console.print(
+            Panel(
+                self.model_opening_message_iteration,
+                title="Agent",
+                border_style="cyan"
+            )
+        )
 
-        # # Get input of user
-        # user_input = questionary.text("You:").ask()
+        # Get input of user
+        user_input = questionary.text("You:").ask()
         
-        # if user_input is None or user_input.lower() in ["exit", "quit"]:
-        #     self.model_manager.unload_model()
-        #     sys.exit()
+        if user_input is None or user_input.lower() in ["exit", "quit"]:
+            self.model_manager.unload_model()
+            sys.exit()
 
-        # # Understand user message and change input parameters and/or criteria parameters
+        # Understand user message and change input parameters and/or criteria parameters
+        previous_summaries = self.project_manager.get_previous_summaries()
+        input_parameters, criteria_parameters = self.LLM_refine_parameters.refine_parameters(user_input, previous_summaries) #ADD REQUIRED INPUTS
 
-        # input_parameters, criteria_parameters = self.LLM_refine_parameters.refine_parameters() #ADD REQUIRED INPUTS
+        # Run DRGEP again
 
-        # # Run DRGEP again
+        list_mechanisms = self.run_mechanism_reduction(input_parameters)
 
-        # input_parameters = None
-
-        # list_mechanisms = self.run_mechanism_reduction(input_parameters)
-
-        # # Select best mechanism
-        # criteria_parameters = None
-        # reply_selection_mechanism = self.select_mechanism(criteria_parameters, list_mechanisms) # Add extra context for the selection?
+        # Select best mechanism
+        reply_selection_mechanism = self.select_mechanism(criteria_parameters, list_mechanisms) # Add extra context for the selection?
 
         ########################################################################################################"
         # 
         # #list_mechanisms = self.run_mechanism_reduction(input_parameters)
-        list_mechanisms = ["2026-09-29-ID005-Glarborg-2024-NH3-error5", "2026-09-29-ID004-Glarborg-2024-NH3-error5", "2026-09-29-ID003-Glarborg-2024-NH3-error20"]
+        # list_mechanisms = ["2026-09-29-ID005-Glarborg-2024-NH3-error5", "2026-09-29-ID004-Glarborg-2024-NH3-error5", "2026-09-29-ID003-Glarborg-2024-NH3-error20"]
         list_mechanisms_metrics_json = self.LLM_select_mechanism.get_mechanism_metrics_json(list_mechanisms)
 
         # reply_selection_mechanism = self.select_mechanism(criteria_parameters, list_mechanisms)
@@ -153,27 +150,27 @@ class Agent:
         ########################################################
         # # Add to history?, Use user input?
 
-        input_parameters = InputParameters(
-            mechanism="Glarborg-2024-NH3",
-            application_regime=None,
-            fuel=[
-                FuelComponent(species="H2", fraction=1.0)
-            ],
-            pressure_start=0.5,
-            pressure_end=20.0,
-            pressure_unit="bar",
-            temperature_start=900.0,
-            temperature_end=1500.0,
-            temperature_unit="K",
-            equivalence_ratio_start=0.5,
-            equivalence_ratio_end=1.5,
-            retained_species=["H2", "N2", "O2"],
-            target_species=["H2"],
-        )
+        # input_parameters = InputParameters(
+        #     mechanism="Glarborg-2024-NH3",
+        #     application_regime=None,
+        #     fuel=[
+        #         FuelComponent(species="H2", fraction=1.0)
+        #     ],
+        #     pressure_start=0.5,
+        #     pressure_end=20.0,
+        #     pressure_unit="bar",
+        #     temperature_start=900.0,
+        #     temperature_end=1500.0,
+        #     temperature_unit="K",
+        #     equivalence_ratio_start=0.5,
+        #     equivalence_ratio_end=1.5,
+        #     retained_species=["H2", "N2", "O2"],
+        #     target_species=["H2"],
+        # )
 
-        criteria_parameters = CriteriaParameters(IDT_accuracy = 1, species_reduction = 0.5, reactions_reduction = 0.5)
+        # criteria_parameters = CriteriaParameters(IDT_accuracy = 1, species_reduction = 0.5, reactions_reduction = 0.5)
 
-        reply_selection_mechanism = "We selected this new mechanism for these other reasons..."
+        # reply_selection_mechanism = "We selected this new mechanism for these other reasons..."
 
         ##########################
 
