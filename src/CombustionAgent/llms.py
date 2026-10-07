@@ -291,27 +291,6 @@ class SelectMechLLM(LLM):
 
         return reply_selection_mechanism
 
-class RefineParametersLLM(LLM):
-
-    def refine_parameters(self, message:str, history_of_summaries: list[str], max_new_tokens: int = 10000) -> tuple[str, InputParameters]:#previously 500 
-
-        # Name of the mechanism + explanation
-
-        message = f"""USER MESSAGE:
-                    {message}
-
-                    Summary of prvious iterations:
-                    {history_of_summaries}
-
-                    Refine the input parameters and criteria parameters according to your instructions.
-                    """
-
-        reply_refine_parameters = self.generate(message, max_new_tokens=max_new_tokens, do_sample=True, enable_thinking=True) #true instead of false with llama
-
-        result_dict = json.loads(reply_refine_parameters)
-
-        return RefinementResult.model_validate(result_dict)
-
     def get_mechanism_metrics_json(self, list_mechanisms: list[str]):
 
         mechanism_metrics = []
@@ -334,3 +313,24 @@ class RefineParametersLLM(LLM):
         )
 
         return mechanism_metrics_json
+
+class RefineParametersLLM(LLM):
+
+    def refine_parameters(self, message:str, history_of_summaries: list[str], max_new_tokens: int = 10000) -> tuple[str, InputParameters]:#previously 500 
+
+        # Name of the mechanism + explanation
+
+        message = f"""USER MESSAGE:
+                    {message}
+
+                    Summary of prvious iterations:
+                    {history_of_summaries}
+
+                    Refine the input parameters and criteria parameters according to your instructions.
+                    """
+
+        reply_refine_parameters = self.generate(message, max_new_tokens=max_new_tokens, do_sample=True, enable_thinking=True) #true instead of false with llama
+
+        result_dict = json.loads(reply_refine_parameters)
+
+        return RefinementResult.model_validate(result_dict)
