@@ -179,7 +179,13 @@ class AgentToolMechReduction():
 
 def create_fuel_sweep(fuel: list[FuelComponent]) -> list[dict[str, float]]:
     if len(fuel) != 2:
-        return [{component.species: component.fraction for component in fuel}]
+        return [
+            {
+                component.species: component.fraction
+                for component in fuel
+                if component.fraction != 0
+            }
+        ]
 
     component_1, component_2 = fuel
 
@@ -198,8 +204,12 @@ def create_fuel_sweep(fuel: list[FuelComponent]) -> list[dict[str, float]]:
 
     return [
         {
-            component_1.species: fraction_1,
-            component_2.species: fraction_2,
+            species: fraction
+            for species, fraction in [
+                (component_1.species, fraction_1),
+                (component_2.species, fraction_2),
+            ]
+            if fraction != 0 # show species only if fraction different from 0
         }
         for fraction_1, fraction_2 in sweep
     ]
