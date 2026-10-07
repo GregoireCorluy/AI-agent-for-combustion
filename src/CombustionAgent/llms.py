@@ -1,5 +1,5 @@
 from .model_manager import ModelManager
-from .parameters import InputParameters, CriteriaParameters, MechanismMetrics
+from .parameters import InputParameters, CriteriaParameters, MechanismMetrics, RefinementResult
 from .database import MechanismDatabase
 from .console import logger
 import json
@@ -303,12 +303,14 @@ class RefineParametersLLM(LLM):
                     Summary of prvious iterations:
                     {history_of_summaries}
 
-                    ..........
+                    Refine the input parameters and criteria parameters according to your instructions.
                     """
 
         reply_refine_parameters = self.generate(message, max_new_tokens=max_new_tokens, do_sample=True, enable_thinking=True) #true instead of false with llama
-        
-        return reply_refine_parameters
+
+        result_dict = json.loads(reply_refine_parameters)
+
+        return RefinementResult.model_validate(result_dict)
 
     def get_mechanism_metrics_json(self, list_mechanisms: list[str]):
 

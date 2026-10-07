@@ -62,3 +62,9 @@ class MechanismMetrics(BaseModel):
     maximum_idt_error_percent: float
     remaining_species_percent: float
     remaining_reactions_percent: float
+
+class RefinementResult(BaseModel):
+    diagnosis: str
+    reasoning: str
+    input_parameters: InputParameters
+    criteria_parameters: CriteriaParameters

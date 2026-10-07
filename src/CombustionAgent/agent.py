@@ -5,7 +5,7 @@ from .llms import ConversationLLM, RetrievalLLM, UpdateLLM, FillInputLLM, Router
 from CombustionAgent.prompts import get_chat_prompt, get_fill_input_prompt, get_retrieve_prompt, get_router_prompt, get_update_prompt, get_fill_criteria_prompt, get_select_mechanism_prompt, get_refine_parameters_prompt
 from .model_manager import ModelManager
 from .project_manager import ProjectManager
-from .parameters import InputParameters, CriteriaParameters, FuelComponent
+from .parameters import InputParameters, CriteriaParameters, RefinementResult
 from .agent_tool import AgentToolMechReduction
 from .console import console, logger
 from rich.markdown import Markdown
@@ -21,6 +21,7 @@ class Agent:
 
         schema_input = InputParameters.model_json_schema()
         schema_criteria = CriteriaParameters.model_json_schema()
+        schema_refinement = RefinementResult.model_json_schema()
         
         self.LLM_conversation = ConversationLLM(self.model_manager, get_chat_prompt(), model_opening_message)
         self.LLM_retrieval = RetrievalLLM(self.model_manager, get_retrieve_prompt(schema_input, database_path))
@@ -29,7 +30,7 @@ class Agent:
         self.LLM_router = RouterLLM(self.model_manager, get_router_prompt())
         self.LLM_fill_criteria = FillCriteriaLLM(self.model_manager, get_fill_criteria_prompt(schema_criteria))
         self.LLM_select_mechanism = SelectMechLLM(self.model_manager, get_select_mechanism_prompt())
-        self.LLM_refine_parameters = RefineParametersLLM(self.model_manager, get_refine_parameters_prompt())
+        self.LLM_refine_parameters = RefineParametersLLM(self.model_manager, get_refine_parameters_prompt(schema_refinement))
 
         self.model_opening_message = model_opening_message
         self.model_opening_message_criteria = model_opening_message_criteria
@@ -60,37 +61,9 @@ class Agent:
         logger.debug(f"Criteria process history:\n{process_history_criteria}")
 
         list_mechanisms = self.run_mechanism_reduction(input_parameters)
-        # list_mechanisms = ["2026-09-29-ID005-Glarborg-2024-NH3-error5", "2026-09-29-ID004-Glarborg-2024-NH3-error5", "2026-09-29-ID003-Glarborg-2024-NH3-error20"]
         list_mechanisms_metrics_json = self.LLM_select_mechanism.get_mechanism_metrics_json(list_mechanisms)
 
         reply_selection_mechanism = self.select_mechanism(criteria_parameters, list_mechanisms)
-
-        ########################################################
-        # # Add to history?, Use user input?
-
-        # input_parameters = InputParameters(
-        #     mechanism="Glarborg-2024-NH3",
-        #     application_regime=None,
-        #     fuel=[
-        #         FuelComponent(species="H2", fraction=1.0)
-        #     ],
-        #     pressure_start=0.5,
-        #     pressure_end=10.0,
-        #     pressure_unit="bar",
-        #     temperature_start=900.0,
-        #     temperature_end=2000.0,
-        #     temperature_unit="K",
-        #     equivalence_ratio_start=0.5,
-        #     equivalence_ratio_end=5.5,
-        #     retained_species=["H2", "N2", "O2"],
-        #     target_species=["H2"],
-        # )
-
-        # criteria_parameters = CriteriaParameters(IDT_accuracy = 1, species_reduction = 0.5, reactions_reduction = 0.5)
-
-        # reply_selection_mechanism = "We selected this mechanism for these reasons..."
-
-        ##########################
 
         messages_history = message_history_input + message_history_criteria
         behind_the_scene_history = behind_the_scene_history_input + behind_the_scene_history_criteria
@@ -130,7 +103,13 @@ class Agent:
 
         # Understand user message and change input parameters and/or criteria parameters
         previous_summaries = self.project_manager.get_previous_summaries()
-        input_parameters, criteria_parameters = self.LLM_refine_parameters.refine_parameters(user_input, previous_summaries) #ADD REQUIRED INPUTS
+        reply_refine_parameters = self.LLM_refine_parameters.refine_parameters(user_input, previous_summaries) #ADD REQUIRED INPUTS
+        logger.debug(f"LLM refine parameters reply:\n{reply_refine_parameters}")
+
+        diagnosis = reply_refine_parameters.diagnosis
+        reasoning = reply_refine_parameters.reasoning
+        input_parameters = reply_refine_parameters.input_parameters
+        criteria_parameters = reply_refine_parameters.criteria_parameters
 
         # Run DRGEP again
 
@@ -138,44 +117,12 @@ class Agent:
 
         # Select best mechanism
         reply_selection_mechanism = self.select_mechanism(criteria_parameters, list_mechanisms) # Add extra context for the selection?
-
-        ########################################################################################################"
-        # 
-        # #list_mechanisms = self.run_mechanism_reduction(input_parameters)
-        # list_mechanisms = ["2026-09-29-ID005-Glarborg-2024-NH3-error5", "2026-09-29-ID004-Glarborg-2024-NH3-error5", "2026-09-29-ID003-Glarborg-2024-NH3-error20"]
+        
+        ########################################################################################################
         list_mechanisms_metrics_json = self.LLM_select_mechanism.get_mechanism_metrics_json(list_mechanisms)
 
-        # reply_selection_mechanism = self.select_mechanism(criteria_parameters, list_mechanisms)
-
-        ########################################################
-        # # Add to history?, Use user input?
-
-        # input_parameters = InputParameters(
-        #     mechanism="Glarborg-2024-NH3",
-        #     application_regime=None,
-        #     fuel=[
-        #         FuelComponent(species="H2", fraction=1.0)
-        #     ],
-        #     pressure_start=0.5,
-        #     pressure_end=20.0,
-        #     pressure_unit="bar",
-        #     temperature_start=900.0,
-        #     temperature_end=1500.0,
-        #     temperature_unit="K",
-        #     equivalence_ratio_start=0.5,
-        #     equivalence_ratio_end=1.5,
-        #     retained_species=["H2", "N2", "O2"],
-        #     target_species=["H2"],
-        # )
-
-        # criteria_parameters = CriteriaParameters(IDT_accuracy = 1, species_reduction = 0.5, reactions_reduction = 0.5)
-
-        # reply_selection_mechanism = "We selected this new mechanism for these other reasons..."
-
-        ##########################
-
-        messages_history = ["This didn't work"] #message_history_input + message_history_criteria
-        behind_the_scene_history = ["We refined the parameters as following"] #behind_the_scene_history_input + behind_the_scene_history_criteria
+        messages_history = [user_input]
+        behind_the_scene_history = [diagnosis, reasoning]
 
         self.project_manager.save_data(messages_history, behind_the_scene_history, input_parameters, criteria_parameters, list_mechanisms_metrics_json, reply_selection_mechanism)
         #######################################################################################################
