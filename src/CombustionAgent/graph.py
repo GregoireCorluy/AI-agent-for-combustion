@@ -214,6 +214,8 @@ class AgentInputGraph:
         history_entries.extend(message_species_validation)
 
         # add default species in retained species
+        input_parameters, message_add_default_retained_species = self.add_default_retained_species(input_parameters)
+        history_entries.extend(message_add_default_retained_species)
 
         missing_fields = [field_name
                             for field_name, value in input_parameters.model_dump().items()
@@ -536,6 +538,59 @@ class AgentInputGraph:
                         f"{input_parameters.pressure_start}-"
                         f"{input_parameters.pressure_end} bar."
                     )
+
+        return input_parameters, messages
+
+    def add_default_retained_species(self,
+                                        input_parameters: InputParameters,
+                                    ) -> tuple[InputParameters, list[str]]:
+
+        messages = []
+
+        if (
+            input_parameters.retained_species is None
+            or input_parameters.mechanism is None
+            or input_parameters.fuel is None
+        ):
+            return input_parameters, messages
+
+        path = "data/detailed_mechanisms/"
+        gas = ct.Solution(path + input_parameters.mechanism + ".yaml")
+        mechanism_species = set(gas.species_names)
+
+        original_species = list(input_parameters.retained_species)
+
+        # Add fuel species
+        default_species = [
+            component.species
+            for component in input_parameters.fuel
+        ]
+
+        # Add N2, He and Ar if present in the mechanism
+        default_species.extend(
+            species
+            for species in ["N2", "He", "Ar"]
+            if species in mechanism_species
+        )
+
+        # Add defaults while preserving existing order and avoiding duplicates
+        retained_species = list(dict.fromkeys(
+            input_parameters.retained_species + default_species
+        ))
+
+        input_parameters.retained_species = retained_species
+
+        # Only report if the field actually changed
+        if retained_species != original_species:
+            added_species = [
+                species
+                for species in retained_species
+                if species not in original_species
+            ]
+
+            messages.append(
+                f"Added default species to retained species: {added_species}"
+            )
 
         return input_parameters, messages
 
