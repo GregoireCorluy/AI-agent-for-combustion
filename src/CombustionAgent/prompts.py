@@ -1308,16 +1308,16 @@ def get_refine_parameters_prompt(schema: dict):
 
             The JSON must have exactly the following structure:
 
-            {
-                "diagnosis": "Short explanation of the problem.",
-                "reasoning": "Explanation of why the parameters should be refined this way.",
-                "input_parameters": {
-                    ...
-                },
-                "criteria_parameters": {
-                    ...
-                }
-            }
+            {{
+                'diagnosis': 'Short explanation of the problem.',
+                'reasoning': 'Explanation of why the parameters should be refined this way.',
+                'input_parameters': {{
+                    [all fields defined by InputParameters]
+                }},
+                'criteria_parameters': {{
+                    [all fields defined by CriteriaParameters]
+                }}
+            }}
 
             The JSON object must follow this schema:
             
