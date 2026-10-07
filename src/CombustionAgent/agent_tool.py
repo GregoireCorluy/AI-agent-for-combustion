@@ -14,7 +14,7 @@ import pymars.pymars as pymars
 import pymars.drgep as drgep
 import pymars.pfa as pfa
 import pymars.drg as drg
-from CombustionAgent.parameters import InputParameters
+from .parameters import InputParameters, FuelComponent
 from pymars.drgep import retrieve_next_ID
 
 ## Pymars log
@@ -82,7 +82,7 @@ class AgentToolMechReduction():
 
         #Here for the moment can only handle one mixture
         # sweep every 25% if two fuels defined
-        fuel = [{component.species: component.fraction for component in input_parameters.fuel}] #Need to modify later to explore different fuel compositions
+        fuel = create_fuel_sweep(input_parameters.fuel) #[{component.species: component.fraction for component in input_parameters.fuel}] #Need to modify later to explore different fuel compositions
         # steps of 200K
         temperature_IDT = create_range(temperature_start, temperature_end, 200)
         #steps of 5 or 10 bar, is smaller just take two extrimities
@@ -176,3 +176,30 @@ class AgentToolMechReduction():
                             self.error_limit, self.target_species, self.safe_species, threshold_upper=None, num_threads=self.num_threads, path='temp/', id = ID)
 
         return list_mechanisms
+
+def create_fuel_sweep(fuel: list[FuelComponent]) -> list[dict[str, float]]:
+    if len(fuel) != 2:
+        return [{component.species: component.fraction for component in fuel}]
+
+    component_1, component_2 = fuel
+
+    sweep = [
+        (1.00, 0.00),
+        (0.75, 0.25),
+        (0.50, 0.50),
+        (0.25, 0.75),
+        (0.00, 1.00),
+    ]
+
+    user_fraction = (component_1.fraction, component_2.fraction)
+
+    if user_fraction not in sweep:
+        sweep.append(user_fraction)
+
+    return [
+        {
+            component_1.species: fraction_1,
+            component_2.species: fraction_2,
+        }
+        for fraction_1, fraction_2 in sweep
+    ]
