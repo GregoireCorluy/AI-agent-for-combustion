@@ -147,67 +147,6 @@ def get_retrieve_prompt(schema: dict, database_path: str) -> str:
             }}
             """
 
-def get_verify_prompt(schema: dict) -> str:
-    return f"""
-            You are a critical verification agent for a combustion simulation assistant.
-            Treat the message of the user as the ground truth and be critical with what the json contains.
-
-            Your task is to compare:
-
-            1. The original message written by the user.
-            2. The parameters extracted by another LLM.
-
-            Determine whether the extracted parameters are consistent with the information explicitly provided by the user.
-
-            Verification rules:
-            - Check every parameter individually.
-            - Only consider information explicitly stated by the user.
-            - Do not add information that the user did not provide.
-            - Do not assume missing values.
-            - Check that numerical values are copied correctly.
-            - Check that units are copied correctly.
-            - Check that the value and its unit are consistent.
-            - Check that the retriever did not convert the numerical values, keep the exact values provided by the user.
-            - Pay particular attention to temperature and pressure units.
-            - If the extracted parameter is null and the user did not provide that parameter, this is correct.
-            - If the extracted parameter contains information that the user did not provide, this is incorrect.
-            - If a parameter differs from what the user explicitly stated, this is incorrect.
-            - If no information is provided and the current value is null, consider it as correct and keep it null.
-
-            FUEL EXCEPTION:
-
-            The fuel field is an exception to the rule about not assuming missing values.
-
-            - If the user explicitly provides one fuel species but does not provide a fraction, assume a fraction of 1.0 for that species.
-            - If the user explicitly provides multiple fuel species but does not provide their fractions, assume equal fractions among the provided species.
-            - For N explicitly provided fuel species, the assumed fraction is 1/N for each species.
-            - For example:
-                - H2 → fuel: [{{"species: "H2", "fraction": 1.0}}]
-                - NH3 + H2 → fuel: [{{"species: "NH3", "fraction": 0.5}}, {{"species: "H2", "fraction": 0.5}}]
-                - NH3 + H2 + CH4 → fuel: [{{"species: "NH3", "fraction": 0.333}}, {{"species: "H2", "fraction": 0.333}}, {{"species: "CH4", "fraction": 0.333}}]
-            - This exception applies only when the user provides the fuel species but does not provide their fractions.
-            - If the user explicitly provides fuel fractions, those fractions must be copied exactly and must not be replaced by assumed equal fractions.
-            - Do not add fuel species that were not explicitly provided by the user.
-            - The order of the fuel species must not be changed.
-            - Do not apply this assumption to any parameter other than fuel fractions.
-
-            If everything is correct, state that no modification is required.
-
-            If something is incorrect, clearly identify:
-            - which parameter is incorrect,
-            - what the extracted value is,
-            - what the user actually stated,
-            - what the corrected value should be.
-
-            Do not recommend values that the user did not provide.
-
-            The JSON object must follow this schema:
-            
-            {json.dumps(schema, indent=2)}
-
-            Return a concise verification report.
-            """
-
 def get_update_prompt(schema: dict) -> str:
     return f"""
             You are a JSON parameter update agent for a combustion simulation assistant.

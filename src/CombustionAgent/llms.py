@@ -119,25 +119,6 @@ class RetrievalLLM(LLM):
 
         return LLM_reply, input_parameters
 
-class VerifyLLM(LLM):
-
-    def verify_information(self, user_message: str, input_parameters: InputParameters, max_new_tokens: int = 1000) -> str:
-
-        input_parameters_json = input_parameters.model_dump_json(indent=2)
-
-        message = f"""ORIGINAL USER MESSAGE:
-                        {user_message}
-
-                        EXTRACTED PARAMETERS:
-                        {input_parameters_json}
-
-                        Verify whether the extracted parameters accurately represent the information
-                        explicitly provided in the original user message."""
-
-        LLM_reply = self.generate(message, max_new_tokens = max_new_tokens, do_sample=True) #true instead of false
-
-        return LLM_reply
-
 class UpdateLLM(LLM):
 
     def update_information(self, message_update: str, current_input_parameters: InputParameters, max_new_tokens: int = 500) -> tuple[str, InputParameters]:

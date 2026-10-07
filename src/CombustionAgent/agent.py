@@ -1,7 +1,8 @@
 import sys
 
 from .graph import AgentInputGraph
-from .llms import ConversationLLM, RetrievalLLM, VerifyLLM, UpdateLLM, FillInputLLM, RouterLLM, FillCriteriaLLM, SelectMechLLM, RefineParametersLLM
+from .llms import ConversationLLM, RetrievalLLM, UpdateLLM, FillInputLLM, RouterLLM, FillCriteriaLLM, SelectMechLLM, RefineParametersLLM
+from CombustionAgent.prompts import get_chat_prompt, get_fill_input_prompt, get_retrieve_prompt, get_router_prompt, get_update_prompt, get_fill_criteria_prompt, get_select_mechanism_prompt, get_refine_parameters_prompt
 from .model_manager import ModelManager
 from .project_manager import ProjectManager
 from .parameters import InputParameters, CriteriaParameters, FuelComponent
@@ -13,20 +14,22 @@ import questionary
 
 class Agent:
 
-    def __init__(self, model_name: str, model_preprompts: list[str], model_opening_message: str, model_opening_message_criteria: str, model_opening_message_iteration: str, database_path: str, project_path: str) -> None:
+    def __init__(self, model_name: str, model_opening_message: str, model_opening_message_criteria: str, model_opening_message_iteration: str, database_path: str, project_path: str) -> None:
 
         self.project_manager = ProjectManager(project_path)
         self.model_manager = ModelManager(model_name)
+
+        schema_input = InputParameters.model_json_schema()
+        schema_criteria = CriteriaParameters.model_json_schema()
         
-        self.LLM_conversation = ConversationLLM(self.model_manager, model_preprompts[0], model_opening_message)
-        self.LLM_retrieval = RetrievalLLM(self.model_manager, model_preprompts[1])
-        self.LLM_verification = VerifyLLM(self.model_manager, model_preprompts[2])
-        self.LLM_update = UpdateLLM(self.model_manager, model_preprompts[3])
-        self.LLM_fill_input = FillInputLLM(self.model_manager, model_preprompts[4], database_path)
-        self.LLM_router = RouterLLM(self.model_manager, model_preprompts[5])
-        self.LLM_fill_criteria = FillCriteriaLLM(self.model_manager, model_preprompts[6])
-        self.LLM_select_mechanism = SelectMechLLM(self.model_manager, model_preprompts[7])
-        self.LLM_refine_parameters = RefineParametersLLM(self.model_manager, model_preprompts[8])
+        self.LLM_conversation = ConversationLLM(self.model_manager, get_chat_prompt(), model_opening_message)
+        self.LLM_retrieval = RetrievalLLM(self.model_manager, get_retrieve_prompt(schema_input, database_path))
+        self.LLM_update = UpdateLLM(self.model_manager, get_update_prompt(schema_input))
+        self.LLM_fill_input = FillInputLLM(self.model_manager, get_fill_input_prompt(schema_input), database_path)
+        self.LLM_router = RouterLLM(self.model_manager, get_router_prompt())
+        self.LLM_fill_criteria = FillCriteriaLLM(self.model_manager, get_fill_criteria_prompt(schema_criteria))
+        self.LLM_select_mechanism = SelectMechLLM(self.model_manager, get_select_mechanism_prompt())
+        self.LLM_refine_parameters = RefineParametersLLM(self.model_manager, get_refine_parameters_prompt())
 
         self.model_opening_message = model_opening_message
         self.model_opening_message_criteria = model_opening_message_criteria

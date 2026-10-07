@@ -1,12 +1,14 @@
 from .state import AgentState
-from langgraph.graph import StateGraph, START, END
 from .parameters import InputParameters, FuelComponent
+from .database import MechanismDatabase
+from .console import console, logger
+
 import re
 import unicodedata
 from rapidfuzz import process, fuzz
-from .database import MechanismDatabase
 import cantera as ct
-from .console import console, logger
+from langgraph.graph import StateGraph, START, END
+from copy import deepcopy
 
 class AgentInputGraph:
 
@@ -23,6 +25,7 @@ class AgentInputGraph:
         #self.graph.add_node("verify", self.verify_node)
         self.graph.add_node("update", self.update_node)
         self.graph.add_node("fill", self.fill_input_node)
+        self.graph.add_node("standardize", self.standardize_input_node)
 
         self.graph.add_edge(START, "router")
         self.graph.add_conditional_edges(
@@ -35,17 +38,17 @@ class AgentInputGraph:
                                         "END": END,
                                     }
                                 )
+        self.graph.add_conditional_edges(   "standardize",
+                                            self.route_after_standardize,
+                                            {
+                                                "chat": "chat",
+                                                "fill": "fill",
+                                            }
+                                        )
+        self.graph.add_edge("retrieve", "standardize")
+        self.graph.add_edge("fill", "standardize")
+        self.graph.add_edge("update", "standardize")
         self.graph.add_edge("chat", END) # End the graph at the end of every iteration, waiting on the answer of the user
-        self.graph.add_edge("fill", "chat")
-        self.graph.add_edge("update", "chat")
-        self.graph.add_conditional_edges(
-                                    "retrieve",
-                                    self.route_after_retrieve,
-                                    {
-                                        "chat": "chat",
-                                        "fill": "fill",
-                                    }
-                                )
 
         self.app = self.graph.compile()
 
@@ -112,20 +115,77 @@ class AgentInputGraph:
         # Provide the information of which input parameters retrieved
         history_entries.extend([f"Retrieved parameters from the user input: {input_parameters}"])
 
-        # LLM_verification_reply = self.agent.LLM_verification.verify_information(state["user_message"], input_parameters)
+        return {"input_parameters": input_parameters,
+                "process_history": state["process_history"] + history_entries,
+                "working_history": state["working_history"] + history_entries,
+                "behind_the_scene_history": state["behind_the_scene_history"] + history_entries}
 
-        # logger.debug(f"\nVerification by the agent: {LLM_verification_reply}")
+    def update_node(self, state: AgentState):
 
-        # LLM_update_reply, input_parameters_updated = self.agent.LLM_update.update_information(LLM_verification_reply, input_parameters)
+        console.print("[bold cyan]Agent is updating the input parameters.[/bold cyan]")
+
+        LLM_reply, input_parameters_filled = self.agent.LLM_update.update_information(state["user_message"], state["input_parameters"])
         
-        # logger.debug(f"\nUpdate by the agent: {LLM_update_reply}")
-        # logger.debug(f"Input parameters after LLM_update: {input_parameters_updated}")
+        logger.debug(f"\nInput parameters after update:\n{LLM_reply}")
 
-        # Check for consistency in retrieved data
+        history_entry = (
+                        "UPDATE RESULT: The input parameters have been updated according to the user's request."
+                    )
 
-        ########################################
-        # Standardization/normalization/checks #
-        ########################################
+        return {"input_parameters": input_parameters_filled,
+                "process_history": state["process_history"] + [history_entry],
+                "working_history": state["working_history"] + [history_entry],
+                "behind_the_scene_history": state["behind_the_scene_history"] + [history_entry]}
+
+    def fill_input_node(self, state: AgentState):
+
+        console.print("[bold cyan]Agent is filling the missing input parameters using the database.[/bold cyan]")
+
+        history_entries = []
+
+        LLM_fill_input_reply, input_parameters_filled, matched_results = self.agent.LLM_fill_input.fill_missing_information(state["input_parameters"])
+        
+        logger.debug(f"Input parameters after LLM_fill_input: {input_parameters_filled}")
+
+        # Function to secure elements that the agent already retrieveds
+        input_parameters_filled = preserve_existing_parameters(state["input_parameters"], input_parameters_filled)
+        logger.debug(f"Previously filled: {state['input_parameters']}\nInput parameters filled (after preservation function): {input_parameters_filled}")
+
+        history_entries.extend([f"Input parameters after filling in the missing fields: {input_parameters_filled}"])
+
+        ############
+        # Messages #
+        ############
+
+        matched_cases_ID = [case.get("id") for case in matched_results]
+
+        previous = state["input_parameters"].model_dump()
+        filled = input_parameters_filled.model_dump()
+        
+        newly_filled_fields = [
+            field_name
+            for field_name, old_value in previous.items()
+            if old_value is None and filled[field_name] is not None
+        ]
+        
+        history_entry_fill = (
+                            f"FILL RESULT: The fields {newly_filled_fields} were filled "
+                            f"using combustion database cases {matched_cases_ID}."
+                        )
+
+        history_entries.append(history_entry_fill)
+
+        return {"input_parameters": input_parameters_filled,
+                "process_history": state["process_history"] + history_entries,
+                "working_history": state["working_history"] + history_entries,
+                "behind_the_scene_history": state["behind_the_scene_history"] + history_entries}
+
+    def standardize_input_node(self, state: AgentState):
+
+        history_entries = []
+
+        input_parameters_before = deepcopy(state["input_parameters"])
+        input_parameters = deepcopy(state["input_parameters"])
 
         # Convert the name of the chemical mechanism
         input_parameters, message_mechanism = self.convert_mechanism_name(input_parameters)
@@ -150,176 +210,41 @@ class AgentInputGraph:
         history_entries.extend(message_standardize_species)
 
         # Remove species which are not in the mechanism
-        
         input_parameters, message_species_validation = self.validate_species(input_parameters)
         history_entries.extend(message_species_validation)
 
-        ############
-        # Messages #
-        ############
+        # add default species in retained species
 
-        logger.debug(f"Input parameters after normalization: {input_parameters}")
-
-        if all(value is not None  for field, value in input_parameters.model_dump().items() if field != "application_regime"):
-            history_entry_retrieval = (
-                            "RETRIEVAL RESULT: All required input parameters are currently filled. "
-                            "The agent should present the extracted parameters to the user and "
-                            "ask for confirmation."
-                        )
-        elif all(value is None for value in input_parameters.model_dump().values()):
-            history_entry_retrieval = (
-                            "RETRIEVAL RESULT: None of the input parameters have been retrieved from the user's message, all parameters will be inferred by the fill-in function."
-                        )
+        missing_fields = [field_name
+                            for field_name, value in input_parameters.model_dump().items()
+                            if value is None and field_name != "application_regime"
+                        ]
+        if not missing_fields:
+            history_entries.append(
+                "STANDARDIZATION RESULT: All required input parameters are "
+                "currently filled and valid. The agent should present the "
+                "parameters to the user and ask for confirmation."
+            )
         else:
-            filled_fields = [
-                        field_name
-                        for field_name, value in input_parameters.model_dump().items()
-                        if value is not None
-                    ]
-            history_entry_retrieval = (
-                            f"RETRIEVAL RESULT: The fields {filled_fields} of the input parameters have been retrieved from the user's message, the remaining ones will be retrieved by the fill-in function."
-                        )
-            
-        history_entries.append(history_entry_retrieval)
-
-        logger.debug(f"History entries after retrieval normalization:\n{history_entries}")
+            history_entries.append(
+                f"STANDARDIZATION RESULT: The currently valid input parameters "
+                f"are {input_parameters}. The fields {missing_fields} are still "
+                f"missing and need to be provided or inferred."
+            )
 
         return {"input_parameters": input_parameters,
                 "process_history": state["process_history"] + history_entries,
                 "working_history": state["working_history"] + history_entries,
-                "behind_the_scene_history": state["behind_the_scene_history"] + history_entries}
+                "behind_the_scene_history": state["behind_the_scene_history"] + history_entries} #adapt history_entries
 
-    # def verify_node(self, state: AgentState):
-    #     result = self.agent.verify(...)
-    #     return {...}
-
-    def update_node(self, state: AgentState):
-
-        console.print("[bold cyan]Agent is updating the input parameters.[/bold cyan]")
-
-        LLM_reply, input_parameters_filled = self.agent.LLM_update.update_information(state["user_message"], state["input_parameters"])
-        
-        logger.debug(f"\nInput parameters after update:\n{LLM_reply}")
-
-        history_entry = (
-                        "UPDATE RESULT: The input parameters have been updated according to the user's request. The agent should present the extracted parameters to the user and ask for confirmation."
-                    )
-
-        return {"input_parameters": input_parameters_filled,
-                "process_history": state["process_history"] + [history_entry],
-                "working_history": state["working_history"] + [history_entry],
-                "behind_the_scene_history": state["behind_the_scene_history"] + [history_entry]}
-
-    def fill_input_node(self, state: AgentState):
-
-        console.print("[bold cyan]Agent is filling the missing input parameters using the database.[/bold cyan]")
-
-        history_entries = []
-
-        LLM_fill_input_reply, input_parameters_filled, matched_results = self.agent.LLM_fill_input.fill_missing_information(state["input_parameters"])
-        
-        logger.debug(f"Input parameters after LLM_fill_input: {input_parameters_filled}")
-
-        # Function to secure elements that the agent already retrieveds
-        input_parameters_filled = preserve_existing_parameters(state["input_parameters"], input_parameters_filled)
-        logger.debug(f"Previously filled: {state['input_parameters']}\nInput parameters filled (after preservation function): {input_parameters_filled}")
-
-        ########################################
-        # Standardization/normalization/checks #
-        ########################################
-
-        # Check mechanism name
-        input_parameters_filled, message_mechanism = self.convert_mechanism_name(input_parameters_filled)
-        history_entries.extend(message_mechanism)
-        
-        # Check fuel species
-        input_parameters_filled, message_convert_fuel_name = self.convert_fuel_names(input_parameters_filled)
-        history_entries.extend(message_convert_fuel_name)
-
-        # Convert ranges of temperature and pressure
-        input_parameters_filled, message_unit = self.convert_units(input_parameters_filled)
-        history_entries.extend(message_unit)
-
-        # Check regime/application keywords (although shoudn't be necessary in theory)
-        database = MechanismDatabase(self.database_path)
-        input_parameters_filled.application_regime = match_application_regimes(input_parameters_filled.application_regime, database.get_unique_application_regime())
-
-        # Remove duplicate species
-        input_parameters_filled = self.remove_duplicate_species(input_parameters_filled)
-
-        # Function to reset the values from the user?
-        # ... (Now the agent sets the values based on the database)
-
-        # Remove species which are not in the mechanism
-        # And standardize species names?
-        input_parameters_filled, message_species_validation = self.validate_species(input_parameters_filled)
-        history_entries.extend(message_species_validation)
-
-        logger.debug(f"Input parameters after normalization:\n{input_parameters_filled}")
-
-        ############
-        # Messages #
-        ############
-
-        matched_cases_ID = [case.get("id") for case in matched_results]
-
-        previous = state["input_parameters"].model_dump()
-        filled = input_parameters_filled.model_dump()
-        
-        newly_filled_fields = [
-            field_name
-            for field_name, old_value in previous.items()
-            if old_value is None and filled[field_name] is not None
-        ]
-
-        missing_fields = [
-                            field_name
-                            for field_name, value in input_parameters_filled.model_dump().items()
-                            if value is None and field_name != "application_regime"
-                        ]
-        
-        if not missing_fields:
-            history_entry_fill = (
-                            f"FILL RESULT: The fields {newly_filled_fields} of the input parameters, that were missing from the user's message, have been filled based on the context provided by the user and combined with the retrieval from a combustion database. The fields {newly_filled_fields} were filled based on cases with ID {matched_cases_ID} from the combustion database. The agent should present the extracted parameters to the user and ask for confirmation."
-                        )
-        else:
-            history_entry_fill = (
-                            f"FILL RESULT: The fields {newly_filled_fields} of the input parameters, that were missing from the user's message, have been filled based on the context provided by the user and combined with the retrieval from a combustion database. The fields {newly_filled_fields} were filled based on cases with ID {matched_cases_ID} from the combustion database."
-                            f"However, the fields {missing_fields} are still missing. The agent should ask the user which values to fill in for these fields."
-                        )
-
-        history_entries.append(history_entry_fill)
-
-        logger.debug(f"History entries after fill normalization:\n{history_entries}")
-
-        return {"input_parameters": input_parameters_filled,
-                "process_history": state["process_history"] + history_entries,
-                "working_history": state["working_history"] + history_entries,
-                "behind_the_scene_history": state["behind_the_scene_history"] + history_entries}
-    
     def route_after_router(self, state: AgentState):
         return state["route"]
 
-    def route_after_retrieve(self, state: AgentState):
+    def route_after_standardize(self, state: AgentState):
         if all(value is not None  for field, value in state["input_parameters"].model_dump().items() if field != "application_regime"):
             return "chat" #maybe don't use the chat in that case but directly print it? How to format the string in the history for the LLM
         
         return "fill"
-
-    def remove_duplicate_species(self, input_parameters: InputParameters,
-                                ) -> InputParameters:
-
-        if input_parameters.retained_species:
-            input_parameters.retained_species = list(
-                dict.fromkeys(input_parameters.retained_species)
-            )
-
-        if input_parameters.target_species:
-            input_parameters.target_species = list(
-                dict.fromkeys(input_parameters.target_species)
-            )
-
-        return input_parameters
 
     def validate_species(self,
                         input_parameters: InputParameters,

@@ -1,7 +1,6 @@
 import json
 from CombustionAgent.agent import Agent
 from CombustionAgent.parameters import InputParameters, CriteriaParameters
-from CombustionAgent.prompts import get_chat_prompt, get_fill_input_prompt, get_retrieve_prompt, get_router_prompt, get_update_prompt, get_verify_prompt, get_fill_criteria_prompt, get_select_mechanism_prompt, get_refine_parameters_prompt
 
 # TO DO:
 # - Fourth model for suggestions
@@ -58,8 +57,6 @@ from CombustionAgent.prompts import get_chat_prompt, get_fill_input_prompt, get_
 
 
 model_id = "models/Qwen3-8B" #"models/Llama-3.1-8B-Instruct"
-schema_input = InputParameters.model_json_schema()
-schema_criteria = CriteriaParameters.model_json_schema()
 database_path = "data/database/2026-09-14-database-mechanisms-H2-NH3-preliminary.json"
 project_path = "projects/"
 opening_message = ("Hello, I'm your combustion mechanism consultant.\n"
@@ -70,11 +67,7 @@ opening_message_criteria = ("Now that the input parameters have been retrieved,\
                             "It can be related to the accuracy, the stability or the size of the mechanism.")
 opening_messag_iteration = ("Tell me what went wrong.")
 
-agent = Agent(model_id, [get_chat_prompt(), get_retrieve_prompt(schema_input, database_path),
-                                  get_verify_prompt(schema_input), get_update_prompt(schema_input),
-                                  get_fill_input_prompt(schema_input), get_router_prompt(),
-                                  get_fill_criteria_prompt(schema_criteria), get_select_mechanism_prompt(), get_refine_parameters_prompt()],
-                                  opening_message, opening_message_criteria, opening_messag_iteration, database_path, project_path)
+agent = Agent(model_id, opening_message, opening_message_criteria, opening_messag_iteration, database_path, project_path)
 
 def main():
     agent.main()
