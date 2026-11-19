@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import inspect
 import json
+import math
 import os
 import shutil
 from datetime import datetime, timezone
@@ -66,13 +68,35 @@ def main():
         model_cfg, config.section("quantization"), config.section("lora")
     )
     checkpoint_dir = run_dir / "checkpoints"
+    per_device_batch_size = int(train_cfg.get("per_device_train_batch_size", 1))
+    gradient_accumulation_steps = int(train_cfg.get("gradient_accumulation_steps", 8))
+    num_train_epochs = float(train_cfg.get("num_train_epochs", 3))
+    warmup_ratio = float(train_cfg.get("warmup_ratio", 0.03))
+    sft_config_parameters = inspect.signature(SFTConfig).parameters
+    if "warmup_ratio" in sft_config_parameters:
+        warmup_args = {"warmup_ratio": warmup_ratio}
+    elif "warmup_steps" in sft_config_parameters:
+        # Newer TRL releases expose warmup_steps instead. Estimate total
+        # optimizer updates from dataset size and distributed batch settings.
+        world_size = int(os.environ.get("WORLD_SIZE", "1")) # Number of distributed processes (GPUs)
+        examples_per_update = (
+            per_device_batch_size * world_size * gradient_accumulation_steps
+        )
+        updates_per_epoch = max(math.ceil(len(train_data) / examples_per_update), 1)
+        estimated_total_updates = max(math.ceil(updates_per_epoch * num_train_epochs), 1)
+        warmup_args = {"warmup_steps": math.ceil(estimated_total_updates * warmup_ratio)}
+    else:
+        raise RuntimeError(
+            "Installed TRL SFTConfig exposes neither warmup_ratio nor warmup_steps; "
+            "check the installed TRL version."
+        )
     training_args = SFTConfig(
         output_dir=str(checkpoint_dir),
         learning_rate=float(train_cfg.get("learning_rate", 1e-4)),
-        num_train_epochs=float(train_cfg.get("num_train_epochs", 3)),
-        per_device_train_batch_size=int(train_cfg.get("per_device_train_batch_size", 1)),
+        num_train_epochs=num_train_epochs,
+        per_device_train_batch_size=per_device_batch_size,
         per_device_eval_batch_size=int(train_cfg.get("per_device_eval_batch_size", 1)),
-        gradient_accumulation_steps=int(train_cfg.get("gradient_accumulation_steps", 8)),
+        gradient_accumulation_steps=gradient_accumulation_steps,
         max_length=int(train_cfg.get("max_seq_length", 2048)),
         logging_steps=int(train_cfg.get("logging_steps", 10)),
         eval_strategy=train_cfg.get("eval_strategy", "epoch"),
@@ -85,7 +109,6 @@ def main():
         gradient_checkpointing_kwargs={"use_reentrant": False},
         optim=train_cfg.get("optim", "paged_adamw_8bit"),
         lr_scheduler_type=train_cfg.get("lr_scheduler_type", "cosine"),
-        warmup_ratio=float(train_cfg.get("warmup_ratio", 0.03)),
         weight_decay=float(train_cfg.get("weight_decay", 0.0)),
         max_grad_norm=float(train_cfg.get("max_grad_norm", 0.3)),
         logging_dir=str(run_dir / "tensorboard"),
@@ -97,6 +120,7 @@ def main():
         completion_only_loss=bool(train_cfg.get("completion_only_loss", True)),
         assistant_only_loss=False,
         packing=bool(train_cfg.get("packing", False)),
+        **warmup_args,
     )
     trainer = SFTTrainer(
         model=model,
