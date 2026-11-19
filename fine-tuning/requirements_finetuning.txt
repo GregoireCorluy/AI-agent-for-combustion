@@ -1,0 +1,12 @@
+# Install CUDA-enabled PyTorch separately to match the machine's CUDA runtime.
+# The main project pins torch; this file contains only fine-tuning extras.
+transformers>=4.56,<6
+trl>=0.22,<1
+peft>=0.15,<1
+accelerate>=1.0,<2
+bitsandbytes>=0.45
+datasets>=3.0
+PyYAML>=6.0
+pydantic>=2.8
+tqdm>=4.66
+tensorboard>=2.15

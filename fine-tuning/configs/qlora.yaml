@@ -1,0 +1,61 @@
+model:
+  # Relative to fine-tuning/. Replace with a Hub ID or another local snapshot if preferred.
+  name_or_path: ../models/Qwen3-8B
+  trust_remote_code: false
+
+data:
+  train_file: data/train.jsonl
+  validation_file: data/validation.jsonl
+  test_file: data/test.jsonl
+  assistant_output_key: input_parameters
+
+output:
+  run_root: outputs/qwen3-8b-qlora/runs
+  latest_run_file: outputs/qwen3-8b-qlora/latest_run.json
+  report_dir: outputs/evaluation
+
+quantization:
+  load_in_4bit: true
+  quant_type: nf4
+  double_quant: true
+  compute_dtype: bfloat16
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules: all-linear
+  bias: none
+  task_type: CAUSAL_LM
+
+training:
+  seed: 42
+  learning_rate: 0.0001
+  num_train_epochs: 3
+  per_device_train_batch_size: 1
+  per_device_eval_batch_size: 1
+  gradient_accumulation_steps: 8
+  max_seq_length: 2048
+  logging_steps: 10
+  save_strategy: epoch
+  eval_strategy: epoch
+  save_total_limit: 2
+  load_best_model_at_end: true
+  metric_for_best_model: eval_loss
+  greater_is_better: false
+  gradient_checkpointing: true
+  optim: paged_adamw_8bit
+  lr_scheduler_type: cosine
+  warmup_ratio: 0.03
+  weight_decay: 0.0
+  max_grad_norm: 0.3
+  bf16: true
+  fp16: false
+  dataloader_num_workers: 2
+  report_to: tensorboard
+  completion_only_loss: true
+  packing: false
+
+evaluation:
+  batch_size: 4
+  max_new_tokens: 512
