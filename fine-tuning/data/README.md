@@ -8,7 +8,7 @@
 Each JSONL line contains system, user, and assistant messages. The assistant message contains the complete InputParameters object, per-field provenance, explicit input anchors, and prior-status notes. Scenario group IDs and split labels exist only in record metadata and are excluded from all conversation messages. Fuel fractions are mole fractions. Fuel entries use the fields species and fraction.
 
 ## User-description variety
-Prompts are generated independently of split-group IDs: none mentions a family number, group label, or training-set category. Specificity is deliberately varied. The intended mix is 20% vague application-only requests, 60% partially specified requests (application/fuel plus one explicit condition or a request for guidance), and 20% detailed requests (multiple explicit conditions or full ranges). Each application and fuel pattern receives examples across these levels. The grouping key is used only by the splitter to keep related scenarios on one side of the train/validation/test boundary.
+Prompts never mention a family number, group label, or training-set category. They use ordinary user phrasing and vary in specificity: 20% vague application-only requests, 60% partially specified requests (application/fuel plus one explicit condition or request for guidance), and 20% detailed requests (multiple explicit conditions or full ranges). Each application and fuel pattern receives examples across these levels. Split-group IDs are stored only in record metadata, to keep related scenarios on one side of the train/validation/test boundary.
 
 ## Range behavior
 Pressure, temperature, and equivalence ratio are non-degenerate swept ranges in every record. If the user supplies one value, that exact number and unit are retained in explicit_anchors and the range is expanded around it; endpoints are marked explicit_and_inferred. An explicit range is copied unchanged. No unit conversion is performed.
@@ -42,7 +42,9 @@ mechanism is null throughout because no mechanism filenames or validated compati
 ## Splits and validation
 Eight application families each have 50 groups of 10 related examples. Per application, 40 entire groups go to train, 5 to validation, and 5 to test using deterministic SHA-256 ordering. Groups never cross splits; exact totals are 3,200/400/400. Every family appears in each split, so this is not a held-out-family evaluation.
 
-The Pydantic validator checks schema fields, positive pressure/phi, strict ranges, mole-fraction sums, and target species being retained. The generator also checks message roles, counts, and group isolation. Regenerate from project root with: python make_dataset.py
+The table gives broad family envelopes. To keep test cases distinct, the generator assigns each scenario a different pressure/temperature/phi window inside its family envelope; explicit user conditions take precedence. These per-scenario sub-windows are synthetic sweep variants, remain provisional, and should not be mistaken for measured values.
+
+The Pydantic validator checks schema fields, positive pressure/phi, strict ranges, mole-fraction sums, and target species being retained. The generator also checks message roles, exact counts, scenario-group isolation, 4,000 unique user prompts, and 4,000 unique complete InputParameters cases. No exact prompt or input-parameter case is repeated across splits. Regenerate from project root with: python make_dataset.py
 
 ## References
 - Methling et al., NH3/H2 shock-tube ignition-delay measurements, Proceedings of the Combustion Institute 41 (2025), 105835. https://doi.org/10.1016/j.proci.2025.105835
