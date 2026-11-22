@@ -142,7 +142,7 @@ def main():
     )
     trainer.train()
     adapter_dir = run_dir / "adapter"
-    if trainer.is_world_process_zero():
+    if trainer.is_world_process_zero(): # Only rank 0 saves the adapter and tokenizer to avoid race conditions
         adapter_dir.mkdir(parents=True, exist_ok=True)
         trainer.save_model(str(adapter_dir))
         tokenizer.save_pretrained(adapter_dir)
