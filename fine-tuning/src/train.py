@@ -9,6 +9,7 @@ import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
+import torch.distributed as dist
 from accelerate.utils import wait_for_everyone
 from transformers import set_seed
 from trl import SFTConfig, SFTTrainer
@@ -177,7 +178,12 @@ def main():
             json.dumps({"run_name": run_name}, indent=2), encoding="utf-8"
         )
         print(f"Best adapter saved to {adapter_dir}")
+    wait_for_everyone()
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    finally:
+        if dist.is_available() and dist.is_initialized():
+            dist.destroy_process_group()
