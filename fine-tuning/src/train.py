@@ -78,18 +78,25 @@ def main():
     elif "warmup_steps" in sft_config_parameters:
         # Newer TRL releases expose warmup_steps instead. Estimate total
         # optimizer updates from dataset size and distributed batch settings.
-        world_size = int(os.environ.get("WORLD_SIZE", "1")) # Number of distributed processes (GPUs)
-        examples_per_update = (
-            per_device_batch_size * world_size * gradient_accumulation_steps
+        world_size = int(os.environ.get("WORLD_SIZE", "1"))
+        steps_per_epoch = math.ceil(
+            len(train_data) / (per_device_batch_size * world_size * gradient_accumulation_steps)
         )
-        updates_per_epoch = max(math.ceil(len(train_data) / examples_per_update), 1)
-        estimated_total_updates = max(math.ceil(updates_per_epoch * num_train_epochs), 1)
-        warmup_args = {"warmup_steps": math.ceil(estimated_total_updates * warmup_ratio)}
+        total_steps = math.ceil(steps_per_epoch * num_train_epochs)
+        warmup_steps = math.ceil(warmup_ratio * total_steps)
+        warmup_args = {"warmup_steps": warmup_steps}
+        print(f"Optimizer steps: {total_steps}, warmup steps: {warmup_steps}")
     else:
         raise RuntimeError(
             "Installed TRL SFTConfig exposes neither warmup_ratio nor warmup_steps; "
             "check the installed TRL version."
         )
+    logging_dir = run_dir / "tensorboard"
+    logging_args = (
+        {"logging_dir": str(logging_dir)}
+        if "logging_dir" in sft_config_parameters
+        else {}
+    )
     training_args = SFTConfig(
         output_dir=str(checkpoint_dir),
         learning_rate=float(train_cfg.get("learning_rate", 1e-4)),
@@ -111,7 +118,6 @@ def main():
         lr_scheduler_type=train_cfg.get("lr_scheduler_type", "cosine"),
         weight_decay=float(train_cfg.get("weight_decay", 0.0)),
         max_grad_norm=float(train_cfg.get("max_grad_norm", 0.3)),
-        logging_dir=str(run_dir / "tensorboard"),
         bf16=bool(train_cfg.get("bf16", True)),
         fp16=bool(train_cfg.get("fp16", False)),
         dataloader_num_workers=int(train_cfg.get("dataloader_num_workers", 2)),
@@ -121,7 +127,12 @@ def main():
         assistant_only_loss=False,
         packing=bool(train_cfg.get("packing", False)),
         **warmup_args,
+        **logging_args,
     )
+    # Some TRL/Transformers combinations remove logging_dir from the config
+    # constructor although TensorBoard integrations still read this attribute.
+    if "logging_dir" not in sft_config_parameters:
+        training_args.logging_dir = str(logging_dir)
     trainer = SFTTrainer(
         model=model,
         args=training_args,
