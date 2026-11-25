@@ -19,7 +19,7 @@ def load_tokenizer(model_name: str, trust_remote_code: bool = False):
     tokenizer = AutoTokenizer.from_pretrained(
         model_name,
         trust_remote_code=trust_remote_code,
-        clean_up_tokenization_spaces=False,
+        clean_up_tokenization_spaces=False, # could add a "add_special_tokens=False" option to avoid problems with other models which add speical tokens with the tokenizer
     )
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token

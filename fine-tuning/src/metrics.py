@@ -80,17 +80,17 @@ def score(prediction: str, record: dict[str, Any]) -> dict[str, Any]:
             checks.append(
                 isinstance(start, (int, float))
                 and isinstance(end, (int, float))
-                and start <= value <= end
+                and start <= value <= end # Check that explicitly mentioned values are englobed by the range provided by the model. If the model does not provide a range, we consider this check to be failed.
             )
     row["explicit_anchor_preservation"] = (
-        sum(checks) / len(checks) if checks else None
+        sum(checks) / len(checks) if checks else None # If there are no explicit anchors, we don't check this property. Otherwise, we compute the fraction of anchors that are preserved in the model's prediction.
     )
     row["mechanism_null_when_unsupplied"] = (
-        params.get("mechanism") is None if expected.get("mechanism") is None else None
+        params.get("mechanism") is None if expected.get("mechanism") is None else None # If the expected mechanism is None, check that the predicted mechanism is also None. Otherwise, we don't check this property.
     )
     for field in ("pressure", "temperature", "equivalence_ratio"):
         start, end = params.get(field + "_start"), params.get(field + "_end")
-        row[field + "_range_sane"] = start is None or end is None or start <= end
+        row[field + "_range_sane"] = start is None or end is None or start <= end # Sanity check for the range of pressure, temperature, and equivalence ratio that the model predicts. If the start is greater than the end, it is considered an error.
     return row
 
 
