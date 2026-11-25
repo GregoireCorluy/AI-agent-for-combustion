@@ -10,17 +10,17 @@ from datasets import Dataset
 
 OUTPUT_INSTRUCTION = (
     "Return exactly one valid JSON object with only the top-level key input_parameters. "
-    "The value must contain the InputParameters fields. Do not output provenance, "
-    "explicit anchors, explanations, or dataset metadata."
+    "The value must contain all InputParameters fields, using null when a value cannot "
+    "be inferred responsibly. Do not output provenance, explicit anchors, explanations, "
+    "or dataset metadata."
 )
 
 
 def prepare_system_prompt(prompt: str) -> str:
-    prompt = prompt.replace(
-        "Infer missing ranges conservatively from the application and label uncertainty.",
-        "Infer missing ranges conservatively from the application; use null when an inference is not justified.",
-    )
-    return prompt.rstrip() + "\n\n" + OUTPUT_INSTRUCTION
+    prompt = prompt.rstrip()
+    if OUTPUT_INSTRUCTION not in prompt:
+        prompt += "\n\n" + OUTPUT_INSTRUCTION
+    return prompt
 
 
 def read_jsonl(path: str | Path) -> list[dict[str, Any]]:
