@@ -100,6 +100,13 @@ def get_retrieve_prompt(schema: dict, database_path: str) -> str:
             - Return ONLY a JSON object.
             - Do not add explanations or any text outside the JSON object.
             - Do not convert numerical values from one unit to another.
+            - Map a temperature explicitly associated with autoignition or ignition-delay
+              simulations to temperature_autoignition_start/end.
+            - Map a temperature explicitly associated with flamelet or laminar-flame-speed
+              simulations to temperature_flamelet_start/end.
+            - For a generic temperature with no simulation type stated, use the
+              autoignition fields to preserve the established meaning of the temperature
+              fields. The temperature_unit is shared by both temperature ranges.
 
             Exception:
             You can assume equal fraction for the fuel species in case the user mentions fuel species without specifying the corresponding fractions.
@@ -137,8 +144,10 @@ def get_retrieve_prompt(schema: dict, database_path: str) -> str:
                 "pressure_start": null,
                 "pressure_end": null,
                 "pressure_unit": null,
-                "temperature_start": null,
-                "temperature_end": null,
+                "temperature_autoignition_start": null,
+                "temperature_autoignition_end": null,
+                "temperature_flamelet_start": null,
+                "temperature_flamelet_end": null,
                 "temperature_unit": null,
                 "equivalence_ratio_start": null,
                 "equivalence_ratio_end": null,
@@ -187,16 +196,25 @@ def get_update_prompt(schema: dict) -> str:
             - Preserve the value exactly as specified by the update instruction.
             - Do not convert units.
             - Keep the value and its unit in their corresponding fields.
-            - For example, "200 degrees Celsius" means:
-                temperature = 200
+            - Temperature ranges are separate: update autoignition fields for ignition-delay
+              conditions and flamelet fields for laminar-flame-speed conditions. The one
+              temperature_unit applies to both ranges.
+            - For example, "set the autoignition temperature to 200 degrees Celsius" means:
+                temperature_autoignition_start = 200
+                temperature_autoignition_end = 200
                 temperature_unit = "C"
+              A flamelet temperature instruction updates the corresponding flamelet fields.
             - "3k Celsius" means:
-                temperature = 3
+                temperature_autoignition_start = 3
+                temperature_autoignition_end = 3
                 temperature_unit = "C"
                 Do NOT convert this to 3000 K.
 
-            10. If a parameter is explicitly removed by the user, set that parameter and
-                its corresponding unit field to null.
+            10. If the user explicitly removes one temperature range, set both endpoints
+                of that range to null. Keep temperature_unit if the other temperature
+                range still has values; set it to null only when both temperature ranges
+                are empty. For pressure, clear pressure_unit when the pressure range is
+                removed.
 
             11. Never modify parameters that are unrelated to the requested update.
 
@@ -224,8 +242,10 @@ def get_update_prompt(schema: dict) -> str:
                 "pressure_start": 10,
                 "pressure_end": 100,
                 "pressure_unit": "bar",
-                "temperature_start": 1000,
-                "temperature_end": 1000,
+                "temperature_autoignition_start": 1000,
+                "temperature_autoignition_end": 1000,
+                "temperature_flamelet_start": null,
+                "temperature_flamelet_end": null,
                 "temperature_unit": "K",
                 "equivalence_ratio_start": null,
                 "equivalence_ratio_end": null,
@@ -234,7 +254,7 @@ def get_update_prompt(schema: dict) -> str:
             }}
 
             UPDATE INSTRUCTION:
-            "Change the end temperature to 1200 K."
+            "Change the autoignition temperature end to 1200 K."
 
             CORRECT OUTPUT:
 
@@ -245,8 +265,10 @@ def get_update_prompt(schema: dict) -> str:
                 "pressure_start": 10,
                 "pressure_end": 100,
                 "pressure_unit": "bar",
-                "temperature_start": 1000,
-                "temperature_end": 1200,
+                "temperature_autoignition_start": 1000,
+                "temperature_autoignition_end": 1200,
+                "temperature_flamelet_start": null,
+                "temperature_flamelet_end": null,
                 "temperature_unit": "K",
                 "equivalence_ratio_start": null,
                 "equivalence_ratio_end": null,
@@ -265,8 +287,10 @@ def get_update_prompt(schema: dict) -> str:
                 "pressure_start": 2,
                 "pressure_end": 5,
                 "pressure_unit": "bar",
-                "temperature_start": 1000,
-                "temperature_end": 1000,
+                "temperature_autoignition_start": 1000,
+                "temperature_autoignition_end": 1000,
+                "temperature_flamelet_start": null,
+                "temperature_flamelet_end": null,
                 "temperature_unit": "K",
                 "equivalence_ratio_start": null,
                 "equivalence_ratio_end": null,
@@ -286,8 +310,10 @@ def get_update_prompt(schema: dict) -> str:
                 "pressure_start": 2,
                 "pressure_end": 5,
                 "pressure_unit": "bar",
-                "temperature_start": 1000,
-                "temperature_end": 1000,
+                "temperature_autoignition_start": 1000,
+                "temperature_autoignition_end": 1000,
+                "temperature_flamelet_start": null,
+                "temperature_flamelet_end": null,
                 "temperature_unit": "K",
                 "equivalence_ratio_start": null,
                 "equivalence_ratio_end": null,
@@ -306,8 +332,10 @@ def get_update_prompt(schema: dict) -> str:
                 "pressure_start": 10,
                 "pressure_end": 100,
                 "pressure_unit": "bar",
-                "temperature_start": 1000,
-                "temperature_end": 1800,
+                "temperature_autoignition_start": 1000,
+                "temperature_autoignition_end": 1800,
+                "temperature_flamelet_start": null,
+                "temperature_flamelet_end": null,
                 "temperature_unit": "K",
                 "equivalence_ratio_start": null,
                 "equivalence_ratio_end": null,
@@ -316,7 +344,7 @@ def get_update_prompt(schema: dict) -> str:
             }}
 
             UPDATE INSTRUCTION:
-            "The user said 3k Celsius, but the extracted temperature was incorrectly interpreted as 3000 K. Change the temperature to the value and unit actually provided by the user."
+            "The user said 3k Celsius, but the extracted autoignition temperature was incorrectly interpreted as 3000 K. Change the autoignition temperature to the value and unit actually provided by the user."
 
             CORRECT OUTPUT:
 
@@ -327,8 +355,10 @@ def get_update_prompt(schema: dict) -> str:
                 "pressure_start": 10,
                 "pressure_end": 100,
                 "pressure_unit": "bar",
-                "temperature_start": 3000,
-                "temperature_end": 3000,
+                "temperature_autoignition_start": 3000,
+                "temperature_autoignition_end": 3000,
+                "temperature_flamelet_start": null,
+                "temperature_flamelet_end": null,
                 "temperature_unit": "C",
                 "equivalence_ratio_start": null,
                 "equivalence_ratio_end": null,
@@ -346,8 +376,10 @@ def get_update_prompt(schema: dict) -> str:
                 "pressure_start": 10,
                 "pressure_end": 100,
                 "pressure_unit": "bar",
-                "temperature_start": 800,
-                "temperature_end": 1500
+                "temperature_autoignition_start": 800,
+                "temperature_autoignition_end": 1500,
+                "temperature_flamelet_start": null,
+                "temperature_flamelet_end": null,
                 "temperature_unit": "K",
                 "equivalence_ratio_start": null,
                 "equivalence_ratio_end": null,
@@ -366,8 +398,10 @@ def get_update_prompt(schema: dict) -> str:
                 "pressure_start": 10000,
                 "pressure_end": 100000,
                 "pressure_unit": "mbar",
-                "temperature_start": 800,
-                "temperature_end": 1500
+                "temperature_autoignition_start": 800,
+                "temperature_autoignition_end": 1500,
+                "temperature_flamelet_start": null,
+                "temperature_flamelet_end": null,
                 "temperature_unit": "K",
                 "equivalence_ratio_start": null,
                 "equivalence_ratio_end": null,
@@ -445,7 +479,8 @@ def get_fill_input_prompt(schema: dict) -> str:
 
             The following parameters are range parameters:
             - pressure_start / pressure_end
-            - temperature_start / temperature_end
+            - temperature_autoignition_start / temperature_autoignition_end
+            - temperature_flamelet_start / temperature_flamelet_end
             - equivalence_ratio_start / equivalence_ratio_end
 
             For these parameters, ALWAYS aggregate the ranges across ALL matching cases:
@@ -453,27 +488,31 @@ def get_fill_input_prompt(schema: dict) -> str:
                 output_start = minimum of ALL case start values
                 output_end   = maximum of ALL case end values
 
+            Aggregate autoignition and flamelet temperature ranges separately. Never use
+            the autoignition range as a substitute for a missing flamelet range, or vice versa.
+            The shared temperature_unit must match the unit of the selected temperature ranges.
+
             For example, if the matching cases contain:
 
             Case 1:
-                temperature: 300-500 K
+                autoignition temperature: 300-500 K
 
             Case 2:
-                temperature: 400-800 K
+                autoignition temperature: 400-800 K
 
             Case 3:
-                temperature: 350-700 K
+                autoignition temperature: 350-700 K
 
             then the output MUST be:
 
-                temperature_start = 300
-                temperature_end   = 800
+                temperature_autoignition_start = 300
+                temperature_autoignition_end   = 800
                 temperature_unit  = K
 
             NOT:
 
-                temperature_start = 300
-                temperature_end   = 500
+                temperature_autoignition_start = 300
+                temperature_autoignition_end   = 500
 
             and NOT the range of whichever case appears first.
 
@@ -605,8 +644,10 @@ def get_fill_input_prompt(schema: dict) -> str:
                 "pressure_start": null,
                 "pressure_end": null,
                 "pressure_unit": null,
-                "temperature_start": null,
-                "temperature_end": null,
+                "temperature_autoignition_start": null,
+                "temperature_autoignition_end": null,
+                "temperature_flamelet_start": null,
+                "temperature_flamelet_end": null,
                 "temperature_unit": null,
                 "equivalence_ratio_start": null,
                 "equivalence_ratio_end": null,
@@ -1102,7 +1143,7 @@ def get_refine_parameters_prompt(schema: dict):
 
             The main parameters that may be refined are:
 
-            - temperature range;
+            - autoignition temperature range and/or flamelet temperature range;
             - equivalence-ratio range;
             - pressure range;
             - fuel composition;
@@ -1113,28 +1154,30 @@ def get_refine_parameters_prompt(schema: dict):
 
             When refining operating-condition ranges, follow this priority:
 
-            1. Temperature
+            1. The temperature range relevant to the reported failure
             2. Equivalence ratio
             3. Pressure
 
-            Temperature should normally be considered first because ignition and many chemical timescales are particularly sensitive to temperature, especially near the lower-temperature boundary.
+            For ignition-delay problems, refine the autoignition temperature range. For laminar-flame-speed problems, refine the flamelet temperature range. Do not change both unless the feedback indicates that both simulation objectives are affected.
 
             Do not automatically change all three parameters. Change only the parameter(s) that are relevant to the reported failure.
 
-            ## TEMPERATURE
+            ## TEMPERATURE RANGES
 
-            When temperature needs to be refined:
+            When a temperature range needs to be refined:
 
-            - focus the range around the conditions relevant to the user's failed simulation;
-            - pay particular attention to the lower temperature bound for ignition-related problems;
-            - avoid unnecessarily extending the temperature range if the user's application does not require it;
-            - preserve the user's known operating temperature whenever possible.
+            - choose the autoignition range for ignition-delay and ignition-related problems;
+            - choose the flamelet range for laminar-flame-speed problems;
+            - focus only the relevant range around conditions that matter to the user's failed simulation;
+            - pay particular attention to the lower autoignition temperature bound for ignition-related problems;
+            - avoid unnecessarily extending either range if the user's application does not require it;
+            - preserve the user's known operating temperature and the shared temperature unit whenever possible.
 
             For example:
 
-            - if the mechanism fails because ignition occurs too early at low temperature, increase the representation of the relevant low-temperature region rather than arbitrarily changing the entire range;
-            - if the mechanism fails at high temperature, ensure that the high-temperature region containing the problematic condition is included;
-            - if the simulation is only performed in a narrow temperature regime, consider narrowing the reduction range around that regime.
+            - if ignition occurs too early at low temperature, refine the relevant low-temperature region of the autoignition range;
+            - if laminar flame speed is inaccurate at a particular reactant temperature, refine the flamelet range around that condition;
+            - if the simulation is only performed in a narrow temperature regime, consider narrowing the corresponding reduction range around that regime.
 
             ## EQUIVALENCE RATIO
 
@@ -1178,7 +1221,8 @@ def get_refine_parameters_prompt(schema: dict):
             If the mechanism predicts ignition TOO EARLY:
 
             - determine whether the reduction domain adequately represents the relevant ignition conditions;
-            - consider refining temperature first, especially the lower-temperature region;
+            - consider refining the autoignition temperature range first, especially the
+              lower-temperature region, when the problem concerns ignition delay;
             - then consider equivalence ratio and pressure if they are relevant to the observed ignition behaviour;
             - consider stricter accuracy criteria if the mechanism remains insufficiently accurate.
 
@@ -1192,7 +1236,8 @@ def get_refine_parameters_prompt(schema: dict):
             If the mechanism DOES NOT IGNITE:
 
             - verify that the reduction domain contains the relevant ignition conditions;
-            - consider whether the temperature range is sufficiently focused around the user's operating conditions;
+            - consider whether the autoignition temperature range is sufficiently focused
+              around the user's operating conditions;
             - consider stricter accuracy requirements if important ignition chemistry may have been removed.
 
             If the simulation DOES NOT CONVERGE or is NUMERICALLY UNSTABLE:

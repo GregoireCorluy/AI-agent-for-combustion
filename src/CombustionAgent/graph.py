@@ -303,10 +303,13 @@ class AgentInputGraph:
         # -------------------------
         # Temperature
         # -------------------------
-        if (
-            input_parameters.temperature_start is not None
-            or input_parameters.temperature_end is not None
-        ):
+        temperature_fields = (
+            "temperature_autoignition_start",
+            "temperature_autoignition_end",
+            "temperature_flamelet_start",
+            "temperature_flamelet_end",
+        )
+        if any(getattr(input_parameters, name) is not None for name in temperature_fields):
 
             if input_parameters.temperature_unit is None:
                 messages.append(
@@ -360,23 +363,33 @@ class AgentInputGraph:
                 else:
                     conversion = temperature_conversions[unit]
 
-                    old_start = input_parameters.temperature_start
-                    old_end = input_parameters.temperature_end
                     old_unit = input_parameters.temperature_unit
+                    old_ranges = {
+                        "autoignition": (
+                            input_parameters.temperature_autoignition_start,
+                            input_parameters.temperature_autoignition_end,
+                        ),
+                        "flamelet": (
+                            input_parameters.temperature_flamelet_start,
+                            input_parameters.temperature_flamelet_end,
+                        ),
+                    }
 
-                    if old_start is not None:
-                        input_parameters.temperature_start = conversion(old_start)
-
-                    if old_end is not None:
-                        input_parameters.temperature_end = conversion(old_end)
+                    for field in temperature_fields:
+                        value = getattr(input_parameters, field)
+                        if value is not None:
+                            setattr(input_parameters, field, conversion(value))
 
                     input_parameters.temperature_unit = "K"
 
                     messages.append(
-                        f"Temperature converted from '{old_unit}' "
-                        f"to K: {old_start}-{old_end} {old_unit} to "
-                        f"{input_parameters.temperature_start}-"
-                        f"{input_parameters.temperature_end} K."
+                        f"Autoignition and flamelet temperature ranges converted "
+                        f"from '{old_unit}' to K: {old_ranges['autoignition']} and "
+                        f"{old_ranges['flamelet']} to "
+                        f"({input_parameters.temperature_autoignition_start}, "
+                        f"{input_parameters.temperature_autoignition_end}) and "
+                        f"({input_parameters.temperature_flamelet_start}, "
+                        f"{input_parameters.temperature_flamelet_end}) K."
                     )
 
         # -------------------------

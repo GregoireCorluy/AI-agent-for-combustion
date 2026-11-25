@@ -11,14 +11,14 @@ Each JSONL line contains system, user, and assistant messages. The assistant mes
 Prompts never mention a family number, group label, or training-set category. They use ordinary user phrasing and vary in specificity: 20% vague application-only requests, 60% partially specified requests (application/fuel plus one explicit condition or request for guidance), and 20% detailed requests (multiple explicit conditions or full ranges). Each application and fuel pattern receives examples across these levels. Split-group IDs are stored only in record metadata, to keep related scenarios on one side of the train/validation/test boundary.
 
 ## Range behavior
-Pressure, temperature, and equivalence ratio are non-degenerate swept ranges in every record. If the user supplies one value, that exact number and unit are retained in explicit_anchors and the range is expanded around it; endpoints are marked explicit_and_inferred. An explicit range is copied unchanged. No unit conversion is performed.
+Pressure, autoignition temperature, flamelet temperature, and equivalence ratio are non-degenerate swept ranges in every record. Existing temperature values and explicit temperature anchors are preserved as the autoignition range. A separate, generally lower flamelet range is inferred from the application. If the user supplies one temperature value, that exact number and unit are retained in explicit_anchors for the autoignition range and the autoignition range is expanded around it; endpoints are marked explicit_and_inferred. Both temperature ranges use the same temperature_unit. An explicit autoignition range is copied unchanged. No user-provided unit conversion is performed.
 
 Missing values use broad provisional application-conditioned sweeps. They are NOT validated ground truth, nominal equipment conditions, or design limits. DRGEP's autoignition sweep is a chemistry-coverage choice, distinct from actual combustor inlet or in-cylinder conditions. The prior status is explicitly marked provisional and requires domain review. Real selection depends on hardware, oxidizer, dilution, pressure basis, and study objective.
 
 ## Default broad sweeps for unspecified values
-Pressure units are atm, temperature units K, and equivalence ratio dimensionless.
+Pressure units are atm, temperature units are normally K (some explicit user cases use C), and equivalence ratio is dimensionless.
 
-| Application | Pressure | Temperature | phi |
+| Application | Pressure | Autoignition temperature | phi |
 |---|---:|---:|---:|
 | Stationary gas turbine | 1–25 atm | 500–2,200 K | 0.4–1.4 |
 | Aircraft gas turbine | 1–40 atm | 400–2,200 K | 0.3–1.4 |
@@ -28,6 +28,20 @@ Pressure units are atm, temperature units K, and equivalence ratio dimensionless
 | Rocket/aerospace | 1–100 atm | 500–3,000 K | 0.3–2.0 |
 | Fundamental ignition research | 0.5–40 atm | 500–2,500 K | 0.3–2.0 |
 | Hydrogen safety/release | 0.8–10 atm | 250–1,800 K | 0.2–2.0 |
+
+## Flamelet temperature ranges
+These lower, application-conditioned flamelet ranges are provisional dataset priors (in K). They represent a separate temperature sweep for laminar-flame-speed flamelet simulations. If a record uses C as its shared temperature unit, the flamelet endpoints are expressed in C as well. These ranges are synthetic examples, not validated operating limits or engineering recommendations.
+
+| Application | Flamelet temperature |
+|---|---:|
+| Stationary gas turbine | 300–650 K |
+| Aircraft gas turbine | 300–650 K |
+| Internal-combustion engine | 300–700 K |
+| Industrial burner/furnace | 295–650 K |
+| Boiler/power generation | 295–650 K |
+| Rocket/aerospace | 250–700 K |
+| Fundamental ignition research | 300–700 K |
+| Hydrogen safety/release | 250–550 K |
 
 These envelopes are rounded broad synthesis ranges, not measurements for each application/fuel combination. Their evidence is uneven. Published NH3/H2 shock-tube autoignition studies include about 940–2,200 K and 4–16 bar for specified compositions, dilution, and oxidizers; other work studies 1,020–1,945 K at 1.2 and 10 atm. A gas-turbine-related high-pressure shock-tube thesis reports 1,000–1,500 K near 25 bar. NASA reports facility-specific turbine inlet pressures and temperatures. A single NIST full-scale garage test is not a universal hydrogen safety envelope. These sources support the need for broad, context-specific sweeps, but do not directly validate every default row. Do not treat this dataset as an engineering recommendation.
 
@@ -42,7 +56,7 @@ mechanism is null throughout because no mechanism filenames or validated compati
 ## Splits and validation
 Eight application families each have 50 groups of 10 related examples. Per application, 40 entire groups go to train, 5 to validation, and 5 to test using deterministic SHA-256 ordering. Groups never cross splits; exact totals are 3,200/400/400. Every family appears in each split, so this is not a held-out-family evaluation.
 
-The table gives broad family envelopes. To keep test cases distinct, the generator assigns each scenario a different pressure/temperature/phi window inside its family envelope; explicit user conditions take precedence. These per-scenario sub-windows are synthetic sweep variants, remain provisional, and should not be mistaken for measured values.
+The table gives broad family envelopes. To keep test cases distinct, the dataset assigns each scenario a different pressure/autoignition-temperature/equivalence-ratio window inside its family envelope; explicit user conditions take precedence. The flamelet temperature range is assigned by application family as listed above. These are synthetic sweep variants and provisional priors, not measured values.
 
 The Pydantic validator checks schema fields, positive pressure/phi, strict ranges, mole-fraction sums, and target species being retained. The generator also checks message roles, exact counts, scenario-group isolation, 4,000 unique user prompts, and 4,000 unique complete InputParameters cases. No exact prompt or input-parameter case is repeated across splits. Regenerate from project root with: python make_dataset.py
 

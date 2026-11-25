@@ -18,9 +18,11 @@ class InputParameters(BaseModel):
     pressure_end: float | None = Field(default = None, description = "Upperbound of the pressure at which the simulation is performed.")
     pressure_unit: str | None = Field(default = None, description = "Unit of the pressure provided by the user. E.g., 'P' for Pascal. 'atm' for standard atmosphere, 'bar'.")
 
-    temperature_start: float | None = Field(default = None, description = "Lowerbound of the temperature at which the simulation should be performed, keeping the number that is provided by the user. Do not convert to another unit.")
-    temperature_end: float | None = Field(default = None, description = "Upperbound of the temperature at which the simulation should be performed, keeping the number that is provided by the user. Do not convert to another unit.")
-    temperature_unit: str | None = Field(default = None, description = "Unit of the temperature provided by the user. E.g., 'K' for Kelvin. 'C' for Celsius. 'F' for Fahrenheit.")
+    temperature_autoignition_start: float | None = Field(default=None, description="Lower bound of the autoignition-simulation temperature range. Preserve the user's value and unit; do not convert units.")
+    temperature_autoignition_end: float | None = Field(default=None, description="Upper bound of the autoignition-simulation temperature range. Preserve the user's value and unit; do not convert units.")
+    temperature_flamelet_start: float | None = Field(default=None, description="Lower bound of the flamelet-simulation temperature range. Preserve the user's value and unit; do not convert units.")
+    temperature_flamelet_end: float | None = Field(default=None, description="Upper bound of the flamelet-simulation temperature range. Preserve the user's value and unit; do not convert units.")
+    temperature_unit: str | None = Field(default=None, description="Shared unit for both temperature ranges, e.g. 'K' for Kelvin, 'C' for Celsius, or 'F' for Fahrenheit.")
 
     equivalence_ratio_start: float | None = Field(default = None, description = "Lowerbound of the equivalence ratio range")
     equivalence_ratio_end: float | None = Field(default = None, description = "Upperbound of the equivalence ratio range")

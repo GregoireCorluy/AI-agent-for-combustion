@@ -112,7 +112,7 @@ class MechanismDatabase:
         )
 
         matching_steps.append({
-            "criterion": "temperature",
+            "criterion": "autoignition_temperature",
             "applied": applied,
             "remaining": len(candidates),
         })
@@ -336,8 +336,8 @@ class MechanismDatabase:
     ) -> bool:
 
         if (
-            params.temperature_start is None
-            and params.temperature_end is None
+            params.temperature_autoignition_start is None
+            and params.temperature_autoignition_end is None
         ):
             return False
 
@@ -349,15 +349,15 @@ class MechanismDatabase:
             return False
 
         user_min = (
-            params.temperature_start
-            if params.temperature_start is not None
-            else params.temperature_end
+            params.temperature_autoignition_start
+            if params.temperature_autoignition_start is not None
+            else params.temperature_autoignition_end
         )
 
         user_max = (
-            params.temperature_end
-            if params.temperature_end is not None
-            else params.temperature_start
+            params.temperature_autoignition_end
+            if params.temperature_autoignition_end is not None
+            else params.temperature_autoignition_start
         )
 
         db_min = case["temperature"]["min"]
@@ -483,8 +483,10 @@ class MechanismDatabase:
             "pressure_end": case.get("pressure", {}).get("max"),
             "pressure_unit": case.get("pressure", {}).get("unit"),
 
-            "temperature_start": case.get("temperature", {}).get("min"),
-            "temperature_end": case.get("temperature", {}).get("max"),
+            "temperature_autoignition_start": case.get("temperature", {}).get("min"),
+            "temperature_autoignition_end": case.get("temperature", {}).get("max"),
+            "temperature_flamelet_start": None,
+            "temperature_flamelet_end": None,
             "temperature_unit": case.get("temperature", {}).get("unit"),
 
             "equivalence_ratio_start": case.get("equivalence_ratio", {}).get("min"),

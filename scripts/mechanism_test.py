@@ -19,8 +19,8 @@ params = InputParameters(
     pressure_end=2.0,
     pressure_unit="bar",
 
-    temperature_start=1000,
-    temperature_end=1500,
+    temperature_autoignition_start=1000,
+    temperature_autoignition_end=1500,
     temperature_unit="K",
 
     equivalence_ratio_start=0.5,

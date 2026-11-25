@@ -75,7 +75,12 @@ def score(prediction: str, record: dict[str, Any]) -> dict[str, Any]:
     for name, value in anchors.items():
         if name.endswith("_unit"):
             checks.append(params.get(name) == value)
-        elif name in {"pressure", "temperature", "equivalence_ratio"}:
+        elif name in {
+            "pressure",
+            "temperature_autoignition",
+            "temperature_flamelet",
+            "equivalence_ratio",
+        }:
             start, end = params.get(name + "_start"), params.get(name + "_end")
             checks.append(
                 isinstance(start, (int, float))
@@ -88,7 +93,12 @@ def score(prediction: str, record: dict[str, Any]) -> dict[str, Any]:
     row["mechanism_null_when_unsupplied"] = (
         params.get("mechanism") is None if expected.get("mechanism") is None else None # If the expected mechanism is None, check that the predicted mechanism is also None. Otherwise, we don't check this property.
     )
-    for field in ("pressure", "temperature", "equivalence_ratio"):
+    for field in (
+        "pressure",
+        "temperature_autoignition",
+        "temperature_flamelet",
+        "equivalence_ratio",
+    ):
         start, end = params.get(field + "_start"), params.get(field + "_end")
         row[field + "_range_sane"] = start is None or end is None or start <= end # Sanity check for the range of pressure, temperature, and equivalence ratio that the model predicts. If the start is greater than the end, it is considered an error.
     return row

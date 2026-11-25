@@ -66,8 +66,8 @@ class AgentToolMechReduction():
 
         #fuel = ...
 
-        temperature_start = input_parameters.temperature_start
-        temperature_end = input_parameters.temperature_end
+        temperature_autoignition_start = input_parameters.temperature_autoignition_start
+        temperature_autoignition_end = input_parameters.temperature_autoignition_end
 
         pressure_start = input_parameters.pressure_start
         pressure_end = input_parameters.pressure_end
@@ -84,7 +84,11 @@ class AgentToolMechReduction():
         # sweep every 25% if two fuels defined
         fuel = create_fuel_sweep(input_parameters.fuel) #[{component.species: component.fraction for component in input_parameters.fuel}] #Need to modify later to explore different fuel compositions
         # steps of 200K
-        temperature_IDT = create_range(temperature_start, temperature_end, 200)
+        temperature_IDT = create_range(
+            temperature_autoignition_start,
+            temperature_autoignition_end,
+            200,
+        )
         #steps of 5 or 10 bar, is smaller just take two extrimities
         pressure = create_range(pressure_start, pressure_end, 10)
         # steps of 0.5 and take extrimities if less than that
@@ -98,7 +102,7 @@ class AgentToolMechReduction():
         print(f"Fuel               : {fuel}")
         print(f"Retained species   : {retained}")
         print(f"Target species     : {targets}")
-        print(f"Temperature [K]    : {temperature_IDT}")
+        print(f"Autoignition temperature [K]: {temperature_IDT}")
         print(f"Pressure [bar]     : {pressure}")
         print(f"Equivalence ratio  : {equivalence_ratio}")
         print(f"Maximum error      : {self.max_error_IDT}%")
