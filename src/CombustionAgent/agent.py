@@ -1,269 +1,226 @@
-import sys
+"""Tool-using conversational orchestrator for combustion mechanism reduction."""
+from __future__ import annotations
 
-from .graph import AgentInputGraph
-from .llms import ConversationLLM, RetrievalLLM, UpdateLLM, FillInputLLM, RouterLLM, FillCriteriaLLM, SelectMechLLM, RefineParametersLLM
-from CombustionAgent.prompts import get_chat_prompt, get_fill_input_prompt, get_retrieve_prompt, get_router_prompt, get_update_prompt, get_fill_criteria_prompt, get_select_mechanism_prompt, get_refine_parameters_prompt
-from .model_manager import ModelManager
-from .project_manager import ProjectManager
-from .parameters import InputParameters, CriteriaParameters, RefinementResult
-from .agent_tool import AgentToolMechReduction
-from .console import console, logger
+import json
+import os
+from pathlib import Path
+from typing import Any
+
+import questionary
 from rich.markdown import Markdown
 from rich.panel import Panel
-import questionary
+
+from .console import console, logger
+from .model_manager import ModelManager
+from .project_manager import ProjectManager
+from .state import AgentState, ChatMessage, ToolEvent
+from .tools import CombustionTools, ToolCall, ToolRegistry, _json_from_reply
+
+
+ORCHESTRATOR_SYSTEM_PROMPT = """You are the orchestrator for a combustion mechanism reduction assistant.
+Choose the next action from the registered tools, or provide a user-facing final response.
+Use tools for parameter extraction, parameter updates, deterministic validation, and DRGEP.
+Never invent input values, mechanism names, tool results, or scientific metrics. Ask the user
+for any missing or unclear input before calling Run_DRGEP. Do not call Run_DRGEP until the
+state says it is ready and missing_required_fields is empty. The DRGEP tool always runs three
+maximum ignition-delay error levels: 5%, 10%, and 20%. Once the tool returns results, recommend
+the best candidate using the measured metrics and explain the trade-off. With no selection
+criteria supplied, the tool's ranking rule favors lowest IDT error, then smaller species and
+reaction percentages. If the user's latest message corrects established values, use
+modify_input_parameters. Keep questions concise and ask only what is needed to continue.
+
+Return exactly one JSON object in one of these forms:
+{"action":"tool_call","tool":"registered_tool_name","arguments":{...}}
+{"action":"final","response":"user-facing message"}
+"""
+
+
+def default_model_specs() -> dict[str, dict[str, Any]]:
+    """Role configuration; environment variables allow replacing or extending models."""
+    orchestrator = os.environ.get("COMBUSTION_ORCHESTRATOR_MODEL", "Qwen/Qwen3.8-27B")
+    extractor = os.environ.get("COMBUSTION_EXTRACTOR_MODEL", "models/Qwen3-8B")
+    adapter = os.environ.get("COMBUSTION_EXTRACTOR_ADAPTER")
+    if not adapter:
+        latest = Path("fine-tuning/outputs/qwen3-8b-qlora/latest_run.json")
+        if latest.is_file():
+            try:
+                run_name = json.loads(latest.read_text(encoding="utf-8"))["run_name"]
+                candidate = Path("fine-tuning/outputs/qwen3-8b-qlora/runs") / run_name / "adapter"
+                if candidate.is_dir():
+                    adapter = str(candidate)
+            except (OSError, KeyError, json.JSONDecodeError):
+                logger.warning("Could not resolve the latest parameter-extractor adapter")
+    if not adapter:
+        logger.warning(
+            "No QLoRA adapter was found for the parameter extractor; the configured base model "
+            "will be used. Set COMBUSTION_EXTRACTOR_ADAPTER to a trained adapter directory."
+        )
+    extractor_system_prompt = None
+    if adapter:
+        saved_prompt = Path(adapter) / "system_prompt.txt"
+        if saved_prompt.is_file():
+            extractor_system_prompt = str(saved_prompt)
+    specs: dict[str, dict[str, Any]] = {
+        "orchestrator": {"model": orchestrator, "multimodal": "Qwen3.8" in orchestrator,
+                         "quantization": "4bit", "compute_dtype": "bfloat16"},
+        "parameter_extractor": {"model": extractor, "adapter": adapter,
+                                "system_prompt_path": extractor_system_prompt,
+                                "quantization": "4bit", "compute_dtype": "bfloat16"},
+        # Parameter editing can use the extractor model until a separate editor is configured.
+        "parameter_editor": {"alias_of": "parameter_extractor"},
+    }
+    editor = os.environ.get("COMBUSTION_EDITOR_MODEL")
+    if editor:
+        specs["parameter_editor"] = {"model": editor, "quantization": "4bit",
+                                     "compute_dtype": "bfloat16"}
+    return specs
+
 
 class Agent:
+    """A bounded tool loop. LangGraph is not needed for this linear control pattern."""
 
-    def __init__(self, model_name: str, model_opening_message: str, model_opening_message_criteria: str, model_opening_message_iteration: str, database_path: str, project_path: str) -> None:
-
+    def __init__(self, model_name: str | None = None, model_opening_message: str = "",
+                 model_opening_message_criteria: str = "", model_opening_message_iteration: str = "",
+                 database_path: str = "data/database/2026-09-14-database-mechanisms-H2-NH3-preliminary.json",
+                 project_path: str = "projects/", model_specs: dict[str, dict[str, Any]] | None = None,
+                 max_tool_steps: int = 12):
+        self.database_path = database_path
+        self.max_tool_steps = max_tool_steps
+        specs = model_specs or default_model_specs()
+        if model_name:
+            specs = {**specs, "orchestrator": {**specs.get("orchestrator", {}), "model": model_name,
+                                                "multimodal": "qwen3.8" in model_name.lower()}}
+        # Eager loading makes resource use and startup failures visible before a conversation begins.
+        self.model_manager = ModelManager(specs)
         self.project_manager = ProjectManager(project_path)
-        self.model_manager = ModelManager(model_name)
-
-        schema_input = InputParameters.model_json_schema()
-        schema_criteria = CriteriaParameters.model_json_schema()
-        schema_refinement = RefinementResult.model_json_schema()
-        
-        self.LLM_conversation = ConversationLLM(self.model_manager, get_chat_prompt(), model_opening_message)
-        self.LLM_retrieval = RetrievalLLM(self.model_manager, get_retrieve_prompt(schema_input, database_path))
-        self.LLM_update = UpdateLLM(self.model_manager, get_update_prompt(schema_input))
-        self.LLM_fill_input = FillInputLLM(self.model_manager, get_fill_input_prompt(schema_input), database_path)
-        self.LLM_router = RouterLLM(self.model_manager, get_router_prompt())
-        self.LLM_fill_criteria = FillCriteriaLLM(self.model_manager, get_fill_criteria_prompt(schema_criteria))
-        self.LLM_select_mechanism = SelectMechLLM(self.model_manager, get_select_mechanism_prompt())
-        self.LLM_refine_parameters = RefineParametersLLM(self.model_manager, get_refine_parameters_prompt(schema_refinement))
-
-        self.model_opening_message = model_opening_message
-        self.model_opening_message_criteria = model_opening_message_criteria
-        self.model_opening_message_iteration = model_opening_message_iteration
-
-        self.input_graph = AgentInputGraph(self, database_path)
+        self.registry = ToolRegistry()
+        CombustionTools(self.model_manager, database_path).register(self.registry)
+        self.opening_message = model_opening_message or (
+            "Describe the combustion simulation or mechanism reduction you want to perform."
+        )
 
     def main(self) -> None:
-
-        selected_project_ID, new_project = self.project_manager.select_project()
-
-        if(new_project):
-            self.workflow_first_interaction()
-
-        else:
-            self.workflow_iteration()
-
-    def workflow_first_interaction(self) -> None:
-
-        input_parameters, process_history_input, message_history_input, behind_the_scene_history_input = self.run_input_graph()
-
-        logger.debug(f"Input parameters: {input_parameters}")
-        logger.debug(f"Input process history:\n{process_history_input}")
-
-        criteria_parameters, process_history_criteria, message_history_criteria, behind_the_scene_history_criteria = self.run_criteria_graph()
-
-        logger.debug(f"Criteria parameters: {criteria_parameters}")
-        logger.debug(f"Criteria process history:\n{process_history_criteria}")
-
-        list_mechanisms = self.run_mechanism_reduction(input_parameters)
-        list_mechanisms_metrics_json = self.LLM_select_mechanism.get_mechanism_metrics_json(list_mechanisms)
-
-        reply_selection_mechanism = self.select_mechanism(criteria_parameters, list_mechanisms)
-
-        messages_history = message_history_input + message_history_criteria
-        behind_the_scene_history = behind_the_scene_history_input + behind_the_scene_history_criteria
-
-        self.project_manager.save_data(messages_history, behind_the_scene_history, input_parameters, criteria_parameters, list_mechanisms_metrics_json, reply_selection_mechanism)
-
-        console.print(
-            Panel(
-                Markdown(reply_selection_mechanism),
-                title="Agent",
-                border_style="cyan"
-            )
-        )
-
-        # how to handle default ranges and steps in ranges, and default species?
-
-        self.model_manager.unload_model()
-        sys.exit()
-
-    def workflow_iteration(self) -> None:
-
-        # Present message with what has been done previous time
-        console.print(
-            Panel(
-                self.model_opening_message_iteration,
-                title="Agent",
-                border_style="cyan"
-            )
-        )
-
-        # Get input of user
-        user_input = questionary.text("You:").ask()
-        
-        if user_input is None or user_input.lower() in ["exit", "quit"]:
+        project_id, new_project = self.project_manager.select_project()
+        if not project_id:
             self.model_manager.unload_model()
-            sys.exit()
+            return
+        state = self._load_state(project_id, new_project)
+        if not state.conversation_history:
+            self._show(self.opening_message)
+            state.conversation_history.append(ChatMessage(role="assistant", content=self.opening_message))
+            self._save_state(state)
 
-        # Understand user message and change input parameters and/or criteria parameters
-        previous_summaries = self.project_manager.get_previous_summaries()
-        reply_refine_parameters = self.LLM_refine_parameters.refine_parameters(user_input, previous_summaries) #ADD REQUIRED INPUTS
-        logger.debug(f"LLM refine parameters reply:\n{reply_refine_parameters}")
-
-        diagnosis = reply_refine_parameters.diagnosis
-        reasoning = reply_refine_parameters.reasoning
-        input_parameters = reply_refine_parameters.input_parameters
-        criteria_parameters = reply_refine_parameters.criteria_parameters
-
-        # Run DRGEP again
-
-        list_mechanisms = self.run_mechanism_reduction(input_parameters)
-
-        # Select best mechanism
-        reply_selection_mechanism = self.select_mechanism(criteria_parameters, list_mechanisms) # Add extra context for the selection?
-        
-        ########################################################################################################
-        list_mechanisms_metrics_json = self.LLM_select_mechanism.get_mechanism_metrics_json(list_mechanisms)
-
-        messages_history = [user_input]
-        behind_the_scene_history = [diagnosis, reasoning]
-
-        self.project_manager.save_data(messages_history, behind_the_scene_history, input_parameters, criteria_parameters, list_mechanisms_metrics_json, reply_selection_mechanism)
-        #######################################################################################################
-
-        # Provide history of what has been done since then
-        console.print(
-        Panel(
-            Markdown(reply_selection_mechanism),
-            title="Agent",
-            border_style="cyan"
-        )
-    )
-
-        # Check if better than previous mechanism
-
-        # Save all history ......
-
-        self.model_manager.unload_model()
-        sys.exit()
-
-
-    def run_input_graph(self) -> tuple[InputParameters, list[str]]:
-
-        # complete process of input graph
-
-        state = {
-                "user_message": "",
-                "process_history": [],
-                "working_history": [],
-                "message_history": [],
-                "behind_the_scene_history": [],
-                "input_parameters": InputParameters(),
-                "route": None,
-                "response": None,
-            }
-
-        console.print(
-            Panel(
-                self.model_opening_message,
-                title="Agent",
-                border_style="cyan"
-            )
-        )
-        state["process_history"].append(f"Agent: {self.model_opening_message}")
-        state["message_history"].append(f"Agent: {self.model_opening_message}")
-
-        while True:
-            try:
-                user_input = questionary.text("You:").ask()
-
-                if user_input is None or user_input.lower() in ["exit", "quit"]:
-                    self.model_manager.unload_model()
-                    sys.exit()
-
-                # Reset fields for new cycle
-                state["working_history"] = []
-                state["route"] = None
-
-                # Update only the part of the state that changes
-                state["user_message"] = user_input
-
-                state["process_history"].append(f"User: {user_input}")
-                state["message_history"].append(f"User: {user_input}")
-
-                # Run the LangGraph
-                state = self.input_graph.app.invoke(state)
-
-                if state["route"] == "END":
-                    console.print("[bold green]Agent found the required input parameters.[/bold green]")
-                    break
-
-                # Display the response generated by the chat node
-                console.print(
-                    Panel(
-                        Markdown(state["response"]),
-                        title="Agent",
-                        border_style="cyan"
-                    )
-                )
-
-            except KeyboardInterrupt:
-                self.model_manager.unload_model()
-                sys.exit()
-
-        return state["input_parameters"], state["process_history"], state["message_history"], state["behind_the_scene_history"]
-
-    def run_criteria_graph(self) -> tuple[CriteriaParameters, list[str]]:
-
-        process_history = []
-        message_history = []
-        behind_the_scene_history = []
-
-        console.print(
-            Panel(
-                self.model_opening_message_criteria,
-                title="Agent",
-                border_style="cyan"
-            )
-        )
-        process_history.append(f"Agent: {self.model_opening_message_criteria}")
-        message_history.append(f"Agent: {self.model_opening_message_criteria}")
- 
         try:
-            user_input = questionary.text("You:").ask()
-            if user_input is None or user_input.lower() in ["exit", "quit"]:
-                self.model_manager.unload_model()
-                sys.exit()
-
-            process_history.append(f"User: {user_input}")
-
-            console.print("[bold cyan]Agent is retrieving the criteria parameters.[/bold cyan]")
-
-            LLM_fill_criteria_reply, criteria_parameters = self.LLM_fill_criteria.fill_criteria(user_input)
-
-            process_history.append(f"FILL CRITERIA PARAMETERS: the agent has filled the criteria parameters and has assigned the weights as follows: {criteria_parameters}")
-            behind_the_scene_history.append(f"FILL CRITERIA PARAMETERS: the agent has filled the criteria parameters and has assigned the weights as follows: {criteria_parameters}")
-
+            while True:
+                user_input = questionary.text("You:").ask()
+                if user_input is None or user_input.strip().lower() in {"exit", "quit"}:
+                    break
+                state.user_message = user_input.strip()
+                state.pending_question = None
+                state.conversation_history.append(ChatMessage(role="user", content=state.user_message))
+                self._save_state(state)
+                self._run_turn(state)
         except KeyboardInterrupt:
+            console.print("\n[yellow]Conversation interrupted.[/yellow]")
+        finally:
             self.model_manager.unload_model()
-            sys.exit()
 
-        return criteria_parameters, process_history, process_history, behind_the_scene_history
+    def _run_turn(self, state: AgentState) -> None:
+        for step in range(self.max_tool_steps):
+            reply = self.model_manager.generate(
+                "orchestrator", self._orchestrator_messages(state),
+                max_new_tokens=1800, do_sample=False, enable_thinking=True,
+            )
+            try:
+                decision = ToolCall.model_validate(_json_from_reply(reply))
+            except Exception as exc:
+                logger.exception("Could not parse orchestrator response")
+                self._show(f"I could not interpret my next action safely ({exc}). Please rephrase your request.")
+                state.status = "error"
+                self._save_state(state)
+                return
 
+            if decision.action == "final":
+                answer = (decision.response or "I could not complete the request.").strip()
+                self._show(answer)
+                state.conversation_history.append(ChatMessage(role="assistant", content=answer))
+                self._save_state(state)
+                return
+            if decision.action != "tool_call" or not decision.tool:
+                self._show("I could not determine a valid next step. Please clarify the request.")
+                state.status = "error"
+                self._save_state(state)
+                return
 
-    def run_mechanism_reduction(self, input_parameters: InputParameters) -> list[str]:
+            tool = self.registry.get(decision.tool)
+            console.print(f"[bold cyan]Running {tool.name}...[/bold cyan]")
+            try:
+                result = self.registry.call(tool.name, decision.arguments, state)
+            except Exception as exc:
+                logger.exception("Tool %s failed", tool.name)
+                result = {"error": f"{type(exc).__name__}: {exc}"}
+                state.status = "error"
+            state.tool_history.append(ToolEvent(tool=tool.name, arguments=decision.arguments, result=result))
+            self._save_state(state)
 
-        console.print("[bold]Launch DRGEP...[/bold]")
+            if tool.name == "Ask_question_to_user":
+                answer = questionary.text(result["question"]).ask()
+                if answer is None:
+                    return
+                state.user_message = answer.strip()
+                state.pending_question = None
+                state.conversation_history.append(ChatMessage(role="assistant", content=result["question"]))
+                state.conversation_history.append(ChatMessage(role="user", content=state.user_message))
+                self._save_state(state)
+        else:
+            message = "I reached the action limit for this turn. Please tell me how you would like to continue."
+            self._show(message)
+            state.conversation_history.append(ChatMessage(role="assistant", content=message))
+            self._save_state(state)
 
-        agent_tool_mechanism_reduction = AgentToolMechReduction()
-        
-        list_mechanisms = agent_tool_mechanism_reduction.run_drgep(input_parameters)
-        logger.debug(f"List of generated mechanisms: {list_mechanisms}")
+    def _orchestrator_messages(self, state: AgentState) -> list[dict[str, str]]:
+        system = ORCHESTRATOR_SYSTEM_PROMPT + "\nAVAILABLE TOOLS:\n" + json.dumps(
+            self.registry.descriptions(), ensure_ascii=False, indent=2
+        ) + "\nCURRENT STATE (authoritative):\n" + json.dumps(
+            state.orchestrator_view(), ensure_ascii=False, indent=2
+        )
+        messages = [{"role": "system", "content": system}]
+        # State already contains compact recent history and latest tool outcomes.
+        for message in state.conversation_history[-8:]:
+            messages.append({"role": message.role, "content": message.content})
+        messages.append({"role": "user", "content": "Choose the next tool or final response for the current task."})
+        return messages
 
-        return list_mechanisms
+    def _load_state(self, project_id: str, new_project: bool) -> AgentState:
+        path = Path(self.project_manager.selected_project_path) / "session_state.json"
+        if path.is_file():
+            state = AgentState.model_validate_json(path.read_text(encoding="utf-8"))
+            state.project_id = project_id
+            return state
+        state = AgentState(project_id=project_id)
+        if not new_project:
+            summaries = self.project_manager.get_previous_summaries()
+            if summaries:
+                saved = summaries[-1].get("input_parameters") or {}
+                state.input_parameters = state.input_parameters.model_validate(saved)
+                state.missing_required_fields = [
+                    field for field in CombustionTools.REQUIRED_FOR_DRGEP
+                    if getattr(state.input_parameters, field) is None
+                ]
+                state.status = "ready" if not state.missing_required_fields else "collecting_inputs"
+                state.conversation_history.append(ChatMessage(
+                    role="assistant", content="I restored the input parameters from the last saved project iteration."
+                ))
+        return state
 
-    def select_mechanism(self, criteria_paramters: CriteriaParameters, list_mechanisms: list[str]) -> str:
+    def _save_state(self, state: AgentState) -> None:
+        if self.project_manager.selected_project_path is None:
+            return
+        path = Path(self.project_manager.selected_project_path) / "session_state.json"
+        temporary = path.with_suffix(".json.tmp")
+        temporary.write_text(state.model_dump_json(indent=2), encoding="utf-8")
+        temporary.replace(path)
 
-        # Provide mechanism + explanation
-
-        console.print("[bold cyan]Agent is selecting the most suitable mechanism.[/bold cyan]")
-
-        reply_selected_mechanism = self.LLM_select_mechanism.select_mechanism(criteria_paramters, list_mechanisms)
-
-        return reply_selected_mechanism
+    @staticmethod
+    def _show(message: str) -> None:
+        console.print(Panel(Markdown(message), title="Agent", border_style="cyan"))

@@ -1,5 +1,5 @@
 from CombustionAgent.parameters import InputParameters, FuelComponent
-from CombustionAgent.graph import AgentGraph
+from CombustionAgent.parameter_validation import ParameterValidator
 
 
 # ============================================================
@@ -8,10 +8,7 @@ from CombustionAgent.graph import AgentGraph
 
 database_path = "data/database/2026-09-14-database-mechanisms-H2-NH3-preliminary.json"
 
-agent_graph = AgentGraph(
-    agent=None,
-    database_path=database_path,
-)
+validator = ParameterValidator(database_path)
 
 
 # ============================================================
@@ -50,13 +47,12 @@ params = InputParameters(
 # Find matching mechanism name
 # ============================================================
 
-matched_name, messages = agent_graph.convert_mechanism_name(
-    params)
+matched_params, messages = validator.validate(params)
 
 
 # ============================================================
 # Print results
 # ============================================================
 
-print(matched_name)
+print(matched_params.mechanism)
 print(messages)

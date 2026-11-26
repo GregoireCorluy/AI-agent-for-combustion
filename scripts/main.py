@@ -1,76 +1,21 @@
-import json
+"""Command-line entry point for the tool-using CombustionAgent."""
+import argparse
+
 from CombustionAgent.agent import Agent
-from CombustionAgent.parameters import InputParameters, CriteriaParameters
-
-# TO DO:
-# - Fourth model for suggestions
-# - Add temperature for models
-# - chat with different iterations of the json, can receive partially filled in json as input
-# - Ask at the end if the suggestion of parameters is correct
-# - Improve description of Pydantic and check what the Pydantic verification is doing
-# - Explore other LLMs
-# - Constrain output generation for information retrieval
-# - Have an LLM that iteratively specifically converts values
-# - Check how to manage the history and different messages
-# - let the agent think first: first generation step is analyzing the input and second generation provides the structured output; use another LLM for performing the conversion; use Python to perform the deterministic conversion and LLM just identifies the fields with the units
-# - Verification also with a structured json
-# - Python code to do the conversion from one unit to another, or use LLM
-# - Verify again what the update has done?
-# - Add a memory: notes to keep for later, keep messages of the user (?)
-# - LLM router
-# - convert units etc. at the end with a deterministic method
-# - Ask at the end if the user agrees with the retrieved parameters
-# - Create Langgraph which will choose the possibilities in function of the current state, state-dependent action
-# - One LLM to take notes/memory
-# - Explain to the user what is happening behind the scenes
-# - Message about how the system works
-# - Keep conversation history
-# - ask at the end if the configuration is correct
-# - have a longer discussion with multiple turns to understand what the user wants and then do the retrieval
-# - to speed up the loop, no update if already indicated that there is no modification necessary
-# - router, let it think first to make its decision?
-# - to consider: if the message of the user is both about the simulation parameters and a question, should be handled afterwards by the chat model?
-# - Fourth model for suggestions?
-# - maybe a start and end value for the temperature and pressure
-
-# TO DO 28th of August 2026
-# X Function to handle REAL END
-# X change name to process_history
-# X remove history for all LLMs except the conversation LLM
-# X update the state keeping only the input parameters, but setting the process history back to null
-# X let's make a scan with ChatGPT if he finds main errors
-# - reorganize code in different scripts when langgraph works
-# - check to do's above
-
-# TO DO later
-# - Explain the choise of the different parameters
-# - Update parameters after verification retrieval only if something to be modified
-
-# POSSIBLE PROBLEMS:
-# - number of new max tokens too small and limits the generated output of the LLM
-
-# QUESTIONS:
-# - Python or LLM to convert values?
-
-# NOTES:
-# - LLM working better when it can "reason" and be wordy
 
 
-model_id = "models/Qwen3-8B" #"models/Llama-3.1-8B-Instruct"
-database_path = "data/database/2026-09-14-database-mechanisms-H2-NH3-preliminary.json"
-project_path = "projects/"
-opening_message = ("Hello, I'm your combustion mechanism consultant.\n"
-                   "I will try to provide you the best chemical mechanism for your application.\n"
-                   "Can you describe the simulation you would like to perform?")
-opening_message_criteria = ("Now that the input parameters have been retrieved,\n"
-                            "could you indicate which aspect of the reduced mechanism is important to you?\n"
-                            "It can be related to the accuracy, the stability or the size of the mechanism.")
-opening_messag_iteration = ("Tell me what went wrong.")
-
-agent = Agent(model_id, opening_message, opening_message_criteria, opening_messag_iteration, database_path, project_path)
-
-def main():
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Combustion mechanism selection and reduction assistant")
+    parser.add_argument("--orchestrator-model", default=None,
+                        help="Override COMBUSTION_ORCHESTRATOR_MODEL (default: Qwen/Qwen3.8-27B)")
+    parser.add_argument("--database", default="data/database/2026-09-14-database-mechanisms-H2-NH3-preliminary.json")
+    parser.add_argument("--projects", default="projects/")
+    args = parser.parse_args()
+    agent = Agent(model_name=args.orchestrator_model,
+                  database_path=args.database,
+                  project_path=args.projects)
     agent.main()
+
 
 if __name__ == "__main__":
     main()

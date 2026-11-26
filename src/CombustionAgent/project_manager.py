@@ -54,6 +54,10 @@ class ProjectManager:
 
             new_project = True
 
+        if selected_project_id is None:
+            self.selected_project_path = None
+            return None, new_project
+
         self.selected_project_path = self.project_path / selected_project_id
 
         return selected_project_id, new_project
@@ -130,8 +134,9 @@ class ProjectManager:
                 continue
 
             iteration_files = list(project_dir.glob("iteration_*.json"))
+            session_state = project_dir / "session_state.json"
 
-            if not iteration_files:
+            if not iteration_files and not session_state.is_file():
                 shutil.rmtree(project_dir)
 
 
